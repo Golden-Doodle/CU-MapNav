@@ -29,10 +29,12 @@ export type RoomLocation = {
   campus: Campus;
 }
 
-export type GoogleCalendarEvent = {
+// Define the Google Calendar event type
+export interface GoogleCalendarEvent {
   id: string;
   summary: string;
-  location: string;
+  description?: string;
+  location?: string;
   start: {
     dateTime: string;
     timeZone: string;
@@ -41,4 +43,8 @@ export type GoogleCalendarEvent = {
     dateTime: string;
     timeZone: string;
   };
-};
+  attendees?: Array<{
+    email: string;
+    responseStatus: string;
+  }>;
+}

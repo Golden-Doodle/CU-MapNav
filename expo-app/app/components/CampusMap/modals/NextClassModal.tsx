@@ -1,8 +1,13 @@
 import React from "react";
 import { Modal, View, Text, Button, StyleSheet } from "react-native";
-import { fakeGoogleCalendarData } from "../data/fakeGoogleCalendarData";
-import { Coordinates, GoogleCalendarEvent, RoomLocation, Building } from "@/app/utils/types";
+import {
+  Coordinates,
+  GoogleCalendarEvent,
+  RoomLocation,
+  Building,
+} from "@/app/utils/types";
 import { SGWBuildings, LoyolaBuildings } from "../data/buildingData";
+import { fetchCalendarEvents } from "@/app/services/GoogleCalendar/fetchingUserCalendarData";
 
 interface NextClassModalProps {
   visible: boolean;
@@ -22,26 +27,22 @@ const NextClassModal: React.FC<NextClassModalProps> = ({
   const [location, setLocation] = React.useState<RoomLocation | null>(null);
 
   React.useEffect(() => {
+
+    // Fetch the next class
     const fetchNextClass = async () => {
-      const data = await new Promise<GoogleCalendarEvent>((resolve) =>
-        setTimeout(() => resolve(fakeGoogleCalendarData[0]), 1000)
-      );
+      if (visible) {
+        const events = await fetchCalendarEvents();
+        setNextClass(events[0]);
 
-      if (!data) {
-        return;
-      }
+        // Set the location of the next class
+        const nextClassLocation = JSON.parse(events[0].location || "{}");
 
-      setNextClass(data);
-      try {
-        setLocation(JSON.parse(data.location));
-      } catch (e) {
-        console.error("Error parsing location");
-      }
+        setLocation(nextClassLocation);
+        // console.log("Next Classssd:", nextClassLocation);
+      };
     };
 
-    if (visible) {
-      fetchNextClass();
-    }
+    fetchNextClass();
   }, [visible]);
 
   const handleGetDirections = () => {
@@ -49,8 +50,13 @@ const NextClassModal: React.FC<NextClassModalProps> = ({
       return;
     }
 
-    const coordinates: Coordinates | undefined = location.campus === "SGW" ? SGWBuildings.find(building => building.name === location.building)?.coordinates[0] : LoyolaBuildings.find(building => building.name === location.building)?.coordinates[0];
-
+    const coordinates: Coordinates | undefined =
+      location.campus === "SGW"
+        ? SGWBuildings.find((building) => building.name === location.building)
+            ?.coordinates[0]
+        : LoyolaBuildings.find(
+            (building) => building.name === location.building
+          )?.coordinates[0];
 
     if (!coordinates) {
       console.error("Building coordinates not found");
@@ -61,13 +67,9 @@ const NextClassModal: React.FC<NextClassModalProps> = ({
     onClose();
   };
 
-
   if (!nextClass) {
     return null;
   }
-
-
-
 
   return (
     <Modal
