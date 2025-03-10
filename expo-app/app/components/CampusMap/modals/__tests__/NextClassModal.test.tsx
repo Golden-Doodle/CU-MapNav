@@ -57,7 +57,7 @@ describe("NextClassModal", () => {
 
     await waitFor(() => {
       expect(getByTestId("class-name")).toHaveTextContent("Math 101");
-      expect(getByTestId("class-time")).toHaveTextContent("10:00 AM - 11:00 AM");
+      expect(getByTestId("class-time")).toHaveTextContent("10:00 a.m. - 11:00 a.m.");
       expect(getByTestId("room-value")).toHaveTextContent("123");
       expect(getByTestId("building-value")).toHaveTextContent("Engineering");
     });

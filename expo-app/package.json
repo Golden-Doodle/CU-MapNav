@@ -83,7 +83,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
-    "@testing-library/react-native": "^13.0.1",
+    "@testing-library/react-native": "^13.0.0",
     "@types/jest": "^29.5.12",
     "@types/mapbox__polyline": "^1.0.5",
     "@types/react": "~18.3.12",
