@@ -94,3 +94,15 @@ export type RouteOption = {
     time_zone: string; // Time zone (e.g., "America/Toronto")
   }
 };
+
+export interface GooglePlace {
+  place_id: string;
+  name: string;
+  geometry: {
+    location: {
+      lat: number;
+      lng: number;
+    };
+  };
+  vicinity: string;
+}

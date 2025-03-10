@@ -1,7 +1,6 @@
 import React from "react";
 import { Marker } from "react-native-maps";
-import { View, Text, StyleSheet } from "react-native";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import { StyleSheet, Image } from "react-native";
 
 type CustomMarkerProps = {
   coordinate: {
@@ -20,37 +19,32 @@ const CustomMarker: React.FC<CustomMarkerProps> = ({
   description = "No description available",
   isFoodLocation = false,
   onPress,
-}) => (
-  <Marker coordinate={coordinate} onPress={onPress} tappable={true}>
-    <View
-      style={[styles.marker, isFoodLocation && styles.foodMarker]}
-      testID="marker-view"
-    >
+}) => {
+  return (
+    <Marker coordinate={coordinate} onPress={onPress} tappable={true}>
       {isFoodLocation ? (
-        <MaterialIcons name="restaurant" size={20} color="white" />
+        <Image
+          source={{ uri: "https://maps.google.com/mapfiles/ms/icons/restaurant.png" }}
+          style={styles.foodMarker}
+        />
       ) : (
-        <Text style={styles.markerText}>{title[0] || "?"}</Text>
+        <Image
+          source={{ uri: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png" }} 
+          style={styles.defaultMarker}
+        />
       )}
-    </View>
-  </Marker>
-);
+    </Marker>
+  );
+};
 
 const styles = StyleSheet.create({
-  marker: {
-    backgroundColor: "blue",
-    padding: 8,
-    borderRadius: 20,
-    borderColor: "white",
-    borderWidth: 2,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   foodMarker: {
-    backgroundColor: "red",
+    width: 40,
+    height: 40,
   },
-  markerText: {
-    color: "white",
-    fontWeight: "bold",
+  defaultMarker: {
+    width: 40,
+    height: 40,
   },
 });
 

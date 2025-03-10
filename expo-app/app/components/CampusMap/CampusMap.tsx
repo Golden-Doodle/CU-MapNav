@@ -1,31 +1,23 @@
-import React, { useState, useCallback, useEffect } from "react";
-import MapView, { Polygon, Polyline, Marker } from "react-native-maps";
-import { View, Alert } from "react-native";
+import React, { useState, useEffect, useCallback } from "react";
+import { View, Alert, Button, StyleSheet } from "react-native";
+import MapView, { Marker, Polygon, Polyline } from "react-native-maps";
 import CustomMarker from "./CustomMarker";
 import { SGWBuildings, LoyolaBuildings } from "./data/buildingData";
 import { getDirections } from "../../utils/directions";
-import {
-  initialRegion,
-  SGWMarkers,
-  LoyolaMarkers,
-} from "./data/customMarkerData";
+import { initialRegion, SGWMarkers, LoyolaMarkers } from "./data/customMarkerData";
 import NavTab from "./CampusMapNavTab";
 import * as Location from "expo-location";
-import {
-  Building,
-  Campus,
-  Coordinates,
-  CustomMarkerType,
-  LocationType,
-} from "../../utils/types";
+import Constants from "expo-constants";
 import BuildingInfoModal from "./modals/BuildingInfoModal";
 import { getFillColorWithOpacity } from "../../utils/helperFunctions";
 import { eatingOnCampusData } from "./data/eatingOnCampusData";
 import NextClassModal from "./modals/NextClassModal";
 import HamburgerWidget from "./HamburgerWidget";
-import { StyleSheet } from "react-native";
 import TransitModal from "./modals/TransitModal";
 import SearchModal from "./modals/SearchModal";
+
+// Import types
+import { Campus, Coordinates, LocationType, CustomMarkerType, Building, SelectedBuildingType, RouteOption, GooglePlace } from "../../utils/types";
 
 interface CampusMapProps {
   pressedOptimizeRoute: boolean;
@@ -40,10 +32,11 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   const [viewCampusMap, setViewCampusMap] = useState<boolean>(true);
   const [isBuildingInfoModalVisible, setIsBuildingInfoModalVisible] = useState<boolean>(false);
   const [isNextClassModalVisible, setIsNextClassModalVisible] = useState<boolean>(false);
-  const [viewEatingOnCampus, setViewEatingOnCampus] = useState<boolean>(false);
+  const [viewEatingOnCampus, setViewEatingOnCampus] = useState<boolean>(false); // State to toggle eating locations
   const [isSearchModalVisible, setIsSearchModalVisible] = useState<boolean>(false);
   const [isTransitModalVisible, setIsTransitModalVisible] = useState<boolean>(false);
-  const [mapRegion, setMapRegion] = useState(initialRegion[campus]); // Store region in state
+  const [restaurantMarkers, setRestaurantMarkers] = useState<CustomMarkerType[]>([]); // Store nearby restaurant markers
+  const [mapRegion, setMapRegion] = useState(initialRegion[campus]);
 
   const markers = campus === "SGW" ? SGWMarkers : LoyolaMarkers;
   const buildings = campus === "SGW" ? SGWBuildings : LoyolaBuildings;
@@ -57,7 +50,6 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         return;
       }
 
-      // Might be worth changing to Location.watchPositionAsync
       let location = await Location.getCurrentPositionAsync({});
       setUserLocation(location.coords);
       setOrigin({
@@ -70,13 +62,39 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
     })();
   }, []);
 
+  // Fetch nearby restaurants using Google Places API
+  useEffect(() => {
+    if (userLocation) {
+      const placesUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${userLocation.latitude},${userLocation.longitude}&radius=1500&type=restaurant|store&key=${Constants.expoConfig?.extra?.googleMapsApiKey}`;
+  
+      fetch(placesUrl)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.results) {
+            const restaurantMarkers = data.results.map((place: GooglePlace) => ({
+              id: place.place_id,
+              coordinate: {
+                latitude: place.geometry.location.lat,
+                longitude: place.geometry.location.lng,
+              },
+              title: place.name,
+              description: place.vicinity,
+            }));
+            setRestaurantMarkers(restaurantMarkers);
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching nearby restaurants: ", error);
+        });
+    }
+  }, [userLocation]);
+
   // Open the modal if the user pressed the optimize route button
-  // Need to see if i can just set default value to pressOptimizeRoute
   useEffect(() => {
     if (pressedOptimizeRoute) {
       setIsNextClassModalVisible(true);
     }
-  }, []);
+  }, [pressedOptimizeRoute]);
 
   // Reset destination and route
   const resetDirections = () => {
@@ -84,7 +102,6 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
     setDestination(null);
   };
 
-  // MAY DEPRICATE THIS FUNCTION
   // Fetch route from user's location to destination
   const fetchRoute = useCallback(async () => {
     if (!origin) {
@@ -131,15 +148,11 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   const toggleCampus = useCallback(() => {
     setCampus((prevCampus) => {
       const newCampus = prevCampus === "SGW" ? "LOY" : "SGW";
-
-      // Update map region based on the new campus value
       setMapRegion(initialRegion[newCampus]);
-
       resetDirections();
       return newCampus;
     });
   }, []);
-
 
   // Handle building press to show building info
   const handleBuildingPressed = (building: Building) => () => {
@@ -149,36 +162,26 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
       return;
     }
 
-    setDestination({building, coordinates: building.coordinates[0], selectedBuilding: true});
+    setDestination({ building, coordinates: building.coordinates[0], selectedBuilding: true });
     setIsBuildingInfoModalVisible(true);
 
-    // Update map region to center on the selected building
     setMapRegion({
-      latitude: building.coordinates[0].latitude, // Adjust to building center
+      latitude: building.coordinates[0].latitude,
       longitude: building.coordinates[0].longitude,
-      latitudeDelta: 0.005, // Zoom level
+      latitudeDelta: 0.005,
       longitudeDelta: 0.005,
     });
   };
 
   // Handle directions press
-  // TODO:
-  // Add logic to open transit modal
   const onDirectionsPress = useCallback(() => {
-    // Set Origin to user location
     setIsTransitModalVisible(true);
-  }, []);
-
-  // Handle closing search modal
-  const onCloseSearchModal = useCallback(() => {
-    setIsSearchModalVisible(false);
   }, []);
 
   // Handle map press
   const handleMapPress = (event: any) => {
     const { latitude, longitude } = event.nativeEvent.coordinate;
     const coordinates: Coordinates = { latitude, longitude };
-
     setDestination({ coordinates } as LocationType);
   };
 
@@ -188,7 +191,11 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
     setIsTransitModalVisible(true);
   };
 
- 
+  // Toggle eating locations visibility
+  const toggleEatingLocations = () => {
+    setViewEatingOnCampus((prevState) => !prevState);
+  };
+
   return (
     <View style={styles.container}>
       {/* Movable Hamburger Widget */}
@@ -200,7 +207,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
       />
 
       <MapView
-        key={viewCampusMap ? "map-visible" : "map-hidden"} // Re-render map when viewCampusMap changes
+        key={viewCampusMap ? "map-visible" : "map-hidden"}
         style={styles.map}
         region={mapRegion}
         showsUserLocation={true}
@@ -222,7 +229,19 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
               />
             ))}
 
-            {/* Render Polygons */}
+            {/* Conditionally render Restaurant Markers */}
+            {viewEatingOnCampus && restaurantMarkers.map((marker) => (
+              <CustomMarker
+                key={marker.id}
+                coordinate={marker.coordinate}
+                title={marker.title}
+                description={marker.description}
+                isFoodLocation={true}
+                onPress={() => handleMarkerPress(marker)}
+              />
+            ))}
+
+            {/* Render Polygons (Buildings) */}
             {buildings.map((building) => (
               <Polygon
                 key={building.id}
@@ -236,21 +255,6 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
             ))}
           </>
         )}
-
-        {/* Render Eating on Campus Markers */}
-        {viewEatingOnCampus &&
-          eatingOnCampusData
-            .filter((marker) => marker.campus === campus)
-            .map((marker) => (
-              <CustomMarker
-                key={marker.id}
-                coordinate={marker.coordinate}
-                title={marker.title}
-                description={marker.description}
-                isFoodLocation={true} // ✅ Mark as a food location
-                onPress={() => handleMarkerPress(marker)}
-              />
-            ))}
 
         {/* Render Polyline for Route */}
         {routeCoordinates.length > 0 && (
@@ -278,34 +282,28 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         onNavigate={onDirectionsPress}
       />
 
-      {/* Search Modal -- Shows up when Search is pressed */}
+      {/* Search Modal */}
       <SearchModal
         visible={isSearchModalVisible}
-        onClose={onCloseSearchModal}
+        onClose={() => setIsSearchModalVisible(false)}
         onSelectLocation={(building) => {
           setDestination({
             coordinates: building.coordinates[0],
             building,
             campus: building.campus,
-          }); // Set destination
+          });
           setIsSearchModalVisible(false);
         }}
-        onPressSelectOnMap={onCloseSearchModal}
+        onPressSelectOnMap={() => setIsSearchModalVisible(false)}
         destination={destination}
-        onGetDirections={() => {
-          fetchRoute();
-          onCloseSearchModal();
-        }}
-        // Passed Data
+        onGetDirections={() => fetchRoute()}
         buildingData={buildings}
         markerData={markers}
       />
 
-      {/* Transit Modal -- Screen to select starting and final destination with mode of transportation */}
+      {/* Transit Modal */}
       <TransitModal
-        onClose={() => {
-          setIsTransitModalVisible(false);
-        }}
+        onClose={() => setIsTransitModalVisible(false)}
         visible={isTransitModalVisible}
         origin={origin}
         destination={destination}
@@ -327,10 +325,9 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
       <NavTab
         campus={campus}
         destination={destination}
-        // onNavigatePress={fetchRoute}
         onSearchPress={() => setIsSearchModalVisible(true)}
         onTravelPress={onTravelPress}
-        onEatPress={() => setViewEatingOnCampus((prevValue) => !prevValue)}
+        onEatPress={toggleEatingLocations} // Pass the toggle function
         onNextClassPress={() => setIsNextClassModalVisible(true)}
         onMoreOptionsPress={() => Alert.alert("More Options pressed")}
         onInfoPress={() => setIsBuildingInfoModalVisible(true)}
@@ -344,62 +341,6 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
 const styles = StyleSheet.create({
   container: { flex: 1, position: "relative" },
   map: { flex: 1 },
-
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContent: {
-    backgroundColor: "white",
-    borderRadius: 12,
-    width: "90%",
-    maxWidth: 400,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  closeButton: {
-    padding: 4,
-  },
-  modalBody: {
-    padding: 16,
-  },
-  modalDescription: {
-    fontSize: 16,
-    color: "#555",
-  },
-  modalFooter: {
-    padding: 16,
-    borderTopWidth: 1,
-    borderTopColor: "#e0e0e0",
-  },
-  navigateButton: {
-    backgroundColor: "#007AFF",
-    borderRadius: 8,
-    padding: 12,
-    alignItems: "center",
-  },
-  navigateButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
 });
 
 export default CampusMap;
