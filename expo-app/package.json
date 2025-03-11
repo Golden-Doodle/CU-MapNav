@@ -26,8 +26,9 @@
       "clover"
     ],
     "collectCoverageFrom": [
-      "app/**/*.{js,jsx,ts,tsx}",
-      "!**/node_modules/**"
+      "expo-app/**/*.{js,jsx,ts,tsx}",
+      "!**/node_modules/**",
+      "!**/coverage/**"
     ]
   },
   "dependencies": {
