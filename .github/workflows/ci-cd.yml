@@ -95,7 +95,7 @@ jobs:
             -Dsonar.pullrequest.key=${{ github.event.pull_request.number }}
             -Dsonar.pullrequest.branch=${{ github.head_ref }}
             -Dsonar.pullrequest.base=${{ github.base_ref }}
-            -Dsonar.javascript.lcov.reportPaths=expo-app/coverage/lcov-report/lcov-report.json  
+            -Dsonar.javascript.lcov.reportPaths=expo-app/coverage/coverage-final.json
 
   deploy:
     needs: [jest-tests-and-Sonar]
