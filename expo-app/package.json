@@ -24,13 +24,13 @@
       "lcov"
     ],
     "collectCoverageFrom": [
-      "expo-app/app/**/*.{js,jsx,ts,tsx}",  // Include only .js, .jsx, .ts, .tsx files inside the app folder
-      "!**/node_modules/**",  // Exclude node_modules
-      "!**/coverage/**",  // Exclude the coverage folder
-      "!**/__tests__/**",  // Exclude test files
-      "!expo-app/expo-app/expo-app/coverage/**",  // Exclude the coverage directory itself
-      "!**/public/**",  // Exclude any static files (like images, HTML, etc.)
-      "!**/assets/**"  // Exclude any static asset folders
+      "expo-app/app/**/*.{js,jsx,ts,tsx}",
+      "!**/node_modules/**", 
+      "!**/coverage/**", 
+      "!**/__tests__/**", 
+      "!expo-app/expo-app/expo-app/coverage/**", 
+      "!**/public/**",  
+      "!**/assets/**" 
     ]
   },
   "dependencies": {
