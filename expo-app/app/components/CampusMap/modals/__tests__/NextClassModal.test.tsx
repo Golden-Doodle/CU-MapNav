@@ -57,13 +57,17 @@ describe("NextClassModal", () => {
   
     await waitFor(() => {
       expect(getByTestId("class-name")).toHaveTextContent("Math 101");
-      
-      const normalizeText = (text: string) => text.toLowerCase().replace(/\./g, '').trim(); 
   
-      const expectedTimeRange = "10:00 am - 11:00 am";
-      const receivedTime = normalizeText(getByTestId("class-time").props.children.join());
+      const normalizeText = (text: string) =>
+        text.toLowerCase().replace(/\./g, "").trim(); 
   
-      expect(receivedTime).toContain(normalizeText(expectedTimeRange)); 
+      const expectedTimeRange = ["10:00 am", "11:00 am"];
+      const receivedTime = getByTestId("class-time")
+        .props.children.join("") 
+        .split(" - ")
+        .map(normalizeText);
+  
+      expect(receivedTime).toEqual(expectedTimeRange.map(normalizeText));
   
       expect(getByTestId("room-value")).toHaveTextContent("123");
       expect(getByTestId("building-value")).toHaveTextContent("Engineering");
