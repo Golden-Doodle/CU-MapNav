@@ -78,7 +78,11 @@ jobs:
         run: |
           echo "Listing contents of the expo-app directory..."
           ls -R expo-app/
-
+          
+      - name: List contents of coverage directory
+        run: |
+          echo "Listing contents of the expo-app/coverage directory..."
+          ls -R expo-app/coverage/
           
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v5
@@ -91,11 +95,12 @@ jobs:
             -Dsonar.projectKey=alexsmags_GoldenDoodle
             -Dsonar.sources=expo-app
             -Dsonar.test.inclusions="expo-app/**/__tests__/**/*.{js,ts,tsx}"
+            -Dsonar.coverage.exclusions="**/__tests__/**"
             -Dsonar.tests=expo-app
             -Dsonar.pullrequest.key=${{ github.event.pull_request.number }}
             -Dsonar.pullrequest.branch=${{ github.head_ref }}
             -Dsonar.pullrequest.base=${{ github.base_ref }}
-            -Dsonar.javascript.lcov.reportPaths=expo-app/expo-app/coverage/lcov.info
+            -Dsonar.javascript.lcov.reportPaths=expo-app/coverage/lcov.info
 
   deploy:
     needs: [jest-tests-and-Sonar]
