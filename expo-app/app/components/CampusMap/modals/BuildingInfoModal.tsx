@@ -7,7 +7,7 @@ type BuildingInfoModalProps = {
   visible: boolean;
   onClose: () => void;
   selectedBuilding: Building | null | undefined;
-  onNavigate?: (latitude: number, longitude: number) => void; // onNavigate is responsible for handling navigation
+  onNavigate?: (latitude: number, longitude: number) => void; 
 };
 
 const BuildingInfoModal: React.FC<BuildingInfoModalProps> = ({
@@ -16,24 +16,24 @@ const BuildingInfoModal: React.FC<BuildingInfoModalProps> = ({
   selectedBuilding,
   onNavigate,
 }) => {
-  const [isImageLoading, setIsImageLoading] = useState<boolean>(false); // Track image loading state
+  const [isImageLoading, setIsImageLoading] = useState<boolean>(false);
 
-  if (!selectedBuilding) return null; // If no building data is available, don't render the modal
+  if (!selectedBuilding) return null;
 
   const handleNavigate = () => {
     if (onNavigate && selectedBuilding?.coordinates?.length) {
       const { latitude, longitude } = selectedBuilding.coordinates[0];
-      onNavigate(latitude, longitude); // Pass coordinates to navigate
-      onClose(); // Close the modal after navigation
+      onNavigate(latitude, longitude);
+      onClose();
     }
   };
 
   const handleImageLoadStart = () => {
-    setIsImageLoading(true); // Start loading spinner when the image starts loading
+    setIsImageLoading(true);
   };
 
   const handleImageLoadEnd = () => {
-    setIsImageLoading(false); // Hide the spinner when the image is fully loaded
+    setIsImageLoading(false);
   };
 
   return (
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.7)", // Darken the background
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
   },
   modalContent: {
     backgroundColor: "white",
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     padding: 16,
-    backgroundColor: "#912338", // A rich color for the header
+    backgroundColor: "#912338",
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
   },
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
     height: 200,
     borderRadius: 12,
     marginBottom: 12,
-    resizeMode: "cover", // Ensure the image is properly cropped
+    resizeMode: "cover",
   },
   spinner: {
     position: "absolute",

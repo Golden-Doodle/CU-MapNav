@@ -1,5 +1,5 @@
 import Constants from "expo-constants";
-import { GooglePlace } from "../../utils/types"; // Import your GooglePlace type
+import { GooglePlace } from "../../utils/types";
 
 interface Coordinates {
   latitude: number;
@@ -38,7 +38,7 @@ export const fetchNearbyRestaurants = async (userLocation: Coordinates): Promise
           height: photo.height,
           width: photo.width,
           photo_reference: photo.photo_reference,
-          imageUrl: getImageUrl(photo.photo_reference), // Add the image URL to each photo
+          imageUrl: getImageUrl(photo.photo_reference), 
         })),
       }));
     }

@@ -13,18 +13,17 @@ export type Building = {
   strokeColor: string;
   description?: string;
   campus: Campus;
-  // Adding the photoUrl and rating fields
-  photoUrl?: string; // URL of the photo, if available
-  rating?: number;  // Rating of the building (if it's a restaurant)
+  photoUrl?: string;
+  rating?: number; 
 };
 export type CustomMarkerType = {
   id: string;
   title: string;
-  description?: string; // Make description optional
+  description?: string;
   coordinate: Coordinates;
   campus?: Campus;
-  photoUrl?: string;  // Optional for restaurant markers
-  rating?: number;    // Optional for restaurant markers
+  photoUrl?: string; 
+  rating?: number; 
 };
 
 
@@ -34,7 +33,6 @@ export type RoomLocation = {
   campus: Campus;
 }
 
-// Define the Google Calendar event type
 export interface GoogleCalendarEvent {
   id: string;
   summary: string;
@@ -54,7 +52,6 @@ export interface GoogleCalendarEvent {
   }>;
 }
 
-// Define SelectedBuilding type
 export type SelectedBuildingType = Building | null | "markerOnMap";
 
 export const concordiaBurgendyColor = "#8C2633";
@@ -114,6 +111,6 @@ export type GooglePlace = {
     height: number;
     width: number;
     photo_reference: string;
-    imageUrl: string;  // This will hold the URL of the photo
+    imageUrl: string; 
   }[];
 };
