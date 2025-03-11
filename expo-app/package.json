@@ -18,12 +18,10 @@
       "<rootDir>/jest.setup.js"
     ],
     "collectCoverage": true,
-    "coverageDirectory": "expo-app/expo-app/coverage/",
+    "coverageDirectory": "coverage",
     "coverageReporters": [
       "json",
-      "lcov",
-      "text",
-      "clover"
+      "lcov"
     ],
     "collectCoverageFrom": [
       "expo-app/**/*.{js,jsx,ts,tsx}",
