@@ -28,7 +28,9 @@
     "collectCoverageFrom": [
       "app/**/*.{js,jsx,ts,tsx}",
       "!**/node_modules/**",
-      "!**/coverage/**"
+      "!**/coverage/**",
+      "!**/__tests__/**",
+      "!expo-app/**/tests/**/*"
     ]
   },
   "dependencies": {
