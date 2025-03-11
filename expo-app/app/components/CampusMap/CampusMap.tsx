@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Alert, Button, StyleSheet } from "react-native";
+import { View, Alert, Button, StyleSheet, ActivityIndicator } from "react-native";
 import MapView, { Marker, Polygon, Polyline } from "react-native-maps";
 import CustomMarker from "./CustomMarker";
 import { SGWBuildings, LoyolaBuildings } from "./data/buildingData";
@@ -16,6 +16,9 @@ import HamburgerWidget from "./HamburgerWidget";
 import TransitModal from "./modals/TransitModal";
 import SearchModal from "./modals/SearchModal";
 
+// Import the fetchNearbyRestaurants function from googlePlacesService
+import { fetchNearbyRestaurants } from "../../services/GoogleMap/googlePlacesService";
+
 // Import types
 import { Campus, Coordinates, LocationType, CustomMarkerType, Building, SelectedBuildingType, RouteOption, GooglePlace } from "../../utils/types";
 
@@ -25,7 +28,7 @@ interface CampusMapProps {
 
 const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   const [campus, setCampus] = useState<Campus>("SGW");
-  const [routeCoordinates, setRouteCoordinates] = useState<Coordinates[]>([]);
+  const [routeCoordinates, setRouteCoordinates] = useState<Coordinates[]>([]); 
   const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
   const [destination, setDestination] = useState<LocationType>(null);
   const [origin, setOrigin] = useState<LocationType>(null);
@@ -37,6 +40,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   const [isTransitModalVisible, setIsTransitModalVisible] = useState<boolean>(false);
   const [restaurantMarkers, setRestaurantMarkers] = useState<CustomMarkerType[]>([]); // Store nearby restaurant markers
   const [mapRegion, setMapRegion] = useState(initialRegion[campus]);
+  const [isLoading, setIsLoading] = useState<boolean>(false); // New loading state
 
   const markers = campus === "SGW" ? SGWMarkers : LoyolaMarkers;
   const buildings = campus === "SGW" ? SGWBuildings : LoyolaBuildings;
@@ -62,32 +66,31 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
     })();
   }, []);
 
-  // Fetch nearby restaurants using Google Places API
+  // Fetch nearby restaurants using the fetchNearbyRestaurants function
   useEffect(() => {
-    if (userLocation) {
-      const placesUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${userLocation.latitude},${userLocation.longitude}&radius=1500&type=restaurant|store&key=${Constants.expoConfig?.extra?.googleMapsApiKey}`;
-  
-      fetch(placesUrl)
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.results) {
-            const restaurantMarkers = data.results.map((place: GooglePlace) => ({
-              id: place.place_id,
-              coordinate: {
-                latitude: place.geometry.location.lat,
-                longitude: place.geometry.location.lng,
-              },
-              title: place.name,
-              description: place.vicinity,
-            }));
-            setRestaurantMarkers(restaurantMarkers);
-          }
+    if (userLocation && viewEatingOnCampus) {
+      setIsLoading(true); // Start loading when fetching restaurants
+      fetchNearbyRestaurants(userLocation)
+        .then((restaurants) => {
+          const restaurantMarkers = restaurants.map((place: GooglePlace) => ({
+            id: place.place_id,
+            coordinate: {
+              latitude: place.geometry.location.lat,
+              longitude: place.geometry.location.lng,
+            },
+            title: place.name,
+            description: place.vicinity,
+          }));
+          setRestaurantMarkers(restaurantMarkers);
         })
         .catch((error) => {
           console.error("Error fetching nearby restaurants: ", error);
+        })
+        .finally(() => {
+          setIsLoading(false); // Stop loading once fetching is done
         });
     }
-  }, [userLocation]);
+  }, [userLocation, viewEatingOnCampus]);
 
   // Open the modal if the user pressed the optimize route button
   useEffect(() => {
@@ -274,6 +277,11 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         )}
       </MapView>
 
+      {/* Show loading spinner if data is being fetched */}
+      {isLoading && (
+        <ActivityIndicator size="large" color="#0000ff" style={styles.spinner} />
+      )}
+
       {/* Modal for Building Info */}
       <BuildingInfoModal
         visible={isBuildingInfoModalVisible}
@@ -341,6 +349,13 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
 const styles = StyleSheet.create({
   container: { flex: 1, position: "relative" },
   map: { flex: 1 },
+  spinner: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    marginLeft: -25,
+    marginTop: -25,
+  },
 });
 
 export default CampusMap;

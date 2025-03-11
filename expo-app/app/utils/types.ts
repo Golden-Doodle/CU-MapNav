@@ -95,7 +95,8 @@ export type RouteOption = {
   }
 };
 
-export interface GooglePlace {
+// types.ts
+export type GooglePlace = {
   place_id: string;
   name: string;
   geometry: {
@@ -105,4 +106,11 @@ export interface GooglePlace {
     };
   };
   vicinity: string;
-}
+  rating?: number;
+  photos?: {
+    height: number;
+    width: number;
+    photo_reference: string;
+    imageUrl: string;  // This will hold the URL of the photo
+  }[];
+};

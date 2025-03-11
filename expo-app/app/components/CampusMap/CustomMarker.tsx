@@ -29,7 +29,7 @@ const CustomMarker: React.FC<CustomMarkerProps> = ({
         />
       ) : (
         <Image
-          source={{ uri: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png" }} 
+          source={{ uri: "https://maps.google.com/mapfiles/ms/icons/red-dot.png" }} 
           style={styles.defaultMarker}
         />
       )}
