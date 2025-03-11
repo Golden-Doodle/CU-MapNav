@@ -1,4 +1,4 @@
-# 🏫 GoldenDoodle - Concordia Campus Guide Project
+# 🏫 GoldenDoodle - Concordia Campus Guide Project [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=alexsmags_GoldenDoodle&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=alexsmags_GoldenDoodle)
 
 GoldenDoodle is a complete Campus Guide application created as part of the SOEN-390 course to assist students in navigating and exploring Concordia University's campuses efficiently. The project is designed to provide an easy and dynamic navigation experience for both the SGW and Loyola campuses, with features such as outdoor and indoor navigation, real-time class instructions, and highlighting major sites of interest across campus.
 
@@ -137,4 +137,8 @@ GoldenDoodle is a complete Campus Guide application created as part of the SOEN-
 | Sadee Shadman    | Back-End     | sadeeshadman@gmail.com  |
 | Seth Hains   | N/A     | N/A  |
 | Steven Zrihen    | Back-End     | N/A  |
+
+---
+
+[![SonarQube Cloud](https://sonarcloud.io/images/project_badges/sonarcloud-dark.svg)](https://sonarcloud.io/summary/new_code?id=alexsmags_GoldenDoodle)
 
