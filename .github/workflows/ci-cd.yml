@@ -83,6 +83,22 @@ jobs:
         uses: actions/checkout@v4       
         with:
           fetch-depth: 0 
+
+      - name: List coverage directory
+        run: |
+          echo "Listing contents of the coverage directory..."
+          ls -R expo-app/coverage/
+
+      - name: Output lcov-report.info
+        run: |
+          echo "Checking if lcov-report.info exists and outputting its contents..."
+          if [ -f expo-app/coverage/lcov-report.info ]; then
+            echo "lcov-report.info file found! Here are the contents:"
+            cat expo-app/coverage/lcov-report.info
+          else
+            echo "lcov-report.info file not found in expo-app/coverage/ directory!"
+          fi
+
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v5
         env:
@@ -92,14 +108,13 @@ jobs:
           args: >
             -Dsonar.organization=goldendoodle-team
             -Dsonar.projectKey=alexsmags_GoldenDoodle
-            -Dsonar.sources=expo-app/app
+            -Dsonar.sources=expo-app
             -Dsonar.test.inclusions="expo-app/**/__tests__/**/*.{js,ts,tsx}"
             -Dsonar.tests=expo-app
             -Dsonar.pullrequest.key=${{ github.event.pull_request.number }}
             -Dsonar.pullrequest.branch=${{ github.head_ref }}
             -Dsonar.pullrequest.base=${{ github.base_ref }}
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov-info/lcov-report.json
-            -X
+            -Dsonar.javascript.lcov.reportPaths=expo-app/coverage/lcov-report.info
 
   deploy:
     needs: [sonarqube]
