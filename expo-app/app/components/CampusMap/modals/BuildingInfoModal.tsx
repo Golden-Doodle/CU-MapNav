@@ -43,7 +43,7 @@ const BuildingInfoModal: React.FC<BuildingInfoModalProps> = ({
           {/* Modal Header */}
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>{selectedBuilding.name}</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <TouchableOpacity onPress={onClose} style={styles.closeButton} testID="close-button">
               <MaterialIcons name="close" size={24} color="#fff" />
             </TouchableOpacity>
           </View>
@@ -54,17 +54,22 @@ const BuildingInfoModal: React.FC<BuildingInfoModalProps> = ({
             {selectedBuilding?.photoUrl && (
               <>
                 {isImageLoading && (
-                  <ActivityIndicator size="large" color="#912338" style={styles.spinner} />
+                  <ActivityIndicator
+                    size="large"
+                    color="#912338"
+                    style={styles.spinner}
+                    testID="spinner" 
+                  />
                 )}
                 <Image
                   source={{ uri: selectedBuilding.photoUrl }}
                   style={styles.image}
                   onLoadStart={handleImageLoadStart}
                   onLoadEnd={handleImageLoadEnd}
+                  testID="building-image"
                 />
               </>
             )}
-
             {/* Display building/restaurant description */}
             <Text style={styles.modalDescription}>
               {selectedBuilding.description || "No description available"}

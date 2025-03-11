@@ -26,11 +26,13 @@ const CustomMarker: React.FC<CustomMarkerProps> = ({
         <Image
           source={{ uri: "https://maps.google.com/mapfiles/ms/icons/restaurant.png" }}
           style={styles.foodMarker}
+          testID="food-marker"
         />
       ) : (
         <Image
           source={{ uri: "https://maps.google.com/mapfiles/ms/icons/red-dot.png" }} 
           style={styles.defaultMarker}
+          testID="default-marker"
         />
       )}
     </Marker>

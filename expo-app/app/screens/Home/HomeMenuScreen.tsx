@@ -9,37 +9,40 @@ export default function HomeMenuScreen() {
   return (
     <View style={styles.container}>
       {/* Back Button in the Top-Left Corner */}
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => router.back()}
+        testID="back-button"
+      >
         <FontAwesome5 name="arrow-left" size={30} color="#fff" />
       </TouchableOpacity>
 
-      <Text style={styles.title}>Menu</Text>
+      <Text style={styles.title} testID="menu-title">Menu</Text>
 
       {/* Navigation Options */}
       <TouchableOpacity 
         style={styles.menuItem} 
         activeOpacity={0.8} 
         onPress={() => router.push("/screens/Home/CampusMapScreen")}
+        testID="campus-map-button"
       >
         <Text style={styles.menuText}>📍 Campus Map</Text>
       </TouchableOpacity>
-
 
       <TouchableOpacity 
         style={styles.menuItem} 
         activeOpacity={0.8} 
         onPress={() => router.push("/screens/Chatbot/ChatBotScreen")}
+        testID="chatbot-button"
       >
         <Text style={styles.menuText}>💬 Chatbot</Text>
       </TouchableOpacity>
 
-
-
-      
       <TouchableOpacity 
         style={styles.menuItem} 
         activeOpacity={0.8} 
         onPress={() => router.push("/screens/Shuttle/ShuttleScreen")}
+        testID="shuttle-button"
       >
         <Text style={styles.menuText}>🚌 Shuttle Schedule</Text>
       </TouchableOpacity>
@@ -48,6 +51,7 @@ export default function HomeMenuScreen() {
         style={styles.menuItem} 
         activeOpacity={0.8} 
         onPress={() => router.push("/screens/Home/StudySpotsScreen")}
+        testID="study-spots-button"
       >
         <Text style={styles.menuText}>📖 Study Spots</Text>
       </TouchableOpacity>

@@ -6,12 +6,16 @@ export default function StudySpots() {
   const router = useRouter();
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Study Spots</Text>
-      <Text style={styles.infoText}>Nearby study spots will be displayed here.</Text>
+    <View style={styles.container} testID="study-spots-container">
+      <Text style={styles.title} testID="study-spots-title">Study Spots</Text>
+      <Text style={styles.infoText} testID="study-spots-info-text">Nearby study spots will be displayed here.</Text>
       
       {/* Back Button */}
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+      <TouchableOpacity 
+        style={styles.backButton} 
+        onPress={() => router.back()} 
+        testID="back-button"
+      >
         <Text style={styles.backButtonText}>Back</Text>
       </TouchableOpacity>
     </View>
