@@ -83,6 +83,11 @@ jobs:
         uses: actions/checkout@v4       
         with:
           fetch-depth: 0 
+          
+      - name: List expo-app directory
+        run: |
+          echo "Listing contents of the expo-app directory..."
+          ls -R expo-app/
 
       - name: List coverage directory
         run: |
