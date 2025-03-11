@@ -5,8 +5,7 @@ on:
     branches:
       - '**'
   pull_request:
-    branches:
-      - '**'
+    types: [opened, synchronize, reopened]
 
 jobs:
   setup:
@@ -81,10 +80,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
-
+        uses: actions/checkout@v4       
+        with:
+          fetch-depth: 0 
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v4
+        uses: SonarSource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: "https://sonarcloud.io"
