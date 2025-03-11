@@ -95,6 +95,7 @@ jobs:
             -Dsonar.projectKey=alexsmags_GoldenDoodle
             -Dsonar.sources=expo-app
             -Dsonar.test.inclusions="expo-app/**/__tests__/**/*.{js,ts,tsx}"
+            -Dsonar.exclusions="expo-app/**/__tests__/**/*.{js,ts,tsx}"
             -Dsonar.tests=expo-app
             -Dsonar.pullrequest.key=${{ github.event.pull_request.number }}
             -Dsonar.pullrequest.branch=${{ github.head_ref }}
