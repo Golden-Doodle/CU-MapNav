@@ -16,13 +16,7 @@
     "preset": "jest-expo",
     "setupFiles": [
       "<rootDir>/jest.setup.js"
-    ],
-  "collectCoverageFrom": [
-    "expo-app/**/*.{js,jsx,ts,tsx}",
-    "!expo-app/**/__tests__/**/*.{js,jsx,ts,tsx}",
-    "!**/node_modules/**",
-    "!**/coverage/**"
-  ] 
+    ] 
   },
   "dependencies": {
     "@expo/config-plugins": "^9.0.15",
