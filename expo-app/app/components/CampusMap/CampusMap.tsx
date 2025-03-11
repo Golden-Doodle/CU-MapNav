@@ -1,26 +1,20 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Alert, Button, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Alert, StyleSheet, ActivityIndicator } from "react-native";
 import MapView, { Marker, Polygon, Polyline } from "react-native-maps";
 import CustomMarker from "./CustomMarker";
 import { SGWBuildings, LoyolaBuildings } from "./data/buildingData";
-import { getDirections } from "../../utils/directions";
+import { getDirections } from "../../utils/directions";  // Ensure this utility function is correctly imported
 import { initialRegion, SGWMarkers, LoyolaMarkers } from "./data/customMarkerData";
 import NavTab from "./CampusMapNavTab";
 import * as Location from "expo-location";
-import Constants from "expo-constants";
 import BuildingInfoModal from "./modals/BuildingInfoModal";
 import { getFillColorWithOpacity } from "../../utils/helperFunctions";
-import { eatingOnCampusData } from "./data/eatingOnCampusData";
 import NextClassModal from "./modals/NextClassModal";
 import HamburgerWidget from "./HamburgerWidget";
 import TransitModal from "./modals/TransitModal";
 import SearchModal from "./modals/SearchModal";
-
-// Import the fetchNearbyRestaurants function from googlePlacesService
 import { fetchNearbyRestaurants } from "../../services/GoogleMap/googlePlacesService";
-
-// Import types
-import { Campus, Coordinates, LocationType, CustomMarkerType, Building, SelectedBuildingType, RouteOption, GooglePlace } from "../../utils/types";
+import { Campus, Coordinates, LocationType, CustomMarkerType, Building, GooglePlace } from "../../utils/types";
 
 interface CampusMapProps {
   pressedOptimizeRoute: boolean;
@@ -28,7 +22,7 @@ interface CampusMapProps {
 
 const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   const [campus, setCampus] = useState<Campus>("SGW");
-  const [routeCoordinates, setRouteCoordinates] = useState<Coordinates[]>([]); 
+  const [routeCoordinates, setRouteCoordinates] = useState<Coordinates[]>([]);
   const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
   const [destination, setDestination] = useState<LocationType>(null);
   const [origin, setOrigin] = useState<LocationType>(null);
@@ -69,7 +63,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   // Fetch nearby restaurants using the fetchNearbyRestaurants function
   useEffect(() => {
     if (userLocation && viewEatingOnCampus) {
-      setIsLoading(true); // Start loading when fetching restaurants
+      setIsLoading(true);
       fetchNearbyRestaurants(userLocation)
         .then((restaurants) => {
           const restaurantMarkers = restaurants.map((place: GooglePlace) => ({
@@ -80,6 +74,8 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
             },
             title: place.name,
             description: place.vicinity,
+            photoUrl: place.photos?.[0]?.imageUrl, // Ensure photoUrl is available
+            rating: place.rating, // Restaurant rating
           }));
           setRestaurantMarkers(restaurantMarkers);
         })
@@ -87,45 +83,10 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
           console.error("Error fetching nearby restaurants: ", error);
         })
         .finally(() => {
-          setIsLoading(false); // Stop loading once fetching is done
+          setIsLoading(false);
         });
     }
   }, [userLocation, viewEatingOnCampus]);
-
-  // Open the modal if the user pressed the optimize route button
-  useEffect(() => {
-    if (pressedOptimizeRoute) {
-      setIsNextClassModalVisible(true);
-    }
-  }, [pressedOptimizeRoute]);
-
-  // Reset destination and route
-  const resetDirections = () => {
-    setRouteCoordinates([]);
-    setDestination(null);
-  };
-
-  // Fetch route from user's location to destination
-  const fetchRoute = useCallback(async () => {
-    if (!origin) {
-      Alert.alert("Cannot fetch route without a starting location");
-      return;
-    }
-
-    if (!destination) {
-      Alert.alert("Select a destination point");
-      return;
-    }
-
-    const route = await getDirections(
-      origin.coordinates,
-      destination.coordinates
-    );
-
-    if (route) {
-      setRouteCoordinates(route);
-    }
-  }, [origin, destination]);
 
   // Handle marker press to set destination
   const handleMarkerPress = useCallback((marker: CustomMarkerType) => {
@@ -137,6 +98,8 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
       strokeColor: "blue",
       fillColor: "rgba(0, 0, 255, 0.5)",
       campus: "SGW",
+      photoUrl: marker.photoUrl,  // Pass photoUrl for restaurant markers
+      rating: marker.rating,      // Pass rating for restaurant markers
     };
 
     setDestination({
@@ -144,7 +107,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
       coordinates: marker.coordinate,
       selectedBuilding: true,
     });
-    setIsBuildingInfoModalVisible(true);
+    setIsBuildingInfoModalVisible(true);  // Open the modal
   }, []);
 
   // Toggle between SGW and Loyola campuses
@@ -152,7 +115,6 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
     setCampus((prevCampus) => {
       const newCampus = prevCampus === "SGW" ? "LOY" : "SGW";
       setMapRegion(initialRegion[newCampus]);
-      resetDirections();
       return newCampus;
     });
   }, []);
@@ -168,26 +130,46 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
     setDestination({ building, coordinates: building.coordinates[0], selectedBuilding: true });
     setIsBuildingInfoModalVisible(true);
 
+    // Update map region to center on the selected building
     setMapRegion({
-      latitude: building.coordinates[0].latitude,
+      latitude: building.coordinates[0].latitude, // Adjust to building center
       longitude: building.coordinates[0].longitude,
-      latitudeDelta: 0.005,
+      latitudeDelta: 0.005, // Zoom level
       longitudeDelta: 0.005,
     });
   };
 
+  // Fetch route from user's location to destination
+  const fetchRoute = useCallback(async () => {
+    if (!origin) {
+      Alert.alert("Cannot fetch route without a starting location");
+      return;
+    }
+
+    if (!destination) {
+      Alert.alert("Select a destination point");
+      return;
+    }
+
+    const route = await getDirections(origin.coordinates, destination.coordinates);
+
+    if (route) {
+      setRouteCoordinates(route);
+    }
+  }, [origin, destination]);
+
   // Handle directions press
   const onDirectionsPress = useCallback(() => {
+    // Set Origin to user location
     setIsTransitModalVisible(true);
   }, []);
-
-  // Handle map press
+  
+  // Handle map press to select destination
   const handleMapPress = (event: any) => {
     const { latitude, longitude } = event.nativeEvent.coordinate;
     const coordinates: Coordinates = { latitude, longitude };
     setDestination({ coordinates } as LocationType);
   };
-
   const onTravelPress = () => {
     const coordinates: Coordinates = initialRegion[campus];
     setDestination({ coordinates, campus } as LocationType);
@@ -210,7 +192,6 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
       />
 
       <MapView
-        key={viewCampusMap ? "map-visible" : "map-hidden"}
         style={styles.map}
         region={mapRegion}
         showsUserLocation={true}
@@ -269,18 +250,12 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         )}
         {/* Render Destination Marker */}
         {destination && !destination.selectedBuilding && (
-          <Marker
-            coordinate={destination.coordinates}
-            pinColor="red"
-            title="Destination"
-          />
+          <Marker coordinate={destination.coordinates} pinColor="red" title="Destination" />
         )}
       </MapView>
 
       {/* Show loading spinner if data is being fetched */}
-      {isLoading && (
-        <ActivityIndicator size="large" color="#0000ff" style={styles.spinner} />
-      )}
+      {isLoading && <ActivityIndicator size="large" color="#912338" style={styles.spinner} />}
 
       {/* Modal for Building Info */}
       <BuildingInfoModal
@@ -335,11 +310,11 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         destination={destination}
         onSearchPress={() => setIsSearchModalVisible(true)}
         onTravelPress={onTravelPress}
-        onEatPress={toggleEatingLocations} // Pass the toggle function
+        onEatPress={toggleEatingLocations}
         onNextClassPress={() => setIsNextClassModalVisible(true)}
         onMoreOptionsPress={() => Alert.alert("More Options pressed")}
         onInfoPress={() => setIsBuildingInfoModalVisible(true)}
-        onBackPress={() => resetDirections()}
+        onBackPress={() => setDestination(null)}
         onDirectionsPress={onDirectionsPress}
       />
     </View>

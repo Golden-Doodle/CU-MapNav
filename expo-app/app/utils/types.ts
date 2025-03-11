@@ -13,15 +13,20 @@ export type Building = {
   strokeColor: string;
   description?: string;
   campus: Campus;
+  // Adding the photoUrl and rating fields
+  photoUrl?: string; // URL of the photo, if available
+  rating?: number;  // Rating of the building (if it's a restaurant)
 };
-
 export type CustomMarkerType = {
   id: string;
   title: string;
-  description: string;
+  description?: string; // Make description optional
   coordinate: Coordinates;
   campus?: Campus;
+  photoUrl?: string;  // Optional for restaurant markers
+  rating?: number;    // Optional for restaurant markers
 };
+
 
 export type RoomLocation = {
   room: string;
@@ -50,7 +55,6 @@ export interface GoogleCalendarEvent {
 }
 
 // Define SelectedBuilding type
-// This is used for the CampusMap and CampusMapNavTab component 
 export type SelectedBuildingType = Building | null | "markerOnMap";
 
 export const concordiaBurgendyColor = "#8C2633";
@@ -95,7 +99,6 @@ export type RouteOption = {
   }
 };
 
-// types.ts
 export type GooglePlace = {
   place_id: string;
   name: string;
