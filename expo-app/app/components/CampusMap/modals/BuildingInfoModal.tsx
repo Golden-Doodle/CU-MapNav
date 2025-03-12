@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Modal, View, Text, TouchableOpacity, StyleSheet, Image, ActivityIndicator } from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-import { Building } from "../../../utils/types";
+import { Building } from "@/app/utils/types";
 
 type BuildingInfoModalProps = {
   visible: boolean;

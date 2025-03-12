@@ -3,18 +3,18 @@ import { View, Alert, StyleSheet, ActivityIndicator } from "react-native";
 import MapView, { Marker, Polygon, Polyline } from "react-native-maps";
 import CustomMarker from "./CustomMarker";
 import { SGWBuildings, LoyolaBuildings } from "./data/buildingData";
-import { getDirections } from "../../utils/directions";
+import { getDirections } from "@/app/utils/directions";
 import { initialRegion, SGWMarkers, LoyolaMarkers } from "./data/customMarkerData";
 import NavTab from "./CampusMapNavTab";
 import * as Location from "expo-location";
 import BuildingInfoModal from "./modals/BuildingInfoModal";
-import { getFillColorWithOpacity } from "../../utils/helperFunctions";
+import { getFillColorWithOpacity } from "@/app/utils/helperFunctions";
 import NextClassModal from "./modals/NextClassModal";
 import HamburgerWidget from "./HamburgerWidget";
 import TransitModal from "./modals/TransitModal";
 import SearchModal from "./modals/SearchModal";
-import { fetchNearbyRestaurants } from "../../services/GoogleMap/googlePlacesService";
-import { Campus, Coordinates, LocationType, CustomMarkerType, Building, GooglePlace } from "../../utils/types";
+import { fetchNearbyRestaurants } from "@/app/services/GoogleMap/googlePlacesService";
+import { Campus, Coordinates, LocationType, CustomMarkerType, Building, GooglePlace } from "@/app/utils/types";
 
 interface CampusMapProps {
   pressedOptimizeRoute: boolean;
