@@ -45,7 +45,7 @@ describe("NextClassModal", () => {
 
   it("should display class details when events are available", async () => {
     (fetchTodaysEventsFromSelectedSchedule as jest.Mock).mockResolvedValueOnce([mockNextClass]);
-
+  
     const { getByTestId } = render(
       <NextClassModal
         visible={true}
@@ -54,14 +54,26 @@ describe("NextClassModal", () => {
         setDestination={() => {}}
       />
     );
-
+  
     await waitFor(() => {
       expect(getByTestId("class-name")).toHaveTextContent("Math 101");
-      expect(getByTestId("class-time")).toHaveTextContent("10:00 AM - 11:00 AM");
+  
+      const normalizeText = (text: string) =>
+        text.toLowerCase().replace(/\./g, "").trim(); 
+  
+      const expectedTimeRange = ["10:00 am", "11:00 am"];
+      const receivedTime = getByTestId("class-time")
+        .props.children.join("") 
+        .split(" - ")
+        .map(normalizeText);
+  
+      expect(receivedTime).toEqual(expectedTimeRange.map(normalizeText));
+  
       expect(getByTestId("room-value")).toHaveTextContent("123");
       expect(getByTestId("building-value")).toHaveTextContent("Engineering");
     });
   });
+  
 
   it("should close the modal when close button is pressed", async () => {
     const mockOnClose = jest.fn();

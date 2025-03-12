@@ -4,19 +4,19 @@ import { FontAwesome5 } from "@expo/vector-icons";
 
 const QuickShortcuts = () => {
   return (
-    <View style={styles.container}>
-      <TouchableOpacity style={styles.shortcut}>
-        <FontAwesome5 name="utensils" size={24} color="#912338" />
+    <View style={styles.container} testID="quick-shortcuts-container">
+      <TouchableOpacity style={styles.shortcut} testID="food-shortcut">
+        <FontAwesome5 name="utensils" size={24} color="#912338" testID="food-icon" />
         <Text style={styles.text}>Food</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.shortcut}>
-        <FontAwesome5 name="toilet" size={24} color="#912338" />
+      <TouchableOpacity style={styles.shortcut} testID="bathroom-shortcut">
+        <FontAwesome5 name="toilet" size={24} color="#912338" testID="bathroom-icon" />
         <Text style={styles.text}>Bathroom</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.shortcut}>
-        <FontAwesome5 name="cocktail" size={24} color="#912338" />
+      <TouchableOpacity style={styles.shortcut} testID="bar-shortcut">
+        <FontAwesome5 name="cocktail" size={24} color="#912338" testID="bar-icon" />
         <Text style={styles.text}>Bar</Text>
       </TouchableOpacity>
     </View>
@@ -31,17 +31,17 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     paddingVertical: 15,
     paddingHorizontal: 20,
-    marginHorizontal: 30, // Centers it properly
-    marginTop: 15, // Space from search bar
+    marginHorizontal: 30,
+    marginTop: 15,
     shadowColor: "#000",
     shadowOffset: { width: 2, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3, // Android shadow
+    elevation: 3,
   },
   shortcut: {
     alignItems: "center",
-    flex: 1, // Even spacing for all buttons
+    flex: 1,
   },
   text: {
     fontSize: 14,
