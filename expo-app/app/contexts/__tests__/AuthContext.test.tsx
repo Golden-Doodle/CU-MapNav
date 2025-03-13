@@ -131,7 +131,7 @@ describe("AuthProvider", () => {
       await contextValue?.handleGoogleSignIn();
     });
   
-    {"** This needs to be fixed **"}
+    // ** This needs to be fixed ** 
     //expect(GoogleSignin.signIn).toHaveBeenCalled();
     //expect(mockAuth.signInWithCredential).toHaveBeenCalled();
     //expect(AsyncStorage.setItem).toHaveBeenCalledWith(
