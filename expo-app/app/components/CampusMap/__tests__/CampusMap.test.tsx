@@ -75,18 +75,27 @@ describe("CampusMap", () => {
   });
 
   it("should display the loading spinner while fetching restaurants", async () => {
-    const { getByTestId } = render(<CampusMap pressedOptimizeRoute={false} />);
+    const { getByTestId, queryByTestId, findAllByTestId } = render(<CampusMap pressedOptimizeRoute={false} />);
     const eatButton = getByTestId("nav-tab-nav-item-Eat");
     fireEvent.press(eatButton);
-
+  
+    // Step 1: Ensure the loading spinner appears
     await waitFor(() => {
       expect(getByTestId("loading-spinner")).toBeTruthy();
     });
-
+  
+    // Step 2: Wait for restaurant markers to appear instead of a restaurant list
+    const restaurantMarkers = await findAllByTestId(/restaurant-marker-.*/);
+  
+    // Step 3: Now check if the spinner is gone
     await waitFor(() => {
-      expect(() => getByTestId("loading-spinner")).toThrow();
+      expect(queryByTestId("loading-spinner")).toBeNull();
     });
+  
+    // Step 4: Ensure restaurant markers are rendered
+    expect(restaurantMarkers.length).toBeGreaterThan(0);
   });
+  
 
   it("should display building markers on the map and open modal when clicked", async () => {
     const { getByTestId, queryByTestId } = render(<CampusMap pressedOptimizeRoute={false} />);
