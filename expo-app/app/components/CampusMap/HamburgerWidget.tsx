@@ -8,6 +8,7 @@ interface HamburgerWidgetProps {
   viewCampusMap: boolean;
   campus: Campus;
   setViewCampusMap: React.Dispatch<React.SetStateAction<boolean>>;
+  testID: string; 
 }
 
 const HamburgerWidget: React.FC<HamburgerWidgetProps> = ({
@@ -15,6 +16,7 @@ const HamburgerWidget: React.FC<HamburgerWidgetProps> = ({
   viewCampusMap,
   setViewCampusMap,
   campus,
+  testID, 
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -28,51 +30,51 @@ const HamburgerWidget: React.FC<HamburgerWidgetProps> = ({
   };
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID={`${testID}-container`}>
       
       {/* Hamburger Button Fixed on the Right */}
       <TouchableOpacity
         style={styles.hamburgerButton}
         onPress={toggleVisibility}
-        testID="hamburger-button"
+        testID={`${testID}-hamburger-button`}
       >
         <MaterialIcons name="menu" size={25} color="black" />
       </TouchableOpacity>
 
       {/* The hidden menu options */}
       {isVisible && (
-        <View style={styles.exposedOptions} testID="menu-options">
+        <View style={styles.exposedOptions} testID={`${testID}-menu-options`}>
           <TouchableOpacity
             style={styles.buttonContainer}
             onPress={toggleCampus}
-            testID="toggle-campus-button"
+            testID={`${testID}-toggle-campus-button`}
           >
             <View style={styles.row}>
               <MaterialIcons name="arrow-upward" size={16} color="black" />
               <MaterialIcons name="arrow-downward" size={16} color="black" />
-              <Text style={styles.buttonText}>
+              <Text style={styles.buttonText} testID={`campus-name`}>
                 View {campus === "SGW" ? "Loyola Campus" : "SGW Campus"}
               </Text>
             </View>
           </TouchableOpacity>
 
           {/* Campus Map Switch */}
-          <View style={styles.switchContainer}>
-            <Text style={styles.switchText}>View Campus Map</Text>
+          <View style={styles.switchContainer} testID={`${testID}-campus-map-switch-container`}>
+            <Text style={styles.switchText} testID={`${testID}-switch-text`}>View Campus Map</Text>
             <Switch
               value={viewCampusMap}
               onValueChange={() => setViewCampusMap((prevValue: boolean) => !prevValue)}
-              testID="campus-map-switch"
+              testID={`${testID}-campus-map-switch`}
             />
           </View>
 
           {/* Dark Mode Switch */}
-          <View style={styles.switchContainer}>
-            <Text style={styles.switchText}>Dark Mode</Text>
+          <View style={styles.switchContainer} testID={`${testID}-dark-mode-switch-container`}>
+            <Text style={styles.switchText} testID={`${testID}-dark-mode-text`}>Dark Mode</Text>
             <Switch
               value={isDarkMode}
               onValueChange={handleThemeChange}
-              testID="dark-mode-switch"
+              testID={`${testID}-dark-mode-switch`}
             />
           </View>
         </View>
@@ -87,14 +89,14 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 55,
     right: 5,
-    alignItems: "flex-end", // Ensures alignment to the right
+    alignItems: "flex-end", 
     zIndex: 10,
   },
   hamburgerButton: {
     backgroundColor: "rgba(255, 255, 255, 0.8)",
     padding: 10,
     borderRadius: 8,
-    elevation: 3, // Adds a shadow on Android
+    elevation: 3, 
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
@@ -106,9 +108,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     borderColor: "gray",
-    marginTop: 10, // Space between the menu button and the box
+    marginTop: 10,
     width: 220,
-    elevation: 5, // Adds a shadow effect on Android
+    elevation: 5, 
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
@@ -132,12 +134,12 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 10,
     fontWeight: "bold",
-    marginLeft: 8, // Space between icons and text
+    marginLeft: 8, 
   },
   switchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between", // Aligns text to left and switch to right
+    justifyContent: "space-between",
     backgroundColor: "rgba(255, 255, 255, 0.8)",
     borderRadius: 8,
     borderWidth: 1,

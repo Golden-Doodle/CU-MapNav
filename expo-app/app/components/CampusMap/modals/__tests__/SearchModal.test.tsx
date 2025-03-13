@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
-import SearchModal from '../SearchModal'; // Assuming SearchModal is in the same folder
+import SearchModal from '../SearchModal';
 import { Building } from '@/app/utils/types';
 
 const mockOnClose = jest.fn();
@@ -41,15 +41,14 @@ describe('SearchModal', () => {
         onPressSelectOnMap={mockOnPressSelectOnMap}
         destination={null}
         onGetDirections={mockOnGetDirections}
+        testID="search-modal" 
       />
     );
 
-    // Ensure state updates are wrapped inside act
     await act(async () => {
-      // Check if modal is visible
-      expect(getByTestId('search-modal')).toBeTruthy();
-      expect(getByTestId('modal-title')).toHaveTextContent('Select Destination');
-      expect(getByTestId('search-input')).toBeTruthy();
+      expect(getByTestId('search-modal-modal-container')).toBeTruthy(); 
+      expect(getByTestId('search-modal-modal-title')).toHaveTextContent('Select Destination'); 
+      expect(getByTestId('search-modal-search-input')).toBeTruthy(); 
     });
   });
 
@@ -64,11 +63,12 @@ describe('SearchModal', () => {
         onPressSelectOnMap={mockOnPressSelectOnMap}
         destination={null}
         onGetDirections={mockOnGetDirections}
+        testID="search-modal"
       />
     );
 
     await act(async () => {
-      fireEvent.press(getByTestId('close-icon'));
+      fireEvent.press(getByTestId('search-modal-close-icon')); 
     });
 
     expect(mockOnClose).toHaveBeenCalled();
@@ -85,19 +85,20 @@ describe('SearchModal', () => {
         onPressSelectOnMap={mockOnPressSelectOnMap}
         destination={null}
         onGetDirections={mockOnGetDirections}
+        testID="search-modal" 
       />
     );
 
     await act(async () => {
-      fireEvent.changeText(getByTestId('search-input'), 'Building 1');
+      fireEvent.changeText(getByTestId('search-modal-search-input'), 'Building 1'); 
     });
 
     await waitFor(() => {
-      expect(getByTestId('result-item-1')).toBeTruthy();
+      expect(getByTestId('search-modal-result-item-1')).toBeTruthy(); 
     });
 
     await act(async () => {
-      fireEvent.press(getByTestId('result-item-1'));
+      fireEvent.press(getByTestId('search-modal-result-item-1')); 
     });
 
     expect(mockOnSelectLocation).toHaveBeenCalledWith(buildingData[0]);

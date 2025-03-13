@@ -10,7 +10,7 @@ jest.mock("@react-native-async-storage/async-storage", () => ({
 }));
 
 jest.mock("@/app/services/GoogleCalendar/fetchingUserCalendarData", () => ({
-  fetchTodaysEventsFromSelectedSchedule: jest.fn().mockResolvedValue([]), 
+  fetchTodaysEventsFromSelectedSchedule: jest.fn().mockResolvedValue([]),
 }));
 
 const mockNextClass: GoogleCalendarEvent = {
@@ -35,45 +35,46 @@ describe("NextClassModal", () => {
         onClose={() => {}}
         destination={{ coordinates: { latitude: 0, longitude: 0 } }}
         setDestination={() => {}}
+        testID="next-class-modal"
       />
     );
 
     await waitFor(() => {
-      expect(getByTestId("loading-indicator")).toBeTruthy(); 
+      expect(getByTestId("next-class-modal-loading-indicator")).toBeTruthy();
     });
   });
 
   it("should display class details when events are available", async () => {
     (fetchTodaysEventsFromSelectedSchedule as jest.Mock).mockResolvedValueOnce([mockNextClass]);
-  
+
     const { getByTestId } = render(
       <NextClassModal
         visible={true}
         onClose={() => {}}
         destination={{ coordinates: { latitude: 0, longitude: 0 } }}
         setDestination={() => {}}
+        testID="next-class-modal"
       />
     );
-  
+
     await waitFor(() => {
-      expect(getByTestId("class-name")).toHaveTextContent("Math 101");
-  
+      expect(getByTestId("next-class-modal-class-name")).toHaveTextContent("Math 101");
+
       const normalizeText = (text: string) =>
-        text.toLowerCase().replace(/\./g, "").trim(); 
-  
+        text.toLowerCase().replace(/\./g, "").trim();
+
       const expectedTimeRange = ["10:00 am", "11:00 am"];
-      const receivedTime = getByTestId("class-time")
-        .props.children.join("") 
+      const receivedTime = getByTestId("next-class-modal-class-time")
+        .props.children.join("")
         .split(" - ")
         .map(normalizeText);
-  
+
       expect(receivedTime).toEqual(expectedTimeRange.map(normalizeText));
-  
-      expect(getByTestId("room-value")).toHaveTextContent("123");
-      expect(getByTestId("building-value")).toHaveTextContent("Engineering");
+
+      expect(getByTestId("next-class-modal-room-value")).toHaveTextContent("123");
+      expect(getByTestId("next-class-modal-building-value")).toHaveTextContent("Engineering");
     });
   });
-  
 
   it("should close the modal when close button is pressed", async () => {
     const mockOnClose = jest.fn();
@@ -84,10 +85,11 @@ describe("NextClassModal", () => {
         onClose={mockOnClose}
         destination={{ coordinates: { latitude: 0, longitude: 0 } }}
         setDestination={() => {}}
+        testID="next-class-modal"
       />
     );
 
-    const closeButton = getByTestId("close-button");
+    const closeButton = getByTestId("next-class-modal-close-button");
 
     await act(async () => {
       fireEvent.press(closeButton);

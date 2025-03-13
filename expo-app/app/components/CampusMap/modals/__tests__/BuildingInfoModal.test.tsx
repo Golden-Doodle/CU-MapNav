@@ -17,7 +17,7 @@ const building: Building = {
   coordinates: [{ latitude: 10.0, longitude: 20.0 }],
   fillColor: "#ff0000",
   strokeColor: "#00ff00",
-  campus: "SGW", 
+  campus: "SGW",
 };
 
 describe("BuildingInfoModal", () => {
@@ -28,6 +28,7 @@ describe("BuildingInfoModal", () => {
         onClose={mockOnClose}
         selectedBuilding={building}
         onNavigate={mockNavigate}
+        testID="building-info-modal"
       />
     );
 
@@ -35,7 +36,7 @@ describe("BuildingInfoModal", () => {
     expect(getByText("This is a description of the building.")).toBeTruthy();
     expect(getByText("Rating: 4.5 ★")).toBeTruthy();
   });
- 
+
   it("calls onNavigate when navigate button is pressed", () => {
     const { getByText } = render(
       <BuildingInfoModal
@@ -43,6 +44,7 @@ describe("BuildingInfoModal", () => {
         onClose={mockOnClose}
         selectedBuilding={building}
         onNavigate={mockNavigate}
+        testID="building-info-modal"
       />
     );
 
@@ -58,12 +60,14 @@ describe("BuildingInfoModal", () => {
         onClose={mockOnClose}
         selectedBuilding={building}
         onNavigate={mockNavigate}
+        testID="building-info-modal"
       />
     );
 
-    fireEvent.press(getByTestId("close-button"));
+    fireEvent.press(getByTestId("building-info-modal-close-button"));
     expect(mockOnClose).toHaveBeenCalled();
   });
+
   it("does not render modal when selectedBuilding is null or undefined", () => {
     const { queryByTestId } = render(
       <BuildingInfoModal
@@ -71,11 +75,12 @@ describe("BuildingInfoModal", () => {
         onClose={mockOnClose}
         selectedBuilding={null}
         onNavigate={mockNavigate}
+        testID="building-info-modal"
       />
     );
   
-    expect(queryByTestId("close-button")).toBeNull();
-    expect(queryByTestId("building-image")).toBeNull();
+    expect(queryByTestId("building-info-modal-close-button")).toBeNull();
+    expect(queryByTestId("building-info-modal-building-image")).toBeNull();
   
     const { queryByTestId: queryByTestIdUndefined } = render(
       <BuildingInfoModal
@@ -83,10 +88,11 @@ describe("BuildingInfoModal", () => {
         onClose={mockOnClose}
         selectedBuilding={undefined}
         onNavigate={mockNavigate}
+        testID="building-info-modal"
       />
     );
   
-    expect(queryByTestIdUndefined("close-button")).toBeNull();
-    expect(queryByTestIdUndefined("building-image")).toBeNull();
+    expect(queryByTestIdUndefined("building-info-modal-close-button")).toBeNull();
+    expect(queryByTestIdUndefined("building-info-modal-building-image")).toBeNull();
   });
 });

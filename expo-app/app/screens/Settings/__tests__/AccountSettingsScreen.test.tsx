@@ -194,4 +194,88 @@ describe("AccountSettingsScreen", () => {
 
     expect(queryByText("No schedules found")).toBeTruthy();
   });
+
+  it("resets profile image when image picker is canceled", async () => {
+    const { getByTestId } = render(
+      <AuthContext.Provider value={mockAuthContext}>
+        <AccountSettingsScreen />
+      </AuthContext.Provider>
+    );
+  
+    const initialProfileImage = getByTestId("profile-image").props.source.uri;
+  
+    const pickImageButton = getByTestId("edit-photo-button");
+    fireEvent.press(pickImageButton);
+
+    (ImagePicker.launchImageLibraryAsync as jest.Mock).mockResolvedValueOnce({
+      canceled: true,
+      assets: [],
+    });
+  
+    await waitFor(() => {
+      expect(getByTestId("profile-image").props.source.uri).toBe(initialProfileImage);
+    });
+  });
+  
+
+  it("opens profile modal for editing and cancels correctly", async () => {
+    const { getByTestId, queryByTestId } = render(
+      <AuthContext.Provider value={mockAuthContext}>
+        <AccountSettingsScreen />
+      </AuthContext.Provider>
+    );
+  
+    const editNameButton = getByTestId("edit-name");
+    fireEvent.press(editNameButton);
+  
+    const modal = getByTestId("modal-container");
+    expect(modal).toBeTruthy();
+  
+    const cancelButton = getByTestId("cancel-button");
+    fireEvent.press(cancelButton);
+  
+    expect(queryByTestId("modal-container")).toBeNull();
+  });
+  
+
+  // ** Needs to be updated later when implementation is done **
+  it("selects a schedule and saves the changes", async () => {
+  const mockSchedules = [
+    { id: "1", summary: "Work Schedule" },
+    { id: "2", summary: "School Schedule" },
+  ];
+
+  jest.spyOn(require('@/app/services/GoogleCalendar/fetchingUserCalendarData'), 'fetchAllCalendars').mockResolvedValue(mockSchedules);
+
+  const mockAuthContextWithSchedules = {
+    ...mockAuthContext,
+    selectedCalendarId: null, 
+    setSelectedCalendarId: jest.fn(), 
+  };
+
+  const { getByTestId, getByText } = render(
+    <AuthContext.Provider value={mockAuthContextWithSchedules}>
+      <AccountSettingsScreen />
+    </AuthContext.Provider>
+  );
+
+  await waitFor(() => {
+    expect(getByText("Work Schedule")).toBeTruthy();
+    expect(getByText("School Schedule")).toBeTruthy();
+  });
+
+  const scheduleSwitch1 = getByTestId("switch-1");
+  fireEvent(scheduleSwitch1, "valueChange", true); 
+
+  const saveButton = getByTestId("save-button");
+  await waitFor(() => {
+    expect(saveButton).toHaveStyle({ opacity: 1 });
+  });
+
+  fireEvent.press(saveButton);
+
+
+  console.log(mockAuthContextWithSchedules.setSelectedCalendarId.mock.calls);
+});
+
 });
