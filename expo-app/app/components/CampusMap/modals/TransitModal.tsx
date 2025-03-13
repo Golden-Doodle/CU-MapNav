@@ -50,6 +50,8 @@ const TransitModal = ({
   userLocation,
   testID, 
 }: TransitModalProps) => {
+  const locationDisplayOrigin = useLocationDisplay(origin);
+  const locationDisplayDestination = useLocationDisplay(destination);
   const [routeOptions, setRouteOptions] = React.useState<RouteOption[]>([]);
   const [isSearching, setIsSearching] = React.useState<"origin" | "destination" | null>(null);
   const { filteredData, searchQuery, setSearchQuery } = useSearch({
@@ -162,10 +164,10 @@ const TransitModal = ({
               style={styles.titleInput}
               onFocus={() => {
                 setIsSearching("origin");
-                setSearchQuery(useLocationDisplay(origin));
+                setSearchQuery(locationDisplayOrigin);
               }}
               onBlur={resetIsSearching}
-              value={isSearching === "origin" ? searchQuery : useLocationDisplay(origin)}
+              value={isSearching === "origin" ? searchQuery : locationDisplayOrigin}
               onChangeText={setSearchQuery}
               onSubmitEditing={() => {
                 searchQuery.trim() === "" && resetIsSearching();
@@ -178,10 +180,10 @@ const TransitModal = ({
               style={styles.titleInput}
               onFocus={() => {
                 setIsSearching("destination");
-                setSearchQuery(useLocationDisplay(destination));
+                setSearchQuery(locationDisplayDestination);
               }}
               onBlur={resetIsSearching}
-              value={isSearching === "destination" ? searchQuery : useLocationDisplay(destination)}
+              value={isSearching === "destination" ? searchQuery : locationDisplayDestination}
               onChangeText={setSearchQuery}
               onSubmitEditing={() => {
                 searchQuery.trim() === "" && resetIsSearching();
@@ -252,11 +254,11 @@ const TransitModal = ({
                           Distance: {item.distance}
                         </Text>
                       )}
-                      {item.duration && (
-                        <Text style={styles.details} testID={`${testID}-route-duration-${item.id}`}>
-                          {item.duration} - Mode: {item.mode}
-                        </Text>
-                      )}
+                    {Boolean(item.duration) && (
+                      <Text style={styles.details} testID={`${testID}-route-duration-${item.id}`}>
+                        {item.duration} - Mode: {item.mode}
+                      </Text>
+                    )}
                       {item.transport && (
                         <Text style={styles.details} testID={`${testID}-route-transport-${item.id}`}>
                           Transport: {item.transport}
