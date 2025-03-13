@@ -63,11 +63,17 @@ const TransitModal = ({
   useEffect(() => {
     if (!origin || !destination) return;
     const fetchRoutes = async () => {
-      const routes = await fetchAllRoutes(origin, destination);
-      setRouteOptions(routes);
+      try {
+        const routes = await fetchAllRoutes(origin, destination);
+        setRouteOptions(routes);
+      } catch (error) {
+        console.error("Failed to fetch routes", error);
+        setRouteOptions([]); 
+      }
     };
     fetchRoutes();
   }, [origin, destination]);
+  
 
   const getTransportIcon = (mode: TransportMode) => {
     switch (mode) {
