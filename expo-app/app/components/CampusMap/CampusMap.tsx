@@ -73,7 +73,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
             title: place.name,
             description: place.vicinity,
             photoUrl: place.photos?.[0]?.imageUrl,
-            rating: place.rating, 
+            rating: place.rating,
           }));
           setRestaurantMarkers(restaurantMarkers);
         })
@@ -95,7 +95,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
       strokeColor: "blue",
       fillColor: "rgba(0, 0, 255, 0.5)",
       campus: "SGW",
-      photoUrl: marker.photoUrl,  
+      photoUrl: marker.photoUrl,
       rating: marker.rating,
     };
 
@@ -126,7 +126,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
     setIsBuildingInfoModalVisible(true);
 
     setMapRegion({
-      latitude: building.coordinates[0].latitude, 
+      latitude: building.coordinates[0].latitude,
       longitude: building.coordinates[0].longitude,
       latitudeDelta: 0.005,
       longitudeDelta: 0.005,
@@ -160,6 +160,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
     const coordinates: Coordinates = { latitude, longitude };
     setDestination({ coordinates } as LocationType);
   };
+
   const onTravelPress = () => {
     const coordinates: Coordinates = initialRegion[campus];
     setDestination({ coordinates, campus } as LocationType);
@@ -174,6 +175,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
     <View style={styles.container}>
       {/* Movable Hamburger Widget */}
       <HamburgerWidget
+        testID="toggle-campus-button"
         toggleCampus={toggleCampus}
         viewCampusMap={viewCampusMap}
         setViewCampusMap={setViewCampusMap}
@@ -188,6 +190,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         scrollEnabled={true}
         zoomEnabled={true}
         onLongPress={(event: any) => handleMapPress(event)}
+        testID="campus-map"
       >
         {viewCampusMap && (
           <>
@@ -195,6 +198,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
             {markers.map((marker) => (
               <CustomMarker
                 key={marker.id}
+                testID={`building-marker-${marker.id}`}
                 coordinate={marker.coordinate}
                 title={marker.title}
                 description={marker.description}
@@ -206,6 +210,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
             {viewEatingOnCampus && restaurantMarkers.map((marker) => (
               <CustomMarker
                 key={marker.id}
+                testID={`restaurant-marker-${marker.id}`}
                 coordinate={marker.coordinate}
                 title={marker.title}
                 description={marker.description}
@@ -224,6 +229,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
                 strokeWidth={2}
                 tappable={true}
                 onPress={handleBuildingPressed(building)}
+                testID={`building-polygon-${building.id}`}
               />
             ))}
           </>
@@ -235,17 +241,18 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
             coordinates={routeCoordinates}
             strokeWidth={4}
             strokeColor="rgba(145, 35, 56, 1)"
+            testID="route-polyline"
           />
         )}
 
         {/* Render Destination Marker */}
         {destination && !destination.selectedBuilding && (
-          <Marker coordinate={destination.coordinates} pinColor="red" title="Destination" />
+          <Marker coordinate={destination.coordinates} pinColor="red" title="Destination" testID="destination-marker" />
         )}
       </MapView>
 
       {/* Show loading spinner if data is being fetched */}
-      {isLoading && <ActivityIndicator size="large" color="#912338" style={styles.spinner} />}
+      {isLoading && <ActivityIndicator size="large" color="#912338" style={styles.spinner} testID="loading-spinner" />}
 
       {/* Modal for Building Info */}
       <BuildingInfoModal
@@ -253,6 +260,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         onClose={() => setIsBuildingInfoModalVisible(false)}
         selectedBuilding={destination?.building}
         onNavigate={onDirectionsPress}
+        testID="building-info-modal"
       />
 
       {/* Search Modal */}
@@ -272,6 +280,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         onGetDirections={() => fetchRoute()}
         buildingData={buildings}
         markerData={markers}
+        testID="search-modal"
       />
 
       {/* Transit Modal */}
@@ -286,6 +295,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         buildingData={buildings}
         markerData={markers}
         userLocation={userLocation}
+        testID="transit-modal"
       />
 
       <NextClassModal
@@ -293,6 +303,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         onClose={() => setIsNextClassModalVisible(false)}
         destination={destination}
         setDestination={setDestination}
+        testID="next-class-modal"
       />
 
       <NavTab
@@ -306,6 +317,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         onInfoPress={() => setIsBuildingInfoModalVisible(true)}
         onBackPress={() => setDestination(null)}
         onDirectionsPress={onDirectionsPress}
+        testID="nav-tab"
       />
     </View>
   );

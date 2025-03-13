@@ -16,11 +16,12 @@ describe("HamburgerWidget Component", () => {
           viewCampusMap={false}
           setViewCampusMap={mockSetViewCampusMap}
           campus={"SGW" as Campus}
+          testID="hamburger-widget" 
         />
       </View>
     );
 
-    await waitFor(() => expect(getByTestId("hamburger-button")).toBeTruthy());
+    await waitFor(() => expect(getByTestId("hamburger-widget-hamburger-button")).toBeTruthy());
   });
 
   test("toggles visibility of menu when hamburger button is clicked", async () => {
@@ -31,19 +32,20 @@ describe("HamburgerWidget Component", () => {
           viewCampusMap={false}
           setViewCampusMap={mockSetViewCampusMap}
           campus={"SGW" as Campus}
+          testID="hamburger-widget"
         />
       </View>
     );
 
-    const hamburgerButton = getByTestId("hamburger-button");
+    const hamburgerButton = getByTestId("hamburger-widget-hamburger-button");
 
-    expect(queryByTestId("menu-options")).toBeNull();
-
-    fireEvent.press(hamburgerButton);
-    await waitFor(() => expect(getByTestId("menu-options")).toBeTruthy());
+    expect(queryByTestId("hamburger-widget-menu-options")).toBeNull();
 
     fireEvent.press(hamburgerButton);
-    await waitFor(() => expect(queryByTestId("menu-options")).toBeNull());
+    await waitFor(() => expect(getByTestId("hamburger-widget-menu-options")).toBeTruthy());
+
+    fireEvent.press(hamburgerButton);
+    await waitFor(() => expect(queryByTestId("hamburger-widget-menu-options")).toBeNull());
   });
 
   test("toggles the campus map switch", async () => {
@@ -54,14 +56,15 @@ describe("HamburgerWidget Component", () => {
           viewCampusMap={false}
           setViewCampusMap={mockSetViewCampusMap}
           campus={"SGW" as Campus}
+          testID="hamburger-widget"
         />
       </View>
     );
   
-    fireEvent.press(getByTestId("hamburger-button"));
-    await waitFor(() => expect(getByTestId("menu-options")).toBeTruthy());
+    fireEvent.press(getByTestId("hamburger-widget-hamburger-button"));
+    await waitFor(() => expect(getByTestId("hamburger-widget-menu-options")).toBeTruthy());
   
-    fireEvent(getByTestId("campus-map-switch"), "valueChange", true);
+    fireEvent(getByTestId("hamburger-widget-campus-map-switch"), "valueChange", true);
   
     expect(mockSetViewCampusMap).toHaveBeenCalled(); 
   });
@@ -75,15 +78,16 @@ describe("HamburgerWidget Component", () => {
           viewCampusMap={false}
           setViewCampusMap={mockSetViewCampusMap}
           campus={"SGW" as Campus}
+          testID="hamburger-widget" 
         />
       </View>
     );
 
-    fireEvent.press(getByTestId("hamburger-button")); 
-    await waitFor(() => expect(getByTestId("menu-options")).toBeTruthy());
+    fireEvent.press(getByTestId("hamburger-widget-hamburger-button")); 
+    await waitFor(() => expect(getByTestId("hamburger-widget-menu-options")).toBeTruthy());
 
-    fireEvent.press(getByTestId("dark-mode-switch"));
-    expect(getByTestId("dark-mode-switch")).toBeTruthy();
+    fireEvent.press(getByTestId("hamburger-widget-dark-mode-switch"));
+    expect(getByTestId("hamburger-widget-dark-mode-switch")).toBeTruthy();
   });
 
   test("calls toggleCampus when campus switch button is pressed", async () => {
@@ -94,14 +98,15 @@ describe("HamburgerWidget Component", () => {
           viewCampusMap={false}
           setViewCampusMap={mockSetViewCampusMap}
           campus={"SGW" as Campus}
+          testID="hamburger-widget"
         />
       </View>
     );
 
-    fireEvent.press(getByTestId("hamburger-button"));
-    await waitFor(() => expect(getByTestId("menu-options")).toBeTruthy());
+    fireEvent.press(getByTestId("hamburger-widget-hamburger-button"));
+    await waitFor(() => expect(getByTestId("hamburger-widget-menu-options")).toBeTruthy());
 
-    fireEvent.press(getByTestId("toggle-campus-button"));
+    fireEvent.press(getByTestId("hamburger-widget-toggle-campus-button"));
     expect(mockToggleCampus).toHaveBeenCalled();
   });
 });

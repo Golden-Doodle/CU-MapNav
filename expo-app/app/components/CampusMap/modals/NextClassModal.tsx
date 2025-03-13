@@ -21,6 +21,7 @@ interface NextClassModalProps {
   onClose: () => void;
   destination: LocationType;
   setDestination: React.Dispatch<React.SetStateAction<LocationType>>;
+  testID: string; 
 }
 
 const NextClassModal: React.FC<NextClassModalProps> = ({
@@ -28,6 +29,7 @@ const NextClassModal: React.FC<NextClassModalProps> = ({
   onClose,
   destination,
   setDestination,
+  testID,
 }) => {
   const [nextClass, setNextClass] = useState<GoogleCalendarEvent | null>(null);
   const [location, setLocation] = useState<RoomLocation | null>(null);
@@ -109,17 +111,18 @@ const NextClassModal: React.FC<NextClassModalProps> = ({
       transparent={true}
       visible={visible}
       onRequestClose={onClose}
+      testID={`${testID}-modal`}
     >
-      <View style={styles.overlay}>
-        <View style={styles.modalContainer}>
-          <Text style={styles.title} testID="modal-title">Next Class</Text>
+      <View style={styles.overlay} testID={`${testID}-overlay`}>
+        <View style={styles.modalContainer} testID={`${testID}-modal-container`}>
+          <Text style={styles.title} testID={`${testID}-modal-title`}>Next Class</Text>
 
           {isLoading ? (
-            <ActivityIndicator size="large" color="#912338" testID="loading-indicator" />
+            <ActivityIndicator size="large" color="#912338" testID={`${testID}-loading-indicator`} />
           ) : nextClass ? (
             <>
-              <Text style={styles.className} testID="class-name">{nextClass.summary}</Text>
-              <Text style={styles.time} testID="class-time">
+              <Text style={styles.className} testID={`${testID}-class-name`}>{nextClass.summary}</Text>
+              <Text style={styles.time} testID={`${testID}-class-time`}>
                 {new Date(nextClass.start.dateTime).toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
@@ -131,38 +134,38 @@ const NextClassModal: React.FC<NextClassModalProps> = ({
                 })}
               </Text>
 
-              <View style={styles.infoContainer}>
-                <Text style={styles.label} testID="room-label">Room:</Text>
-                <Text style={styles.value} testID="room-value">{location?.room?.toUpperCase() || "N/A"}</Text>
+              <View style={styles.infoContainer} testID={`${testID}-room-info`}>
+                <Text style={styles.label} testID={`${testID}-room-label`}>Room:</Text>
+                <Text style={styles.value} testID={`${testID}-room-value`}>{location?.room?.toUpperCase() || "N/A"}</Text>
               </View>
-              <View style={styles.infoContainer}>
-                <Text style={styles.label} testID="building-label">Building:</Text>
-                <Text style={styles.value} testID="building-value">
+              <View style={styles.infoContainer} testID={`${testID}-building-info`}>
+                <Text style={styles.label} testID={`${testID}-building-label`}>Building:</Text>
+                <Text style={styles.value} testID={`${testID}-building-value`}>
                   {location?.building?.name || "N/A"}
                 </Text>
               </View>
-              <View style={styles.infoContainer}>
-                <Text style={styles.label} testID="campus-label">Campus:</Text>
-                <Text style={styles.value} testID="campus-value">{location?.campus || "Unknown"}</Text>
+              <View style={styles.infoContainer} testID={`${testID}-campus-info`}>
+                <Text style={styles.label} testID={`${testID}-campus-label`}>Campus:</Text>
+                <Text style={styles.value} testID={`${testID}-campus-value`}>{location?.campus || "Unknown"}</Text>
               </View>
 
               <TouchableOpacity
                 style={[styles.button, isButtonDisabled && styles.disabledButton]}
                 onPress={handleGetDirections}
                 disabled={isButtonDisabled}
-                testID="get-directions-button"
+                testID={`${testID}-get-directions-button`}
               >
-                <Text style={styles.buttonText} testID="get-directions-text">
+                <Text style={styles.buttonText} testID={`${testID}-get-directions-text`}>
                   {isButtonDisabled ? "Location Not Available" : "Go to Location"}
                 </Text>
               </TouchableOpacity>
             </>
           ) : (
-            <Text style={styles.noClassText} testID="no-class-text">No upcoming classes found.</Text>
+            <Text style={styles.noClassText} testID={`${testID}-no-class-text`}>No upcoming classes found.</Text>
           )}
 
-          <TouchableOpacity style={styles.closeButton} onPress={onClose} testID="close-button">
-            <Text style={styles.closeButtonText} testID="close-button-text">Close</Text>
+          <TouchableOpacity style={styles.closeButton} onPress={onClose} testID={`${testID}-close-button`}>
+            <Text style={styles.closeButtonText} testID={`${testID}-close-button-text`}>Close</Text>
           </TouchableOpacity>
         </View>
       </View>

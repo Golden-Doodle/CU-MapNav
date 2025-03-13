@@ -1,7 +1,7 @@
 import { render, fireEvent, screen, waitFor, act } from '@testing-library/react-native';
 import TransitModal from '../TransitModal';  
 import { fetchAllRoutes } from '@/app/utils/directions';
-import { LocationType, RouteOption, TransportMode, Building, Campus, Coordinates, CustomMarkerType } from '@/app/utils/types'; // Added CustomMarkerType import;
+import { LocationType, RouteOption, TransportMode, Building, Campus, Coordinates, CustomMarkerType } from '@/app/utils/types';
 
 jest.mock('@/app/utils/directions', () => ({
   fetchAllRoutes: jest.fn(),
@@ -94,12 +94,13 @@ describe('TransitModal', () => {
         buildingData={mockBuildingData} 
         markerData={mockMarkerData}
         userLocation={mockUserLocation}    
+        testID="transit-modal"
       />
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('origin-input').props.value).toBe('Current Location');
-      expect(screen.getByTestId('destination-input').props.value).toBe('45.4275, -75.6933');
+      expect(screen.getByTestId('transit-modal-origin-input').props.value).toBe('Current Location');
+      expect(screen.getByTestId('transit-modal-destination-input').props.value).toBe('45.4275, -75.6933');
     });
   });
 
@@ -116,6 +117,7 @@ describe('TransitModal', () => {
         buildingData={mockBuildingData}    
         markerData={mockMarkerData}          
         userLocation={mockUserLocation}    
+        testID="transit-modal"
       />
     );
 
@@ -137,16 +139,18 @@ describe('TransitModal', () => {
         buildingData={mockBuildingData}   
         markerData={mockMarkerData}          
         userLocation={mockUserLocation}   
+        testID="transit-modal"
       />
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('route-transport-1')).toHaveTextContent('Transport: Car');
-      expect(screen.getByTestId('route-cost-1')).toHaveTextContent('Cost: $5');
-      expect(screen.getByTestId('route-time-1')).toHaveTextContent('10:00 AM - 10:30 AM');
-      expect(screen.getByTestId('route-distance-1')).toHaveTextContent('Distance: 2.5 km');
+      expect(screen.getByTestId('transit-modal-route-transport-1')).toHaveTextContent('Transport: Car');
+      expect(screen.getByTestId('transit-modal-route-cost-1')).toHaveTextContent('Cost: $5');
+      expect(screen.getByTestId('transit-modal-route-time-1')).toHaveTextContent('10:00 AM - 10:30 AM');
+      expect(screen.getByTestId('transit-modal-route-distance-1')).toHaveTextContent('Distance: 2.5 km');
     });
   });
+
   it('handles "Switch" button press', async () => {
     const originWithCoordinates: LocationType = {
       coordinates: { latitude: 45.4215, longitude: -75.6992 },
@@ -167,17 +171,17 @@ describe('TransitModal', () => {
         buildingData={mockBuildingData}
         markerData={mockMarkerData}
         userLocation={mockUserLocation}
+        testID="transit-modal"
       />
     );
   
     await act(async () => {
-      fireEvent.press(screen.getByTestId('switch-button'));
+      fireEvent.press(screen.getByTestId('transit-modal-switch-button'));
     });
   
     expect(mockSetOrigin).toHaveBeenCalledWith(destinationWithCoordinates);
     expect(mockSetDestination).toHaveBeenCalledWith(originWithCoordinates);
   });
-  
 
   it('closes modal when close icon is pressed', async () => {
     render(
@@ -192,11 +196,12 @@ describe('TransitModal', () => {
         buildingData={mockBuildingData}
         markerData={mockMarkerData}          
         userLocation={mockUserLocation}  
+        testID="transit-modal"
       />
     );
 
     await act(async () => {
-      fireEvent.press(screen.getByTestId('close-button'));
+      fireEvent.press(screen.getByTestId('transit-modal-close-button'));
     });
 
     expect(mockOnClose).toHaveBeenCalled();
@@ -215,15 +220,16 @@ describe('TransitModal', () => {
         buildingData={mockBuildingData} 
         markerData={mockMarkerData}     
         userLocation={mockUserLocation}  
+        testID="transit-modal"
       />
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId(`route-option-1`)).toBeTruthy();
+      expect(screen.getByTestId(`transit-modal-route-option-1`)).toBeTruthy();
     });
 
     await act(async () => {
-      fireEvent.press(screen.getByTestId(`route-option-1`));
+      fireEvent.press(screen.getByTestId(`transit-modal-route-option-1`));
     });
 
     expect(mockSetRouteCoordinates).toHaveBeenCalledWith(routeOptions[0].routeCoordinates);

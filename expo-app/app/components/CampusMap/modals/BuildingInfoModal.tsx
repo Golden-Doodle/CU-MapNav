@@ -8,6 +8,7 @@ type BuildingInfoModalProps = {
   onClose: () => void;
   selectedBuilding: Building | null | undefined;
   onNavigate?: (latitude: number, longitude: number) => void; 
+  testID?: string;
 };
 
 const BuildingInfoModal: React.FC<BuildingInfoModalProps> = ({
@@ -15,6 +16,7 @@ const BuildingInfoModal: React.FC<BuildingInfoModalProps> = ({
   onClose,
   selectedBuilding,
   onNavigate,
+  testID
 }) => {
   const [isImageLoading, setIsImageLoading] = useState<boolean>(false);
 
@@ -38,18 +40,18 @@ const BuildingInfoModal: React.FC<BuildingInfoModalProps> = ({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
+      <View style={styles.modalOverlay} testID={`${testID}-overlay`}>
+        <View style={styles.modalContent} testID={`${testID}-content`}>
           {/* Modal Header */}
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>{selectedBuilding.name}</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton} testID="close-button">
+          <View style={styles.modalHeader} testID={`${testID}-header`}>
+            <Text style={styles.modalTitle} testID={`${testID}-title`}>{selectedBuilding.name}</Text>
+            <TouchableOpacity onPress={onClose} style={styles.closeButton} testID={`${testID}-close-button`}>
               <MaterialIcons name="close" size={24} color="#fff" />
             </TouchableOpacity>
           </View>
 
           {/* Modal Body */}
-          <View style={styles.modalBody}>
+          <View style={styles.modalBody} testID={`${testID}-body`}>
             {/* Display restaurant photo if available */}
             {selectedBuilding?.photoUrl && (
               <>
@@ -58,7 +60,7 @@ const BuildingInfoModal: React.FC<BuildingInfoModalProps> = ({
                     size="large"
                     color="#912338"
                     style={styles.spinner}
-                    testID="spinner" 
+                    testID={`${testID}-spinner`} 
                   />
                 )}
                 <Image
@@ -66,25 +68,28 @@ const BuildingInfoModal: React.FC<BuildingInfoModalProps> = ({
                   style={styles.image}
                   onLoadStart={handleImageLoadStart}
                   onLoadEnd={handleImageLoadEnd}
-                  testID="building-image"
+                  testID={`${testID}-building-image`}
                 />
               </>
             )}
             {/* Display building/restaurant description */}
-            <Text style={styles.modalDescription}>
+            <Text style={styles.modalDescription} testID={`${testID}-description`}>
               {selectedBuilding.description || "No description available"}
             </Text>
 
             {/* Display restaurant rating if available */}
             {selectedBuilding?.rating && (
-              <Text style={styles.rating}>Rating: {selectedBuilding.rating} ★</Text>
+              <Text style={styles.rating} testID={`${testID}-rating`}>Rating: {selectedBuilding.rating} ★</Text>
             )}
           </View>
 
           {/* Modal Footer */}
-          <View style={styles.modalFooter}>
+          <View style={styles.modalFooter} testID={`${testID}-footer`}>
             {onNavigate && selectedBuilding.coordinates.length > 0 && (
-              <TouchableOpacity style={styles.navigateButton} onPress={handleNavigate}>
+              <TouchableOpacity 
+                style={styles.navigateButton} 
+                onPress={handleNavigate} 
+                testID={`${testID}-navigate-button`}>
                 <Text style={styles.navigateButtonText}>Navigate to this Building</Text>
               </TouchableOpacity>
             )}

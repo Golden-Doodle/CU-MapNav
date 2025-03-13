@@ -1,7 +1,6 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
 import CustomMarker from "../CustomMarker";
-import { Marker } from "react-native-maps";
 
 describe("CustomMarker", () => {
   const coordinate = { latitude: 10.0, longitude: 20.0 };
@@ -15,10 +14,11 @@ describe("CustomMarker", () => {
         description="Sample Description"
         isFoodLocation={false}
         onPress={mockOnPress}
+        testID="custom-marker" 
       />
     );
 
-    const marker = getByTestId("default-marker");
+    const marker = getByTestId("custom-marker-default-marker"); 
     expect(marker).toBeTruthy();
   });
 
@@ -30,10 +30,11 @@ describe("CustomMarker", () => {
         description="Delicious food here"
         isFoodLocation={true}
         onPress={mockOnPress}
+        testID="custom-marker"
       />
     );
 
-    const marker = getByTestId("food-marker");
+    const marker = getByTestId("custom-marker-food-marker"); 
     expect(marker).toBeTruthy();
   });
 
@@ -45,10 +46,11 @@ describe("CustomMarker", () => {
         description="Sample Description"
         isFoodLocation={false}
         onPress={mockOnPress}
+        testID="custom-marker" 
       />
     );
 
-    fireEvent.press(getByTestId("default-marker"));
+    fireEvent.press(getByTestId("custom-marker-default-marker")); 
     expect(mockOnPress).toHaveBeenCalled();
   });
 
@@ -60,10 +62,11 @@ describe("CustomMarker", () => {
         description="Sample Description"
         isFoodLocation={false}
         onPress={mockOnPress}
+        testID="custom-marker"
       />
     );
 
-    const image = getByTestId("default-marker").props.source.uri;
+    const image = getByTestId("custom-marker-default-marker").props.source.uri; 
     expect(image).toBe("https://maps.google.com/mapfiles/ms/icons/red-dot.png");
   });
 
@@ -75,10 +78,11 @@ describe("CustomMarker", () => {
         description="Delicious food here"
         isFoodLocation={true}
         onPress={mockOnPress}
+        testID="custom-marker" 
       />
     );
 
-    const image = getByTestId("food-marker").props.source.uri;
+    const image = getByTestId("custom-marker-food-marker").props.source.uri; 
     expect(image).toBe("https://maps.google.com/mapfiles/ms/icons/restaurant.png");
   });
 });
