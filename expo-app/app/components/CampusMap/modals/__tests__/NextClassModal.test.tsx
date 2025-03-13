@@ -38,6 +38,30 @@ const renderComponent = (props = {}) =>
     />
   );
 
+  const MOCK_CLASS_WITH_BUILDING_STRING = {
+    id: "3",
+    summary: "Computer Science 301",
+    start: { dateTime: "2025-03-02T18:00:00", timeZone: "America/Toronto" },
+    end: { dateTime: "2025-03-02T19:00:00", timeZone: "America/Toronto" },
+    location: '{"room": "789", "building": "Science Hall"}',
+  };
+
+  const MOCK_CLASS_WITH_UNKNOWN_BUILDING = {
+    id: "4",
+    summary: "Data Structures",
+    start: { dateTime: "2025-03-02T20:00:00", timeZone: "America/Toronto" },
+    end: { dateTime: "2025-03-02T21:00:00", timeZone: "America/Toronto" },
+    location: '{"room": "999", "building": "Nonexistent Hall"}',
+  };
+
+  const MOCK_CLASS_WITH_COORDINATES = {
+    id: "7",
+    summary: "Cybersecurity 101",
+    start: { dateTime: "2025-03-02T14:00:00", timeZone: "America/Toronto" },
+    end: { dateTime: "2025-03-02T15:00:00", timeZone: "America/Toronto" },
+    location: '{"room": "777", "building": {"name": "Computer Science Building", "campus": "SGW"}}',
+  };
+
 describe("NextClassModal", () => {
   afterEach(() => {
     jest.clearAllMocks();
@@ -77,15 +101,7 @@ describe("NextClassModal", () => {
   });
 
   it("should correctly map building name to its corresponding building object", async () => {
-    const mockClassWithBuildingString = {
-      id: "3",
-      summary: "Computer Science 301",
-      start: { dateTime: "2025-03-02T18:00:00", timeZone: "America/Toronto" },
-      end: { dateTime: "2025-03-02T19:00:00", timeZone: "America/Toronto" },
-      location: '{"room": "789", "building": "Science Hall"}',
-    };
-
-    (fetchTodaysEventsFromSelectedSchedule as jest.Mock).mockResolvedValueOnce([mockClassWithBuildingString]);
+    (fetchTodaysEventsFromSelectedSchedule as jest.Mock).mockResolvedValueOnce([MOCK_CLASS_WITH_BUILDING_STRING]);
 
     const { getByTestId } = renderComponent();
 
@@ -95,15 +111,7 @@ describe("NextClassModal", () => {
   });
 
   it("should assign a default building if the parsed building is not found", async () => {
-    const mockClassWithUnknownBuilding = {
-      id: "4",
-      summary: "Data Structures",
-      start: { dateTime: "2025-03-02T20:00:00", timeZone: "America/Toronto" },
-      end: { dateTime: "2025-03-02T21:00:00", timeZone: "America/Toronto" },
-      location: '{"room": "999", "building": "Nonexistent Hall"}',
-    };
-
-    (fetchTodaysEventsFromSelectedSchedule as jest.Mock).mockResolvedValueOnce([mockClassWithUnknownBuilding]);
+    (fetchTodaysEventsFromSelectedSchedule as jest.Mock).mockResolvedValueOnce([MOCK_CLASS_WITH_UNKNOWN_BUILDING]);
 
     const { getByTestId } = renderComponent();
 
@@ -115,16 +123,8 @@ describe("NextClassModal", () => {
   it("should set the destination and close modal when 'Go to Location' button is pressed", async () => {
     const mockSetDestination = jest.fn();
     const mockOnClose = jest.fn();
-
-    const mockClassWithCoordinates = {
-      id: "7",
-      summary: "Cybersecurity 101",
-      start: { dateTime: "2025-03-02T14:00:00", timeZone: "America/Toronto" },
-      end: { dateTime: "2025-03-02T15:00:00", timeZone: "America/Toronto" },
-      location: '{"room": "777", "building": {"name": "Computer Science Building", "campus": "SGW"}}',
-    };
-
-    (fetchTodaysEventsFromSelectedSchedule as jest.Mock).mockResolvedValueOnce([mockClassWithCoordinates]);
+    
+    (fetchTodaysEventsFromSelectedSchedule as jest.Mock).mockResolvedValueOnce([MOCK_CLASS_WITH_COORDINATES]);
 
     const { getByTestId } = renderComponent({
       onClose: mockOnClose,

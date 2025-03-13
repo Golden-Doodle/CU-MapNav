@@ -95,7 +95,7 @@ const NextClassModal: React.FC<NextClassModalProps> = ({
       coordinates: coordinates,
       room: location,
       building: location.building,
-      campus: location.campus  || "SGW",
+      campus: location.campus  ?? "SGW",
     } as LocationType);
     onClose();
   };
