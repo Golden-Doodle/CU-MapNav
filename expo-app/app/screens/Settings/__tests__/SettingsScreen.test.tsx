@@ -2,7 +2,6 @@ import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import SettingsScreen from "../SettingsScreen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import auth from "@react-native-firebase/auth";
 
 const mockSignOut = jest.fn();
 const mockPush = jest.fn();
