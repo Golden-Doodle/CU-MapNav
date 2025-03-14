@@ -20,22 +20,24 @@ import { AuthContext } from "@/app/contexts/AuthContext";
 import { fetchAllCalendars } from "@/app/services/GoogleCalendar/fetchingUserCalendarData";
 import { useTranslation } from "react-i18next";
 
-const MAJORS = [
-  "Computer Science",
-  "Software Engineering",
-  "Mechanical Engineering",
-  "Electrical Engineering",
-  "Civil Engineering",
-  "Psychology",
-  "Economics",
-  "Marketing",
-  "Biology",
-];
-
 export default function AccountDetailsScreen() {
-
   const { t } = useTranslation("AccountSettingsScreen");
-
+  
+  const getMajors = () => {
+    return [
+      t("Computer Science"),
+      t("Software Engineering"),
+      t("Mechanical Engineering"),
+      t("Electrical Engineering"),
+      t("Civil Engineering"),
+      t("Psychology"),
+      t("Economics"),
+      t("Marketing"),
+      t("Biology"),
+    ];
+  };
+  const MAJORS = getMajors();
+  
   const router = useRouter();
   const authContext = useContext(AuthContext);
   if (!authContext) {
@@ -48,14 +50,12 @@ export default function AccountDetailsScreen() {
     name: "Johnny Woodstorm",
     email: user?.email || "j.wood@live.concordia.ca",
     password: "********",
-    major: "Software Engineering", // default
+    major: t("Software Engineering"), // default
     phone: "514-101-1008",
   });
 
   // Photo State & Permissions
-  const [selectedPhotoUri, setSelectedPhotoUri] = useState<string | null>(
-    user?.photoURL || null
-  );
+  const [selectedPhotoUri, setSelectedPhotoUri] = useState<string | null>(user?.photoURL || null);
 
   useEffect(() => {
     (async () => {
@@ -130,9 +130,7 @@ export default function AccountDetailsScreen() {
   const saveChanges = async () => {
     if (selectedCalendarId) {
       await AsyncStorage.setItem("selectedScheduleID", selectedCalendarId);
-      const selCalendar = availableSchedules.find(
-        (cal) => cal.id === selectedCalendarId
-      );
+      const selCalendar = availableSchedules.find((cal) => cal.id === selectedCalendarId);
       if (selCalendar) {
         await AsyncStorage.setItem("selectedScheduleName", selCalendar.summary);
       }
@@ -171,27 +169,32 @@ export default function AccountDetailsScreen() {
           </TouchableOpacity>
         </View>
 
-        {Object.entries(profile).map(([fieldKey, fieldValue]) => (
-          <View key={fieldKey} style={styles.section} testID={`section-${fieldKey}`}>
-            <View style={styles.rowBetween}>
-              <Text style={styles.label}>
-                {fieldKey.charAt(0).toUpperCase() + fieldKey.slice(1)}
-              </Text>
-              <TouchableOpacity
-                onPress={() => startEditing(fieldKey as keyof typeof profile)}
-                testID={`edit-${fieldKey}`}
-              >
-                <FontAwesome5 name="edit" size={18} color="#912238" />
-              </TouchableOpacity>
-            </View>
-            <TextInput
-              style={[styles.input, { backgroundColor: "#F2F3F5" }]}
-              value={fieldValue as string}
-              editable={false}
-              testID={`input-${fieldKey}`}
-            />
-          </View>
-        ))}
+        {Object.entries(profile).map(
+          ([fieldKey, fieldValue]) => (
+            (fieldKey = t(fieldKey)),
+            (
+              <View key={fieldKey} style={styles.section} testID={`section-${fieldKey}`}>
+                <View style={styles.rowBetween}>
+                  <Text style={styles.label}>
+                    {fieldKey.charAt(0).toUpperCase() + fieldKey.slice(1)}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => startEditing(fieldKey as keyof typeof profile)}
+                    testID={`edit-${fieldKey}`}
+                  >
+                    <FontAwesome5 name="edit" size={18} color="#912238" />
+                  </TouchableOpacity>
+                </View>
+                <TextInput
+                  style={[styles.input, { backgroundColor: "#F2F3F5" }]}
+                  value={fieldValue as string}
+                  editable={false}
+                  testID={`input-${fieldKey}`}
+                />
+              </View>
+            )
+          )
+        )}
 
         <View style={styles.divider} testID="divider" />
 

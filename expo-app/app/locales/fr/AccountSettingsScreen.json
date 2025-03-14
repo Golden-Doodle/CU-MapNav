@@ -10,5 +10,22 @@
   "No schedules found": "Aucun horaire trouvé",
   "Save Changes": "Enregistrer les modifications",
   "Cancel": "Annuler",
-  "Save": "Enregistrer"
+  "Save": "Enregistrer",
+  "name": "nom",
+  "email": "email",
+  "phone": "téléphone",
+  "password": "mot de passe",
+  "major": "spécialité",
+  "profilePicture": "photo de profil",
+  "edit": "modifier",
+  "change": "changer",
+  "Computer Science": "Informatique",
+  "Software Engineering": "Génie logiciel",
+  "Mechanical Engineering": "Génie mécanique",
+  "Electrical Engineering": "Génie électrique",
+  "Civil Engineering": "Génie civil",
+  "Psychology": "Psychologie",
+  "Economics": "Économie",
+  "Marketing": "Marketing",
+  "Biology": "Biologie"
 }

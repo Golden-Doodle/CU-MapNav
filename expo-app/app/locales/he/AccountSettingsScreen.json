@@ -10,5 +10,22 @@
   "No schedules found": "לא נמצאו לוחות זמנים",
   "Save Changes": "שמור שינויים",
   "Cancel": "ביטול",
-  "Save": "שמור"
+  "Save": "שמור",
+  "name": "שם",
+  "email": "אימייל",
+  "phone": "טלפון",
+  "password": "סיסמה",
+  "major": "מגמה",
+  "profilePicture": "תמונת פרופיל",
+  "edit": "ערוך",
+  "change": "שנה",
+  "Computer Science": "מדעי המחשב",
+  "Software Engineering": "הנדסת תוכנה",
+  "Mechanical Engineering": "הנדסה מכנית",
+  "Electrical Engineering": "הנדסה חשמלית",
+  "Civil Engineering": "הנדסה אזרחית",
+  "Psychology": "פסיכולוגיה",
+  "Economics": "כלכלה",
+  "Marketing": "שיווק",
+  "Biology": "ביולוגיה"
 }

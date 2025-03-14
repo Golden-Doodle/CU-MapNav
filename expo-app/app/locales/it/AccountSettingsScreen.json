@@ -10,5 +10,22 @@
   "No schedules found": "Nessun orario trovato",
   "Save Changes": "Salva modifiche",
   "Cancel": "Annulla",
-  "Save": "Salva"
+  "Save": "Salva",
+  "name": "nome",
+  "email": "email",
+  "phone": "telefono",
+  "password": "password",
+  "major": "materia",
+  "profilePicture": "foto profilo",
+  "edit": "modifica",
+  "change": "cambia",
+  "Computer Science": "Informatica",
+  "Software Engineering": "Ingegneria del software",
+  "Mechanical Engineering": "Ingegneria meccanica",
+  "Electrical Engineering": "Ingegneria elettrica",
+  "Civil Engineering": "Ingegneria civile",
+  "Psychology": "Psicologia",
+  "Economics": "Economia",
+  "Marketing": "Marketing",
+  "Biology": "Biologia"
 }

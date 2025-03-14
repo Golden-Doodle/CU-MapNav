@@ -10,5 +10,22 @@
   "No schedules found": "No schedules found",
   "Save Changes": "Save Changes",
   "Cancel": "Cancel",
-  "Save": "Save"
+  "Save": "Save",
+  "name": "name",
+  "email": "email",
+  "phone": "phone",
+  "password": "password",
+  "major": "major",
+  "profilePicture": "profile picture",
+  "edit": "edit",
+  "change": "change",
+  "Computer Science": "Computer Science",
+  "Software Engineering": "Software Engineering",
+  "Mechanical Engineering": "Mechanical Engineering",
+  "Electrical Engineering" : "Electrical Engineering",
+  "Civil Engineering" : "Civil Engineering",
+  "Psychology": "Psychology",
+  "Economics" : "Economics",
+  "Marketing" : "Marketing",
+  "Biology": "Biology"
 }
