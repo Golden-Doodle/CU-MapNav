@@ -1,6 +1,7 @@
 import { Stack } from "expo-router";
 import { AuthProvider } from "@/app/contexts/AuthContext";
 import Instabug, { InvocationEvent } from "instabug-reactnative";
+import { concordiaBurgendyColor } from "./utils/types";
 
 Instabug.init({
   token: "f2056620dadfdf9fa5d6a7f2bf0e3041",
@@ -10,6 +11,7 @@ Instabug.init({
     InvocationEvent.floatingButton,
   ],
 });
+Instabug.setPrimaryColor(concordiaBurgendyColor);
 
 export default function RootLayout() {
   return (
