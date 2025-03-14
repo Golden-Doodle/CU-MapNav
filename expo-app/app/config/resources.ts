@@ -13,29 +13,65 @@ import itHomeMenuScreen from "@/app/locales/it/HomeMenuScreen.json";
 import heHomeMenuScreen from "@/app/locales/he/HomeMenuScreen.json";
 import arHomeMenuScreen from "@/app/locales/ar/HomeMenuScreen.json";
 
-import enCampusMap from "@/app/locales/en/CampusMap.json"
-import frCampusMap from "@/app/locales/fr/CampusMap.json"
-import esCampusMap from "@/app/locales/es/CampusMap.json"
-import itCampusMap from "@/app/locales/it/CampusMap.json"
-import heCampusMap from "@/app/locales/he/CampusMap.json"
-import arCampusMap from "@/app/locales/ar/CampusMap.json"
+import enCampusMap from "@/app/locales/en/CampusMap.json";
+import frCampusMap from "@/app/locales/fr/CampusMap.json";
+import esCampusMap from "@/app/locales/es/CampusMap.json";
+import itCampusMap from "@/app/locales/it/CampusMap.json";
+import heCampusMap from "@/app/locales/he/CampusMap.json";
+import arCampusMap from "@/app/locales/ar/CampusMap.json";
 
+import enAccountSettingsScreen from "@/app/locales/en/AccountSettingsScreen.json";
+import frAccountSettingsScreen from "@/app/locales/fr/AccountSettingsScreen.json";
+import esAccountSettingsScreen from "@/app/locales/es/AccountSettingsScreen.json";
+import itAccountSettingsScreen from "@/app/locales/it/AccountSettingsScreen.json";
+import heAccountSettingsScreen from "@/app/locales/he/AccountSettingsScreen.json";
+import arAccountSettingsScreen from "@/app/locales/ar/AccountSettingsScreen.json";
 
 /*
-  * Define your resources here
-  * The key is the language code
-  * The value is the JSON object
-  * Do this for each screen you have
-  * Don't forget to import the JSON files at the top
-  * Don't forget to add the new Screen to the ns array in i18n.ts
-  */
+ * Define your resources here
+ * The key is the language code
+ * The value is the JSON object
+ * Do this for each screen you have
+ * Don't forget to import the JSON files at the top
+ * Don't forget to add the new Screen to the ns array in i18n.ts
+ */
 const resources = {
-  en: { HomePageScreen: enHomePageScreen, HomeMenuScreen: enHomeMenuScreen, CampusMap: enCampusMap },
-  fr: { HomePageScreen: frHomePageScreen, HomeMenuScreen: frHomeMenuScreen, CampusMap: frCampusMap },
-  es: { HomePageScreen: esHomePageScreen, HomeMenuScreen: esHomeMenuScreen, CampusMap: esCampusMap },
-  it: { HomePageScreen: itHomePageScreen, HomeMenuScreen: itHomeMenuScreen, CampusMap: itCampusMap },
-  he: { HomePageScreen: heHomePageScreen, HomeMenuScreen: heHomeMenuScreen, CampusMap: heCampusMap },
-  ar: { HomePageScreen: arHomePageScreen, HomeMenuScreen: arHomeMenuScreen, CampusMap: arCampusMap },
+  en: {
+    HomePageScreen: enHomePageScreen,
+    HomeMenuScreen: enHomeMenuScreen,
+    CampusMap: enCampusMap,
+    AccountSettingsScreen: enAccountSettingsScreen,
+  },
+  fr: {
+    HomePageScreen: frHomePageScreen,
+    HomeMenuScreen: frHomeMenuScreen,
+    CampusMap: frCampusMap,
+    AccountSettingsScreen: frAccountSettingsScreen,
+  },
+  es: {
+    HomePageScreen: esHomePageScreen,
+    HomeMenuScreen: esHomeMenuScreen,
+    CampusMap: esCampusMap,
+    AccountSettingsScreen: esAccountSettingsScreen,
+  },
+  it: {
+    HomePageScreen: itHomePageScreen,
+    HomeMenuScreen: itHomeMenuScreen,
+    CampusMap: itCampusMap,
+    AccountSettingsScreen: itAccountSettingsScreen,
+  },
+  he: {
+    HomePageScreen: heHomePageScreen,
+    HomeMenuScreen: heHomeMenuScreen,
+    CampusMap: heCampusMap,
+    AccountSettingsScreen: heAccountSettingsScreen,
+  },
+  ar: {
+    HomePageScreen: arHomePageScreen,
+    HomeMenuScreen: arHomeMenuScreen,
+    CampusMap: arCampusMap,
+    AccountSettingsScreen: arAccountSettingsScreen,
+  },
 };
 
 export default resources;
