@@ -13,7 +13,8 @@
       "bundleIdentifier": "com.goldendoodle.expoapp",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
       "adaptiveIcon": {
