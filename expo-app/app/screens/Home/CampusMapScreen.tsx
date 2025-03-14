@@ -22,13 +22,7 @@ export default function CampusMapScreen() {
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <FontAwesome5 name="arrow-left" size={30} color="#fff" />
           {/* Added label for translation */}
-          <Text style={styles.backButtonText}>{t("back_button")}</Text>
         </TouchableOpacity>
-
-        {/* Title */}
-        <View style={styles.titleContainer}>
-          <Text style={styles.titleText}>{t("map_title")}</Text>
-        </View>
 
         {/* Placeholder View for symmetry */}
         <View style={{ width: 40 }} />
@@ -64,7 +58,7 @@ const styles = StyleSheet.create({
   backButtonText: {
     color: "#fff",
     fontSize: 18,
-    marginLeft: 8
+    marginLeft: 8,
   },
   titleContainer: {
     flex: 1,
