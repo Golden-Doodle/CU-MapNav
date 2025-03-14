@@ -1,0 +1,14 @@
+{
+  "AuthContext must be used within an AuthProvider.": "AuthContext doit être utilisé dans un AuthProvider.",
+  "Permission required": "Autorisation requise",
+  "We need access to your photo library to set a profile picture.": "Nous avons besoin d'accéder à votre bibliothèque de photos pour définir une photo de profil.",
+  "Error loading schedules:": "Erreur lors du chargement des horaires :",
+  "Success": "Succès",
+  "Your changes have been saved!": "Vos modifications ont été enregistrées !",
+  "Account Details": "Détails du compte",
+  "Select Schedule": "Sélectionner un horaire",
+  "No schedules found": "Aucun horaire trouvé",
+  "Save Changes": "Enregistrer les modifications",
+  "Cancel": "Annuler",
+  "Save": "Enregistrer"
+}

@@ -1,0 +1,14 @@
+{
+  "AuthContext must be used within an AuthProvider.": "AuthContext must be used within an AuthProvider.",
+  "Permission required": "Permission required",
+  "We need access to your photo library to set a profile picture.": "We need access to your photo library to set a profile picture.",
+  "Error loading schedules:": "Error loading schedules:",
+  "Success": "Success",
+  "Your changes have been saved!": "Your changes have been saved!",
+  "Account Details": "Account Details",
+  "Select Schedule": "Select Schedule",
+  "No schedules found": "No schedules found",
+  "Save Changes": "Save Changes",
+  "Cancel": "Cancel",
+  "Save": "Save"
+}

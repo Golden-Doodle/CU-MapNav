@@ -1,0 +1,14 @@
+{
+  "AuthContext must be used within an AuthProvider.": "יש להשתמש ב-AuthContext בתוך AuthProvider.",
+  "Permission required": "נדרש אישור",
+  "We need access to your photo library to set a profile picture.": "אנו זקוקים לגישה לספריית התמונות שלך כדי להגדיר תמונת פרופיל.",
+  "Error loading schedules:": "שגיאה בטעינת לוחות הזמנים:",
+  "Success": "הצלחה",
+  "Your changes have been saved!": "השינויים שלך נשמרו!",
+  "Account Details": "פרטי חשבון",
+  "Select Schedule": "בחר לוח זמנים",
+  "No schedules found": "לא נמצאו לוחות זמנים",
+  "Save Changes": "שמור שינויים",
+  "Cancel": "ביטול",
+  "Save": "שמור"
+}

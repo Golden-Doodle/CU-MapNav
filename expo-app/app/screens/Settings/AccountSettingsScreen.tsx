@@ -18,6 +18,7 @@ import * as ImagePicker from "expo-image-picker";
 import { Picker } from "@react-native-picker/picker"; // <-- Import the Picker
 import { AuthContext } from "@/app/contexts/AuthContext";
 import { fetchAllCalendars } from "@/app/services/GoogleCalendar/fetchingUserCalendarData";
+import { useTranslation } from "react-i18next";
 
 const MAJORS = [
   "Computer Science",
@@ -32,10 +33,13 @@ const MAJORS = [
 ];
 
 export default function AccountDetailsScreen() {
+
+  const { t } = useTranslation("AccountSettingsScreen");
+
   const router = useRouter();
   const authContext = useContext(AuthContext);
   if (!authContext) {
-    throw new Error("AuthContext must be used within an AuthProvider.");
+    throw new Error(t("AuthContext must be used within an AuthProvider."));
   }
   const { user } = authContext;
 
@@ -58,8 +62,8 @@ export default function AccountDetailsScreen() {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
         Alert.alert(
-          "Permission required",
-          "We need access to your photo library to set a profile picture."
+          t("Permission required"),
+          t("We need access to your photo library to set a profile picture.")
         );
       }
     })();
@@ -112,7 +116,7 @@ export default function AccountDetailsScreen() {
         setSelectedCalendarId(storedCalendarId);
         setInitialCalendarId(storedCalendarId);
       } catch (err) {
-        console.error("Error loading schedules:", err);
+        console.error(t("Error loading schedules:"), err);
       }
     };
     loadData();
@@ -135,7 +139,7 @@ export default function AccountDetailsScreen() {
     }
     setInitialCalendarId(selectedCalendarId);
     setHasChanges(false);
-    Alert.alert("Success", "Your changes have been saved!");
+    Alert.alert(t("Success"), t("Your changes have been saved!"));
   };
 
   return (
@@ -144,17 +148,25 @@ export default function AccountDetailsScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <FontAwesome5 name="arrow-left" size={28} color="#333" />
         </TouchableOpacity>
-        <Text style={styles.headerText}>Account Details</Text>
+        <Text style={styles.headerText}>{t("Account Details")}</Text>
       </View>
 
       <View style={styles.formContainer}>
         <View style={styles.profileContainer} testID="profile-container">
           {selectedPhotoUri ? (
-            <Image source={{ uri: selectedPhotoUri }} style={styles.profileImage} testID="profile-image" />
+            <Image
+              source={{ uri: selectedPhotoUri }}
+              style={styles.profileImage}
+              testID="profile-image"
+            />
           ) : (
             <FontAwesome5 name="user-circle" size={100} color="#888" />
           )}
-          <TouchableOpacity style={styles.editPhotoButton} onPress={handlePickImage} testID="edit-photo-button">
+          <TouchableOpacity
+            style={styles.editPhotoButton}
+            onPress={handlePickImage}
+            testID="edit-photo-button"
+          >
             <FontAwesome5 name="camera" size={20} color="#fff" />
           </TouchableOpacity>
         </View>
@@ -183,10 +195,16 @@ export default function AccountDetailsScreen() {
 
         <View style={styles.divider} testID="divider" />
 
-        <Text style={styles.label} testID="schedule-label">Select Schedule</Text>
+        <Text style={styles.label} testID="schedule-label">
+          {t("Select Schedule")}
+        </Text>
         {availableSchedules.length > 0 ? (
           availableSchedules.map((calendar) => (
-            <View key={calendar.id} style={styles.scheduleOption} testID={`schedule-${calendar.id}`}>
+            <View
+              key={calendar.id}
+              style={styles.scheduleOption}
+              testID={`schedule-${calendar.id}`}
+            >
               <Text style={styles.scheduleText}>{calendar.summary}</Text>
               <Switch
                 value={selectedCalendarId === calendar.id}
@@ -196,7 +214,7 @@ export default function AccountDetailsScreen() {
             </View>
           ))
         ) : (
-          <Text style={styles.noCalendarText}>No schedules found</Text>
+          <Text style={styles.noCalendarText}>{t("No schedules found")}</Text>
         )}
 
         <TouchableOpacity
@@ -206,18 +224,21 @@ export default function AccountDetailsScreen() {
           onPress={saveChanges}
           testID="save-button"
         >
-          <Text style={styles.saveButtonText}>Save Changes</Text>
+          <Text style={styles.saveButtonText}>{t("Save Changes")}</Text>
         </TouchableOpacity>
       </View>
 
-      <Modal visible={editingField !== ""} transparent animationType="slide" testID="modal-container">
+      <Modal
+        visible={editingField !== ""}
+        transparent
+        animationType="slide"
+        testID="modal-container"
+      >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>
               Edit{" "}
-              {editingField
-                ? editingField.charAt(0).toUpperCase() + editingField.slice(1)
-                : ""}
+              {editingField ? editingField.charAt(0).toUpperCase() + editingField.slice(1) : ""}
             </Text>
 
             {editingField === "major" ? (
@@ -247,14 +268,14 @@ export default function AccountDetailsScreen() {
                 onPress={() => setEditingField("")}
                 testID="cancel-button"
               >
-                <Text style={styles.cancelText}>Cancel</Text>
+                <Text style={styles.cancelText}>{t("Cancel")}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalButton, styles.saveButtonModal]}
                 onPress={saveEdit}
                 testID="save-edit-button"
               >
-                <Text style={styles.saveText}>Save</Text>
+                <Text style={styles.saveText}>{t("Save")}</Text>
               </TouchableOpacity>
             </View>
           </View>
