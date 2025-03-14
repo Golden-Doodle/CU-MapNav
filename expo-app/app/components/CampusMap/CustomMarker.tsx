@@ -1,7 +1,6 @@
 import React from "react";
 import { Marker } from "react-native-maps";
-import { View, Text, StyleSheet } from "react-native";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import { StyleSheet, Image } from "react-native";
 
 type CustomMarkerProps = {
   coordinate: {
@@ -12,6 +11,7 @@ type CustomMarkerProps = {
   description?: string;
   isFoodLocation?: boolean;
   onPress?: () => void;
+  testID: string; // Added testID as a required parameter
 };
 
 const CustomMarker: React.FC<CustomMarkerProps> = ({
@@ -20,37 +20,35 @@ const CustomMarker: React.FC<CustomMarkerProps> = ({
   description = "No description available",
   isFoodLocation = false,
   onPress,
-}) => (
-  <Marker coordinate={coordinate} onPress={onPress} tappable={true}>
-    <View
-      style={[styles.marker, isFoodLocation && styles.foodMarker]}
-      testID="marker-view"
-    >
+  testID, // Destructure testID prop
+}) => {
+  return (
+    <Marker coordinate={coordinate} onPress={onPress} tappable={true} testID={`${testID}-marker`}>
       {isFoodLocation ? (
-        <MaterialIcons name="restaurant" size={20} color="white" />
+        <Image
+          source={{ uri: "https://maps.google.com/mapfiles/ms/icons/restaurant.png" }}
+          style={styles.foodMarker}
+          testID={`${testID}-food-marker`} // Added testID for food marker
+        />
       ) : (
-        <Text style={styles.markerText}>{title[0] || "?"}</Text>
+        <Image
+          source={{ uri: "https://maps.google.com/mapfiles/ms/icons/red-dot.png" }}
+          style={styles.defaultMarker}
+          testID={`${testID}-default-marker`}
+        />
       )}
-    </View>
-  </Marker>
-);
+    </Marker>
+  );
+};
 
 const styles = StyleSheet.create({
-  marker: {
-    backgroundColor: "blue",
-    padding: 8,
-    borderRadius: 20,
-    borderColor: "white",
-    borderWidth: 2,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   foodMarker: {
-    backgroundColor: "red",
+    width: 40,
+    height: 40,
   },
-  markerText: {
-    color: "white",
-    fontWeight: "bold",
+  defaultMarker: {
+    width: 40,
+    height: 40,
   },
 });
 

@@ -1,0 +1,7 @@
+appId: com.goldendoodle.expoapp
+---
+- assertVisible: "Sign in with Google"
+- assertVisible: "Continue as Guest"
+- tapOn: "Sign in with Google"
+- tapOn: "Close tab"
+- tapOn: "Continue as Guest"

@@ -15,18 +15,23 @@ export default function HomeMenuScreen() {
   return (
     <View style={styles.container}>
       {/* Back Button in the Top-Left Corner (icon only, no text) */}
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => router.back()}
+        testID="back-button"
+      >
         <FontAwesome5 name="arrow-left" size={30} color="#fff" />
       </TouchableOpacity>
 
       {/* Menu Title */}
-      <Text style={styles.title}>{t("menu_title")}</Text>
+      <Text style={styles.title} testID="menu-title">{t("menu_title")}</Text>
 
       {/* Navigation Options */}
       <TouchableOpacity
         style={styles.menuItem}
         activeOpacity={0.8}
         onPress={() => router.push("/screens/Home/CampusMapScreen")}
+        testID="campus-map-button"
       >
         {/* We keep the emoji, but the text itself is translated */}
         <Text style={styles.menuText}>📍 {t("campus_map")}</Text>
@@ -36,14 +41,16 @@ export default function HomeMenuScreen() {
         style={styles.menuItem}
         activeOpacity={0.8}
         onPress={() => router.push("/screens/Chatbot/ChatBotScreen")}
+        testID="chatbot-button"
       >
         <Text style={styles.menuText}>💬 {t("chatbot")}</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.menuItem}
-        activeOpacity={0.8}
+      <TouchableOpacity 
+        style={styles.menuItem} 
+        activeOpacity={0.8} 
         onPress={() => router.push("/screens/Shuttle/ShuttleScreen")}
+        testID="shuttle-button"
       >
         <Text style={styles.menuText}>🚌 {t("shuttle_schedule")}</Text>
       </TouchableOpacity>
@@ -52,6 +59,7 @@ export default function HomeMenuScreen() {
         style={styles.menuItem}
         activeOpacity={0.8}
         onPress={() => router.push("/screens/Home/StudySpotsScreen")}
+        testID="study-spots-button"
       >
         <Text style={styles.menuText}>📖 {t("study_spots")}</Text>
       </TouchableOpacity>

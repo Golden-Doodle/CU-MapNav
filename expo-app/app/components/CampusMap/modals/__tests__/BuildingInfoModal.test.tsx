@@ -1,99 +1,98 @@
-import React from 'react';
-import { render, fireEvent } from '@testing-library/react-native';
-import BuildingInfoModal from '../BuildingInfoModal';  // Adjust the import based on the file location
-import { Building } from '@/app/utils/types'; // Assuming correct import path
+import React from "react";
+import { render, fireEvent } from "@testing-library/react-native";
+import BuildingInfoModal from "../BuildingInfoModal";
+import { Building } from "../../../../utils/types";
 
-describe('BuildingInfoModal', () => {
-  const mockOnNavigate = jest.fn();
-  const mockOnClose = jest.fn();
+const mockNavigate = jest.fn();
+const mockOnClose = jest.fn();
 
-  const selectedBuilding: Building = {
-    id: "1",
-    name: "Library",
-    coordinates: [{ latitude: 123.45, longitude: 678.90 }],
-    fillColor: "#FF0000",
-    strokeColor: "#0000FF",
-    campus: "SGW",
-    description: "This is the library building.",
-  };
+export type Campus = "SGW" | "LOY";
 
-  it('renders correctly when selectedBuilding is provided', () => {
-    const { getByText, getByTestId } = render(
-      <BuildingInfoModal
-        visible={true}
-        onClose={mockOnClose}
-        selectedBuilding={selectedBuilding}
-        onNavigate={mockOnNavigate}
-      />
-    );
+const building: Building = {
+  id: "1",
+  name: "Building Name",
+  description: "This is a description of the building.",
+  photoUrl: "https://example.com/photo.jpg",
+  rating: 4.5,
+  coordinates: [{ latitude: 10.0, longitude: 20.0 }],
+  fillColor: "#ff0000",
+  strokeColor: "#00ff00",
+  campus: "SGW",
+};
 
-    // Check that modal header and body render correctly
-    expect(getByText('Library')).toBeTruthy();  // Building name
-    expect(getByText('This is the library building.')).toBeTruthy();  // Building description
-  });
-
-  it('does not render when selectedBuilding is null or undefined', () => {
-    const { queryByText } = render(
-      <BuildingInfoModal
-        visible={true}
-        onClose={mockOnClose}
-        selectedBuilding={null}
-        onNavigate={mockOnNavigate}
-      />
-    );
-
-    // Ensure modal content is not rendered when selectedBuilding is null
-    expect(queryByText('Library')).toBeNull();
-  });
-
-  it('calls the onNavigate function with the correct coordinates when the "Navigate to this Building" button is pressed', () => {
+describe("BuildingInfoModal", () => {
+  it("renders correctly with building information", () => {
     const { getByText } = render(
       <BuildingInfoModal
         visible={true}
         onClose={mockOnClose}
-        selectedBuilding={selectedBuilding}
-        onNavigate={mockOnNavigate}
+        selectedBuilding={building}
+        onNavigate={mockNavigate}
+        testID="building-info-modal"
       />
     );
 
-    const navigateButton = getByText('Navigate to this Building');
-    fireEvent.press(navigateButton);
-
-    // Check that onNavigate is called with correct coordinates
-    expect(mockOnNavigate).toHaveBeenCalledWith(123.45, 678.90);
+    expect(getByText("Building Name")).toBeTruthy();
+    expect(getByText("This is a description of the building.")).toBeTruthy();
+    expect(getByText("Rating: 4.5 ★")).toBeTruthy();
   });
 
-  it('closes the modal when the close button is pressed', () => {
+  it("calls onNavigate when navigate button is pressed", () => {
+    const { getByText } = render(
+      <BuildingInfoModal
+        visible={true}
+        onClose={mockOnClose}
+        selectedBuilding={building}
+        onNavigate={mockNavigate}
+        testID="building-info-modal"
+      />
+    );
+
+    fireEvent.press(getByText("Navigate to this Building"));
+
+    expect(mockNavigate).toHaveBeenCalledWith(10.0, 20.0);
+  });
+
+  it("calls onClose when close button is pressed", () => {
     const { getByTestId } = render(
       <BuildingInfoModal
         visible={true}
         onClose={mockOnClose}
-        selectedBuilding={selectedBuilding}
-        onNavigate={mockOnNavigate}
+        selectedBuilding={building}
+        onNavigate={mockNavigate}
+        testID="building-info-modal"
       />
     );
 
-    const closeButton = getByTestId('close-button');  // assuming you add a testID to the close button
-    fireEvent.press(closeButton);
-
-    // Ensure the onClose handler was called when the close button is pressed
+    fireEvent.press(getByTestId("building-info-modal-close-button"));
     expect(mockOnClose).toHaveBeenCalled();
   });
 
-  it('closes the modal when the overlay is pressed', () => {
-    const { getByTestId } = render(
+  it("does not render modal when selectedBuilding is null or undefined", () => {
+    const { queryByTestId } = render(
       <BuildingInfoModal
         visible={true}
         onClose={mockOnClose}
-        selectedBuilding={selectedBuilding}
-        onNavigate={mockOnNavigate}
+        selectedBuilding={null}
+        onNavigate={mockNavigate}
+        testID="building-info-modal"
       />
     );
-
-    const overlay = getByTestId('modal-overlay');  // assuming you add a testID to the overlay
-    fireEvent.press(overlay);
-
-    // Ensure the onClose handler was called when the overlay is pressed
-    expect(mockOnClose).toHaveBeenCalled();
+  
+    expect(queryByTestId("building-info-modal-close-button")).toBeNull();
+    expect(queryByTestId("building-info-modal-building-image")).toBeNull();
+  
+    const { queryByTestId: queryByTestIdUndefined } = render(
+      <BuildingInfoModal
+        visible={true}
+        onClose={mockOnClose}
+        selectedBuilding={undefined}
+        onNavigate={mockNavigate}
+        testID="building-info-modal"
+      />
+    );
+  
+    expect(queryByTestIdUndefined("building-info-modal-close-button")).toBeNull();
+    expect(queryByTestIdUndefined("building-info-modal-building-image")).toBeNull();
   });
 });

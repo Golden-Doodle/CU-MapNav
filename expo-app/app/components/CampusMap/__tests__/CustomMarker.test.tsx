@@ -1,81 +1,88 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
-import CustomMarker from "../CustomMarker"; 
-
-jest.mock("react-native-vector-icons/MaterialIcons", () => "Icon");
+import CustomMarker from "../CustomMarker";
 
 describe("CustomMarker", () => {
-  it("should render the food icon when isFoodLocation is true", () => {
+  const coordinate = { latitude: 10.0, longitude: 20.0 };
+  const mockOnPress = jest.fn();
+
+  it("renders default marker when isFoodLocation is false", () => {
     const { getByTestId } = render(
       <CustomMarker
-        coordinate={{ latitude: 45.5017, longitude: -73.5673 }}
-        isFoodLocation={true}
-      />
-    );
-
-    const icon = getByTestId("marker-view"); 
-    expect(icon).toBeTruthy(); 
-  });
-
-  it("should render the marker with the correct default text", () => {
-    const { getByText } = render(
-      <CustomMarker
-        coordinate={{ latitude: 45.5017, longitude: -73.5673 }}
-      />
-    );
-
-    expect(getByText("U")).toBeTruthy();
-  });
-
-  it("should render the marker with custom title and description", () => {
-    const { getByText } = render(
-      <CustomMarker
-        coordinate={{ latitude: 45.5017, longitude: -73.5673 }}
-        title="Custom Title"
-        description="Custom description"
-      />
-    );
-
-    expect(getByText("C")).toBeTruthy();
-  });
-
-  it("should apply the correct styles when isFoodLocation is true", () => {
-    const { getByTestId } = render(
-      <CustomMarker
-        coordinate={{ latitude: 45.5017, longitude: -73.5673 }}
-        isFoodLocation={true}
-      />
-    );
-
-    const markerView = getByTestId("marker-view");
-
-    expect(markerView.props.style).toContainEqual(
-      expect.objectContaining({ backgroundColor: "red" })
-    );
-  });
-
-  it("should trigger the onPress function when the marker is pressed", () => {
-    const onPressMock = jest.fn();
-    const { getByText } = render(
-      <CustomMarker
-        coordinate={{ latitude: 45.5017, longitude: -73.5673 }}
-        onPress={onPressMock}
-      />
-    );
-
-    fireEvent.press(getByText("U"));
-
-    expect(onPressMock).toHaveBeenCalledTimes(1);
-  });
-
-  it("should render the default marker icon when isFoodLocation is false", () => {
-    const { getByText } = render(
-      <CustomMarker
-        coordinate={{ latitude: 45.5017, longitude: -73.5673 }}
+        coordinate={coordinate}
+        title="Sample Location"
+        description="Sample Description"
         isFoodLocation={false}
+        onPress={mockOnPress}
+        testID="custom-marker" 
       />
     );
 
-    expect(getByText("U")).toBeTruthy();
+    const marker = getByTestId("custom-marker-default-marker"); 
+    expect(marker).toBeTruthy();
+  });
+
+  it("renders food marker when isFoodLocation is true", () => {
+    const { getByTestId } = render(
+      <CustomMarker
+        coordinate={coordinate}
+        title="Food Location"
+        description="Delicious food here"
+        isFoodLocation={true}
+        onPress={mockOnPress}
+        testID="custom-marker"
+      />
+    );
+
+    const marker = getByTestId("custom-marker-food-marker"); 
+    expect(marker).toBeTruthy();
+  });
+
+  it("calls onPress when marker is pressed", () => {
+    const { getByTestId } = render(
+      <CustomMarker
+        coordinate={coordinate}
+        title="Sample Location"
+        description="Sample Description"
+        isFoodLocation={false}
+        onPress={mockOnPress}
+        testID="custom-marker" 
+      />
+    );
+
+    fireEvent.press(getByTestId("custom-marker-default-marker")); 
+    expect(mockOnPress).toHaveBeenCalled();
+  });
+
+  it("renders default marker with correct image source", () => {
+    const { getByTestId } = render(
+      <CustomMarker
+        coordinate={coordinate}
+        title="Sample Location"
+        description="Sample Description"
+        isFoodLocation={false}
+        onPress={mockOnPress}
+        testID="custom-marker"
+      />
+    );
+
+    const image = getByTestId("custom-marker-default-marker").props.source.uri; 
+    expect(image).toBe("https://maps.google.com/mapfiles/ms/icons/red-dot.png");
+  });
+
+  it("renders food marker with correct image source", () => {
+    const { getByTestId } = render(
+      <CustomMarker
+        coordinate={coordinate}
+        title="Food Location"
+        description="Delicious food here"
+        isFoodLocation={true}
+        onPress={mockOnPress}
+        testID="custom-marker" 
+      />
+    );
+
+    const image = getByTestId("custom-marker-food-marker").props.source.uri; 
+    expect(image).toBe("https://maps.google.com/mapfiles/ms/icons/restaurant.png");
   });
 });

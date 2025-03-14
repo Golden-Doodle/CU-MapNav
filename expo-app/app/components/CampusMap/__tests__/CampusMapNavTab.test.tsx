@@ -1,10 +1,8 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
-import NavTab from '../CampusMapNavTab'; // Adjust the import based on the file location
-import { FontAwesome5 } from '@expo/vector-icons';
-import { Building, LocationType, Coordinates, Campus } from '../../../utils/types'; // Import types
+import NavTab from '../CampusMapNavTab'; 
+import { Building, LocationType } from '@/app/utils/types'; 
 
-// Mock the FontAwesome5 component to avoid issues with icon rendering
 jest.mock('@expo/vector-icons', () => ({
   FontAwesome5: jest.fn(() => <></>),
 }));
@@ -17,26 +15,26 @@ describe('NavTab', () => {
     const onNextClassPress = jest.fn();
     const onMoreOptionsPress = jest.fn();
 
-    const campus = "SGW"; // Now campus is a string
+    const campus = "SGW";
 
-    const { getByText } = render(
+    const { getByTestId } = render(
       <NavTab
         campus={campus}
-        destination={null}  // No destination
+        destination={null} 
         onSearchPress={onSearchPress}
         onTravelPress={onTravelPress}
         onEatPress={onEatPress}
         onNextClassPress={onNextClassPress}
         onMoreOptionsPress={onMoreOptionsPress}
+        testID="nav-tab" 
       />
     );
 
-    // Test if the correct labels are rendered
-    expect(getByText('Search')).toBeTruthy();
-    expect(getByText('SGW')).toBeTruthy();  // Verify that "SGW" is rendered
-    expect(getByText('Eat')).toBeTruthy();
-    expect(getByText('Class')).toBeTruthy();
-    expect(getByText('More')).toBeTruthy();
+    expect(getByTestId('nav-tab-nav-item-Search')).toBeTruthy();
+    expect(getByTestId('nav-tab-nav-item-SGW')).toBeTruthy();
+    expect(getByTestId('nav-tab-nav-item-Eat')).toBeTruthy();
+    expect(getByTestId('nav-tab-nav-item-Class')).toBeTruthy();
+    expect(getByTestId('nav-tab-nav-item-More')).toBeTruthy();
   });
 
   it('renders the correct navigation items when a building is selected as destination', () => {
@@ -44,7 +42,6 @@ describe('NavTab', () => {
     const onInfoPress = jest.fn();
     const onDirectionsPress = jest.fn();
 
-    // Adjusted to match the Building type structure
     const destination: LocationType = { 
       building: {
         id: "1",
@@ -52,27 +49,27 @@ describe('NavTab', () => {
         coordinates: [{ latitude: 123, longitude: 456 }],
         fillColor: "#FF0000",
         strokeColor: "#0000FF",
-        campus: "SGW", // Ensure the campus is set correctly
-      } as Building, // Cast it to Building type
-      coordinates: { latitude: 123, longitude: 456 }, // Coordinates for fallback
+        campus: "SGW", 
+      } as Building, 
+      coordinates: { latitude: 123, longitude: 456 }, 
     };
 
-    const campus = "SGW"; // Now campus is a string
+    const campus = "SGW"; 
 
-    const { getByText } = render(
+    const { getByTestId } = render(
       <NavTab
         campus={campus}
-        destination={destination}  // Pass the destination with building as a Building object
+        destination={destination}
         onBackPress={onBackPress}
         onInfoPress={onInfoPress}
         onDirectionsPress={onDirectionsPress}
+        testID="nav-tab" 
       />
     );
 
-    // Test if the correct labels are rendered
-    expect(getByText('Back')).toBeTruthy();
-    expect(getByText('Info')).toBeTruthy();
-    expect(getByText('Directions')).toBeTruthy();
+    expect(getByTestId('nav-tab-nav-item-Back')).toBeTruthy();
+    expect(getByTestId('nav-tab-nav-item-Info')).toBeTruthy();
+    expect(getByTestId('nav-tab-nav-item-Directions')).toBeTruthy();
   });
 
   it('renders the correct navigation items when coordinates are selected as destination', () => {
@@ -80,58 +77,59 @@ describe('NavTab', () => {
     const onDirectionsPress = jest.fn();
 
     const destination: LocationType = { 
-      coordinates: { latitude: 123, longitude: 456 }  // Only coordinates provided
+      coordinates: { latitude: 123, longitude: 456 } 
     };
 
-    const campus = "SGW"; // Now campus is a string
+    const campus = "SGW"
 
-    const { getByText } = render(
+    const { getByTestId } = render(
       <NavTab
         campus={campus}
         destination={destination}
         onBackPress={onBackPress}
         onDirectionsPress={onDirectionsPress}
+        testID="nav-tab" 
       />
     );
 
-    // Test if the correct labels are rendered
-    expect(getByText('Back')).toBeTruthy();
-    expect(getByText('Directions')).toBeTruthy();
+    expect(getByTestId('nav-tab-nav-item-Back')).toBeTruthy();
+    expect(getByTestId('nav-tab-nav-item-Directions')).toBeTruthy();
   });
 
   it('calls the correct action when a navigation item is pressed', () => {
     const onSearchPress = jest.fn();
 
-    const campus = "SGW"; // Now campus is a string
+    const campus = "SGW";
 
-    const { getByText } = render(
+    const { getByTestId } = render(
       <NavTab
         campus={campus}
-        destination={null}  // No destination
+        destination={null}
         onSearchPress={onSearchPress}
+        testID="nav-tab"
       />
     );
 
-    const searchButton = getByText('Search');
+    const searchButton = getByTestId('nav-tab-nav-item-Search');
     fireEvent.press(searchButton);
 
     expect(onSearchPress).toHaveBeenCalledTimes(1);
   });
 
   it('highlights the active tab when a navigation item is selected', () => {
-    const campus = "SGW"; // Now campus is a string
+    const campus = "SGW";
 
     const { getByText } = render(
       <NavTab
         campus={campus}
-        destination={null}  // No destination
+        destination={null}
+        testID="nav-tab" 
       />
     );
 
     const searchButton = getByText('Search');
     fireEvent.press(searchButton);
 
-    // Check if the active text style is applied
     expect(searchButton.props.style[1]).toEqual(expect.objectContaining({ color: "#fff" }));
   });
 });

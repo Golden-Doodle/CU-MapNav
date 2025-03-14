@@ -14,6 +14,7 @@ interface NavTabProps {
   onInfoPress?: () => void;
   onBackPress?: () => void;
   onDirectionsPress?: () => void;
+  testID: string; 
 }
 
 const NavTab: React.FC<NavTabProps> = ({
@@ -27,11 +28,11 @@ const NavTab: React.FC<NavTabProps> = ({
   onInfoPress,
   onBackPress,
   onDirectionsPress,
+  testID, 
 }) => {
   const [activeTab, setActiveTab] = useState<string | null>(null);
 
   const getNavItems = () => {
-
     // No Destination
     if (!destination) return [
         { label: "Search", icon: "search", action: onSearchPress },
@@ -63,7 +64,7 @@ const NavTab: React.FC<NavTabProps> = ({
   const NAV_ITEMS = getNavItems();
 
   return (
-    <View style={styles.navContainer}>
+    <View style={styles.navContainer} testID={`${testID}-nav-container`}>
       {NAV_ITEMS.map((item) => (
         <TouchableOpacity
           key={item.label}
@@ -72,9 +73,15 @@ const NavTab: React.FC<NavTabProps> = ({
             setActiveTab(item.label);
             item.action && item.action();
           }}
+          testID={`${testID}-nav-item-${item.label}`} 
         >
-          <FontAwesome5 name={item.icon} size={24} color={activeTab === item.label ? "#fff" : "#ddd"} />
-          <Text style={[styles.navText, activeTab === item.label && styles.activeText]}>
+          <FontAwesome5 
+            name={item.icon} 
+            size={24} 
+            color={activeTab === item.label ? "#fff" : "#ddd"} 
+            testID={`${testID}-icon-${item.label}`} 
+          />
+          <Text style={[styles.navText, activeTab === item.label && styles.activeText]} testID={`${testID}-nav-text-${item.label}`}>
             {item.label}
           </Text>
         </TouchableOpacity>

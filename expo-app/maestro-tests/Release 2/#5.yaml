@@ -1,0 +1,7 @@
+appId: com.goldendoodle.expoapp
+---
+- assertVisible: "" 
+- tapOn: ""
+- tapOn: "📍 Campus Map"
+- tapOn: "My Location"
+- assertVisible: "Google Map"

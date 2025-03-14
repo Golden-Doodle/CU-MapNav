@@ -5,8 +5,7 @@ on:
     branches:
       - '**'
   pull_request:
-    branches:
-      - '**'
+    types: [opened, synchronize, reopened]
 
 jobs:
   setup:
@@ -34,7 +33,7 @@ jobs:
         run: npm install @react-native-google-signin/google-signin
         working-directory: expo-app
 
-  jest-tests:
+  jest-tests-and-Sonar:
     needs: setup
     runs-on: ubuntu-latest
     steps:
@@ -64,7 +63,7 @@ jobs:
   
       - name: Run Jest Tests with Coverage
         run: |
-          npx jest --coverage --ci --passWithNoTests || true
+          npx jest --coverage --ci --passWithNoTests
         working-directory: expo-app
   
       - name: Upload Coverage Report to Codecov
@@ -75,16 +74,18 @@ jobs:
           fail_ci_if_error: true
           verbose: true
 
- 
-  sonarqube:
-    needs: [jest-tests]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
+      - name: List expo-app directory
+        run: |
+          echo "Listing contents of the expo-app directory..."
+          ls -R expo-app/
+          
+      - name: List contents of coverage directory
+        run: |
+          echo "Listing contents of the expo-app/coverage directory..."
+          ls -R expo-app/coverage/
+          
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v4
+        uses: SonarSource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: "https://sonarcloud.io"
@@ -92,17 +93,17 @@ jobs:
           args: >
             -Dsonar.organization=goldendoodle-team
             -Dsonar.projectKey=alexsmags_GoldenDoodle
-            -Dsonar.sources=expo-app/app
+            -Dsonar.sources=expo-app
             -Dsonar.test.inclusions="expo-app/**/__tests__/**/*.{js,ts,tsx}"
-            -Dsonar.exclusions=expo-app/node_modules/**,expo-app/coverage/**,expo-app/__tests__/**
+            -Dsonar.coverage.exclusions="**/__tests__/**"
             -Dsonar.tests=expo-app
             -Dsonar.pullrequest.key=${{ github.event.pull_request.number }}
             -Dsonar.pullrequest.branch=${{ github.head_ref }}
             -Dsonar.pullrequest.base=${{ github.base_ref }}
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov-info/lcov-report.json
+            -Dsonar.javascript.lcov.reportPaths=expo-app/coverage/lcov.info
 
   deploy:
-    needs: [sonarqube]
+    needs: [jest-tests-and-Sonar]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:

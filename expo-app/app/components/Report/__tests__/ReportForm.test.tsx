@@ -26,15 +26,12 @@ describe("ReportForm", () => {
     
         fireEvent.press(dateButton);
     
-        const selectedDay = "2025-03-01";
+        const selectedDay = new Date().toISOString().split("T")[0];
     
         const calendar = getByTestId("calendar");
-        fireEvent.press(calendar);
+        fireEvent.press(calendar); 
     
         await waitFor(() => {
-            const day = { dateString: selectedDay };
-            fireEvent.press(calendar); 
-    
             expect(getByTestId("selectedDate").children[0]).toBe(selectedDay);
         });
     });

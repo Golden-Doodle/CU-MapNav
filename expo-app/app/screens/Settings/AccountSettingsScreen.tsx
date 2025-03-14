@@ -19,7 +19,6 @@ import { Picker } from "@react-native-picker/picker"; // <-- Import the Picker
 import { AuthContext } from "@/app/contexts/AuthContext";
 import { fetchAllCalendars } from "@/app/services/GoogleCalendar/fetchingUserCalendarData";
 
-/** A list of example majors. Adjust to your needs. */
 const MAJORS = [
   "Computer Science",
   "Software Engineering",
@@ -40,9 +39,7 @@ export default function AccountDetailsScreen() {
   }
   const { user } = authContext;
 
-  // ---------------------------
-  // 1) Local Profile State
-  // ---------------------------
+  // Local Profile State
   const [profile, setProfile] = useState({
     name: "Johnny Woodstorm",
     email: user?.email || "j.wood@live.concordia.ca",
@@ -51,9 +48,7 @@ export default function AccountDetailsScreen() {
     phone: "514-101-1008",
   });
 
-  // ---------------------------
-  // 2) Photo State & Permissions
-  // ---------------------------
+  // Photo State & Permissions
   const [selectedPhotoUri, setSelectedPhotoUri] = useState<string | null>(
     user?.photoURL || null
   );
@@ -86,9 +81,7 @@ export default function AccountDetailsScreen() {
     }
   };
 
-  // ---------------------------
-  // 3) Edit Modal Logic
-  // ---------------------------
+  // Edit Modal Logic
   const [editingField, setEditingField] = useState<keyof typeof profile | "">("");
   const [editedValue, setEditedValue] = useState("");
 
@@ -104,9 +97,7 @@ export default function AccountDetailsScreen() {
     }
   };
 
-  // ---------------------------
-  // 4) Schedule Selection
-  // ---------------------------
+  // Schedule Selection
   const [selectedCalendarId, setSelectedCalendarId] = useState<string | null>(null);
   const [availableSchedules, setAvailableSchedules] = useState<any[]>([]);
   const [initialCalendarId, setInitialCalendarId] = useState<string | null>(null);
@@ -133,7 +124,6 @@ export default function AccountDetailsScreen() {
   };
 
   const saveChanges = async () => {
-    // Save the selected schedule
     if (selectedCalendarId) {
       await AsyncStorage.setItem("selectedScheduleID", selectedCalendarId);
       const selCalendar = availableSchedules.find(
@@ -145,68 +135,63 @@ export default function AccountDetailsScreen() {
     }
     setInitialCalendarId(selectedCalendarId);
     setHasChanges(false);
-
-    // Optionally, store other profile changes, e.g. to an API or AsyncStorage
-
     Alert.alert("Success", "Your changes have been saved!");
   };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-      {/* Header Bar */}
-      <View style={styles.header}>
+      <View style={styles.header} testID="header">
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <FontAwesome5 name="arrow-left" size={28} color="#333" />
         </TouchableOpacity>
         <Text style={styles.headerText}>Account Details</Text>
       </View>
 
-      {/* Form Container */}
       <View style={styles.formContainer}>
-        {/* Profile Image */}
-        <View style={styles.profileContainer}>
+        <View style={styles.profileContainer} testID="profile-container">
           {selectedPhotoUri ? (
-            <Image source={{ uri: selectedPhotoUri }} style={styles.profileImage} />
+            <Image source={{ uri: selectedPhotoUri }} style={styles.profileImage} testID="profile-image" />
           ) : (
             <FontAwesome5 name="user-circle" size={100} color="#888" />
           )}
-          <TouchableOpacity style={styles.editPhotoButton} onPress={handlePickImage}>
+          <TouchableOpacity style={styles.editPhotoButton} onPress={handlePickImage} testID="edit-photo-button">
             <FontAwesome5 name="camera" size={20} color="#fff" />
           </TouchableOpacity>
         </View>
 
-        {/* Profile fields (all editable via modal) */}
         {Object.entries(profile).map(([fieldKey, fieldValue]) => (
-          <View key={fieldKey} style={styles.section}>
+          <View key={fieldKey} style={styles.section} testID={`section-${fieldKey}`}>
             <View style={styles.rowBetween}>
               <Text style={styles.label}>
                 {fieldKey.charAt(0).toUpperCase() + fieldKey.slice(1)}
               </Text>
               <TouchableOpacity
                 onPress={() => startEditing(fieldKey as keyof typeof profile)}
+                testID={`edit-${fieldKey}`}
               >
-                <FontAwesome5 name="edit" size={18} color="#912338" />
+                <FontAwesome5 name="edit" size={18} color="#912238" />
               </TouchableOpacity>
             </View>
             <TextInput
               style={[styles.input, { backgroundColor: "#F2F3F5" }]}
               value={fieldValue as string}
               editable={false}
+              testID={`input-${fieldKey}`}
             />
           </View>
         ))}
 
-        <View style={styles.divider} />
+        <View style={styles.divider} testID="divider" />
 
-        {/* Schedule Selection */}
-        <Text style={styles.label}>Select Schedule</Text>
+        <Text style={styles.label} testID="schedule-label">Select Schedule</Text>
         {availableSchedules.length > 0 ? (
           availableSchedules.map((calendar) => (
-            <View key={calendar.id} style={styles.scheduleOption}>
+            <View key={calendar.id} style={styles.scheduleOption} testID={`schedule-${calendar.id}`}>
               <Text style={styles.scheduleText}>{calendar.summary}</Text>
               <Switch
                 value={selectedCalendarId === calendar.id}
                 onValueChange={() => selectCalendar(calendar.id)}
+                testID={`switch-${calendar.id}`}
               />
             </View>
           ))
@@ -214,19 +199,18 @@ export default function AccountDetailsScreen() {
           <Text style={styles.noCalendarText}>No schedules found</Text>
         )}
 
-        {/* Save Button */}
         <TouchableOpacity
           style={[styles.saveButton, { opacity: hasChanges ? 1 : 0.5 }]}
           activeOpacity={0.8}
           disabled={!hasChanges}
           onPress={saveChanges}
+          testID="save-button"
         >
           <Text style={styles.saveButtonText}>Save Changes</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Edit Modal */}
-      <Modal visible={editingField !== ""} transparent animationType="slide">
+      <Modal visible={editingField !== ""} transparent animationType="slide" testID="modal-container">
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>
@@ -236,7 +220,6 @@ export default function AccountDetailsScreen() {
                 : ""}
             </Text>
 
-            {/* If "major", show Picker. Otherwise, show TextInput. */}
             {editingField === "major" ? (
               <View style={styles.pickerContainer}>
                 <Picker
@@ -254,6 +237,7 @@ export default function AccountDetailsScreen() {
                 style={styles.modalInput}
                 value={editedValue}
                 onChangeText={setEditedValue}
+                testID="modal-input"
               />
             )}
 
@@ -261,12 +245,14 @@ export default function AccountDetailsScreen() {
               <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => setEditingField("")}
+                testID="cancel-button"
               >
                 <Text style={styles.cancelText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalButton, styles.saveButtonModal]}
                 onPress={saveEdit}
+                testID="save-edit-button"
               >
                 <Text style={styles.saveText}>Save</Text>
               </TouchableOpacity>
@@ -424,7 +410,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: "#333",
   },
-  // We conditionally render either <TextInput> or <Picker>
   pickerContainer: {
     width: "100%",
     borderWidth: 1,
@@ -460,7 +445,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   saveButtonModal: {
-    backgroundColor: "#912338",
+    backgroundColor: "#912238",
   },
   cancelText: {
     color: "#333",

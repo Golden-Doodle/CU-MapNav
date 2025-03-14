@@ -1,30 +1,35 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
-import { useRouter } from "expo-router";
-import StudySpots from "../StudySpotScreen"; 
+import StudySpots from "../StudySpotScreen";
+import * as Router from "expo-router";
 
+// Mock the useRouter hook properly
 jest.mock("expo-router", () => ({
   useRouter: jest.fn(),
 }));
 
 describe("StudySpots", () => {
-  it("renders correctly", () => {
-    const { getByText } = render(<StudySpots />);
+  const mockBack = jest.fn();
 
-    expect(getByText("Study Spots")).toBeTruthy();
-    expect(getByText("Nearby study spots will be displayed here.")).toBeTruthy();
+  beforeEach(() => {
+    (Router.useRouter as jest.Mock).mockReturnValue({ back: mockBack });
   });
 
-  it("should call router.back() when back button is pressed", () => {
-    const mockBack = jest.fn();
-    (useRouter as jest.Mock).mockReturnValue({
-      back: mockBack,
-    });
+  it("renders correctly", () => {
+    const { getByTestId } = render(<StudySpots />);
 
-    const { getByText } = render(<StudySpots />);
+    expect(getByTestId("study-spots-container")).toBeTruthy();
+    expect(getByTestId("study-spots-title")).toHaveTextContent("Study Spots");
+    expect(getByTestId("study-spots-info-text")).toHaveTextContent(
+      "Nearby study spots will be displayed here."
+    );
+    expect(getByTestId("back-button")).toBeTruthy();
+  });
 
-    const backButton = getByText("Back");
-    fireEvent.press(backButton);
+  it("calls router.back() when Back button is pressed", () => {
+    const { getByTestId } = render(<StudySpots />);
+
+    fireEvent.press(getByTestId("back-button"));
 
     expect(mockBack).toHaveBeenCalled();
   });

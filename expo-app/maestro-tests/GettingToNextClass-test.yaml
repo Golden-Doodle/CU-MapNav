@@ -1,8 +1,0 @@
-appId: com.goldendoodle.expoapp
----
-- tapOn: "Continue as Guest"
-- tapOn: ""
-- tapOn: "📍 Campus Map"
-- tapOn: ", Class"
-- assertVisible: "Next Class"
-- tapOn: "GET DIRECTIONS"

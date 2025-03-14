@@ -1,0 +1,13 @@
+appId: com.goldendoodle.expoapp
+---
+- assertVisible:
+    id: "study-spot-text"
+- tapOn: ""
+- tapOn: "📍 Campus Map"
+- tapOn: "Map Marker"
+- tapOn: "Navigate to this Building"
+- tapOn: ", Directions"
+- assertVisible:
+    id: "card"
+    index: 2
+- assertVisible: ""

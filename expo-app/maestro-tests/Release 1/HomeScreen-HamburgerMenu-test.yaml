@@ -1,0 +1,10 @@
+appId: com.goldendoodle.expoapp
+---
+- assertVisible: "📍 Campus Map"
+- assertVisible: "🚌 Shuttle Schedule"
+- assertVisible: "📖 Study Spots"
+- tapOn: "🚌 Shuttle Schedule"
+- assertVisible: "Back"
+- tapOn: "Back"
+- tapOn: "📖 Study Spots"
+- tapOn: "Back"
