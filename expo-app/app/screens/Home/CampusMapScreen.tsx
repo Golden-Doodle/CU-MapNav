@@ -3,7 +3,7 @@ import { View, TouchableOpacity, StyleSheet, SafeAreaView, Text } from "react-na
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useLocalSearchParams } from "expo-router";
-import CampusMapping from "../../components/CampusMap/CampusMap";
+import CampusMap from "../../components/CampusMap/CampusMap";
 
 export default function CampusMapScreen() {
   const router = useRouter();
@@ -24,7 +24,7 @@ export default function CampusMapScreen() {
 
       {/* Map Content */}
       <View style={styles.mapContainer}>
-        <CampusMapping pressedOptimizeRoute={pressedOptimizeRoute === "true"} />
+        <CampusMap pressedOptimizeRoute={pressedOptimizeRoute === "true"} />
       </View>
     </View>
   );
