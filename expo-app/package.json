@@ -16,7 +16,7 @@
     "preset": "jest-expo",
     "setupFiles": [
       "<rootDir>/jest.setup.js"
-    ] 
+    ]
   },
   "dependencies": {
     "@expo/config-plugins": "^9.0.15",
@@ -50,6 +50,7 @@
     "expo-symbols": "~0.2.1",
     "expo-system-ui": "~4.0.7",
     "expo-web-browser": "~14.0.2",
+    "instabug-reactnative": "^14.1.0",
     "lottie-react-native": "7.1.0",
     "react": "18.3.1",
     "react-dom": "^18.3.1",
