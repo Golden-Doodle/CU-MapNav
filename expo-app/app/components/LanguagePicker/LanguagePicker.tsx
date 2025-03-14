@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTranslation } from "react-i18next";
-import supportedLanguages from "@/app/config/supportedLanguages"; // Import languages
+import supportedLanguages from "@/app/config/supportedLanguages";
+import { FontAwesome5 } from "@expo/vector-icons";
 
 const LanguageSelector = () => {
   const { i18n } = useTranslation();
   const { t } = useTranslation("SettingsScreen");
   const [selectedLanguage, setSelectedLanguage] = useState(i18n.language);
 
-  // Load saved language from AsyncStorage on mount
   useEffect(() => {
     const loadLanguage = async () => {
       const storedLang = await AsyncStorage.getItem("language");
@@ -22,21 +22,18 @@ const LanguageSelector = () => {
     loadLanguage();
   }, []);
 
-  // Handle language change
-  const changeLanguage = async (lang: any) => {
+  const changeLanguage = async (lang: string) => {
     setSelectedLanguage(lang);
     i18n.changeLanguage(lang);
+    await AsyncStorage.setItem("language", lang);
   };
 
-  // Get the full name of the selected language
   const selectedLanguageLabel =
     supportedLanguages.find((lang) => lang.code === selectedLanguage)?.label || "English";
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>
-        {t("Selected Language")}: {selectedLanguageLabel} {/* Display full name */}
-      </Text>
+    <View style={styles.settingOption}>
+      <FontAwesome5 name="language" size={18} color="#912338" />
       <Picker selectedValue={selectedLanguage} onValueChange={changeLanguage} style={styles.picker}>
         {supportedLanguages.map((lang) => (
           <Picker.Item key={lang.code} label={lang.label} value={lang.code} />
@@ -47,18 +44,23 @@ const LanguageSelector = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    marginVertical: 20,
-    paddingHorizontal: 10,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 5,
+  settingOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#fff",
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    marginBottom: 10,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
   },
   picker: {
-    height: 50,
-    width: "100%",
+    flex: 1,
+    color: "#912338",
   },
 });
 
