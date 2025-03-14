@@ -5,15 +5,9 @@ import { useRouter } from "expo-router";
 import { useLocalSearchParams } from "expo-router";
 import CampusMapping from "../../components/CampusMap/CampusMap";
 
-// 1. Import useTranslation and choose the namespace "CampusMapScreen"
-import { useTranslation } from "react-i18next";
-
 export default function CampusMapScreen() {
   const router = useRouter();
   const { pressedOptimizeRoute } = useLocalSearchParams();
-
-  // 2. Hook into the "CampusMapScreen" namespace
-  const { t } = useTranslation("CampusMapScreen");
 
   return (
     <View style={styles.container}>
