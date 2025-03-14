@@ -1,19 +1,34 @@
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 
 interface BottomNavigationProps {
     testID: string; 
 }
 
 const BottomNavigation: React.FC<BottomNavigationProps> = ({ testID }) => {
-  const router = useRouter(); 
+  
+  const { t } = useTranslation("HomePageScreen");
+  const router = useRouter();
 
   const TABS = [
-    { label: "Home", icon: "home", path: "/screens/Home/HomePageScreen" },
-    { label: "Services", icon: "concierge-bell" },
-    { label: "Report", icon: "exclamation-circle", path: "/screens/Report/ReportScreen" },
-    { label: "Settings", icon: "cog", path: "/screens/Settings/SettingsScreen"},
+    {
+      label: t("home_tab"),
+      icon: "home",
+      path: "/screens/Home/HomePageScreen",
+    },
+    { label: t("services_tab"), icon: "concierge-bell" },
+    {
+      label: t("report_tab"),
+      icon: "exclamation-circle",
+      path: "/screens/Report/ReportScreen",
+    },
+    {
+      label: t("settings_tab"),
+      icon: "cog",
+      path: "/screens/Settings/SettingsScreen",
+    },
   ];
 
   return (

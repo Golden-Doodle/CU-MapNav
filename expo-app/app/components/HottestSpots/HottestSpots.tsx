@@ -1,8 +1,12 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons"; // Flame icon
+import { useTranslation } from "react-i18next";
 
 const HottestSpots = () => {
+
+  const {t} = useTranslation("HomePageScreen");
+
   return (
     <View style={styles.container}>
       {/* Flame Icon */}
@@ -10,7 +14,7 @@ const HottestSpots = () => {
 
       {/* Title */}
       <Text style={styles.text}>
-        Concordia's hottest spots of the week will show up here.
+        {t("concordia_s_hottest_spots_of_the_week_will_show_up_here")}
       </Text>
     </View>
   );
