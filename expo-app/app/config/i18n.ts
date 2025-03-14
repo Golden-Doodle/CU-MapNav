@@ -21,13 +21,13 @@ const getLanguage = async () => {
 
 // Initialize i18n after getting the language
 (async () => {
-  // const lng = await getLanguage();
-  const lng = "en"; // For testing purposes - you may set the language here
+  const lng = await getLanguage();
+  // const lng = "en"; // For testing purposes - you may set the language here
   i18n.use(initReactI18next).init({
     resources,
     lng,
     fallbackLng: "en",
-    ns: ["HomePageScreen", "HomeMenuScreen"], // Define namespaces based on screen names, Remember to add the screen json to the resourses object that is imported
+    ns: ["HomePageScreen", "HomeMenuScreen", "CampusMap"], // Define namespaces based on screen names, Remember to add the screen json to the resourses object that is imported
     defaultNS: "HomePageScreen",
     interpolation: { escapeValue: false },
   });

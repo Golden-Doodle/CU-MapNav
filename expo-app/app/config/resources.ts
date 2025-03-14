@@ -13,6 +13,13 @@ import itHomeMenuScreen from "@/app/locales/it/HomeMenuScreen.json";
 import heHomeMenuScreen from "@/app/locales/he/HomeMenuScreen.json";
 import arHomeMenuScreen from "@/app/locales/ar/HomeMenuScreen.json";
 
+import enCampusMap from "@/app/locales/en/CampusMap.json"
+import frCampusMap from "@/app/locales/fr/CampusMap.json"
+import esCampusMap from "@/app/locales/es/CampusMap.json"
+import itCampusMap from "@/app/locales/it/CampusMap.json"
+import heCampusMap from "@/app/locales/he/CampusMap.json"
+import arCampusMap from "@/app/locales/ar/CampusMap.json"
+
 
 /*
   * Define your resources here
@@ -23,12 +30,12 @@ import arHomeMenuScreen from "@/app/locales/ar/HomeMenuScreen.json";
   * Don't forget to add the new Screen to the ns array in i18n.ts
   */
 const resources = {
-  en: { HomePageScreen: enHomePageScreen, HomeMenuScreen: enHomeMenuScreen },
-  fr: { HomePageScreen: frHomePageScreen, HomeMenuScreen: frHomeMenuScreen },
-  es: { HomePageScreen: esHomePageScreen, HomeMenuScreen: esHomeMenuScreen },
-  it: { HomePageScreen: itHomePageScreen, HomeMenuScreen: itHomeMenuScreen },
-  he: { HomePageScreen: heHomePageScreen, HomeMenuScreen: heHomeMenuScreen },
-  ar: { HomePageScreen: arHomePageScreen, HomeMenuScreen: arHomeMenuScreen },
+  en: { HomePageScreen: enHomePageScreen, HomeMenuScreen: enHomeMenuScreen, CampusMap: enCampusMap },
+  fr: { HomePageScreen: frHomePageScreen, HomeMenuScreen: frHomeMenuScreen, CampusMap: frCampusMap },
+  es: { HomePageScreen: esHomePageScreen, HomeMenuScreen: esHomeMenuScreen, CampusMap: esCampusMap },
+  it: { HomePageScreen: itHomePageScreen, HomeMenuScreen: itHomeMenuScreen, CampusMap: itCampusMap },
+  he: { HomePageScreen: heHomePageScreen, HomeMenuScreen: heHomeMenuScreen, CampusMap: heCampusMap },
+  ar: { HomePageScreen: arHomePageScreen, HomeMenuScreen: arHomeMenuScreen, CampusMap: arCampusMap },
 };
 
 export default resources;
