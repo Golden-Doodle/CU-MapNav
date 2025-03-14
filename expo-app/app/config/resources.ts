@@ -56,6 +56,14 @@ import itSettingsHeader from "@/app/locales/it/SettingsHeader.json";
 import heSettingsHeader from "@/app/locales/he/SettingsHeader.json";
 import arSettingsHeader from "@/app/locales/ar/SettingsHeader.json";
 
+import enSignInScreen from "@/app/locales/en/SignInScreen.json";
+import frSignInScreen from "@/app/locales/fr/SignInScreen.json";
+import esSignInScreen from "@/app/locales/es/SignInScreen.json";
+import itSignInScreen from "@/app/locales/it/SignInScreen.json";
+import heSignInScreen from "@/app/locales/he/SignInScreen.json";
+import arSignInScreen from "@/app/locales/ar/SignInScreen.json";
+import SignInScreen from "..";
+
 
 /*
  * Define your resources here
@@ -75,6 +83,7 @@ const resources = {
     SettingsScreen: enSettingsScreen,
     SupportScreen: enSupportScreen,
     SettingsHeader: enSettingsHeader,
+    SignInScreen: enSignInScreen
   },
   fr: {
     HomePageScreen: frHomePageScreen,
@@ -85,6 +94,7 @@ const resources = {
     SettingsScreen: frSettingsScreen,
     SupportScreen: frSupportScreen,
     SettingsHeader: frSettingsHeader,
+    SignInScreen: frSignInScreen,
   },
   es: {
     HomePageScreen: esHomePageScreen,
@@ -95,6 +105,7 @@ const resources = {
     SettingsScreen: esSettingsScreen,
     SupportScreen: esSupportScreen,
     SettingsHeader: esSettingsHeader,
+    SignInScreen: esSignInScreen,
   },
   it: {
     HomePageScreen: itHomePageScreen,
@@ -105,6 +116,7 @@ const resources = {
     SettingsScreen: itSettingsScreen,
     SupportScreen: itSupportScreen,
     SettingsHeader: itSettingsHeader,
+    SignInScreen: itSignInScreen,
   },
   he: {
     HomePageScreen: heHomePageScreen,
@@ -114,7 +126,8 @@ const resources = {
     ScheduleScreen: heScheduleScreen,
     SettingsScreen: heSettingsScreen,
     SupportScreen: heSupportScreen,
-    SettingsHeader: heSettingsHeader
+    SettingsHeader: heSettingsHeader,
+    SignInScreen: heSignInScreen,
   },
   ar: {
     HomePageScreen: arHomePageScreen,
@@ -124,7 +137,8 @@ const resources = {
     ScheduleScreen: arScheduleScreen,
     SettingsScreen: arSettingsScreen,
     SupportScreen: arSupportScreen,
-    SettingsHeader: arSettingsHeader
+    SettingsHeader: arSettingsHeader,
+    SignInScreen: arSignInScreen,
   },
 };
 
