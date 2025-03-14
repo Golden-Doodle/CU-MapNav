@@ -1,6 +1,15 @@
 import { Stack } from "expo-router";
 import { AuthProvider } from "@/app/contexts/AuthContext";
+import Instabug, { InvocationEvent } from "instabug-reactnative";
 
+Instabug.init({
+  token: "f2056620dadfdf9fa5d6a7f2bf0e3041",
+  invocationEvents: [
+    InvocationEvent.shake,
+    InvocationEvent.screenshot,
+    InvocationEvent.floatingButton,
+  ],
+});
 
 export default function RootLayout() {
   return (
