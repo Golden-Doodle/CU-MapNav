@@ -41,7 +41,13 @@ import esSettingsScreen from "@/app/locales/es/SettingsScreen.json";
 import itSettingsScreen from "@/app/locales/it/SettingsScreen.json";
 import heSettingsScreen from "@/app/locales/he/SettingsScreen.json";
 import arSettingsScreen from "@/app/locales/ar/SettingsScreen.json";
-import SettingsScreen from "../screens/Settings/SettingsScreen";
+
+import enSupportScreen from "@/app/locales/en/SupportScreen.json";
+import frSupportScreen from "@/app/locales/fr/SupportScreen.json";
+import esSupportScreen from "@/app/locales/es/SupportScreen.json";
+import itSupportScreen from "@/app/locales/it/SupportScreen.json";
+import heSupportScreen from "@/app/locales/he/SupportScreen.json";
+import arSupportScreen from "@/app/locales/ar/SupportScreen.json";
 
 
 /*
@@ -60,6 +66,7 @@ const resources = {
     AccountSettingsScreen: enAccountSettingsScreen,
     ScheduleScreen: enScheduleScreen,
     SettingsScreen: enSettingsScreen,
+    SupportScreen: enSupportScreen,
   },
   fr: {
     HomePageScreen: frHomePageScreen,
@@ -68,6 +75,7 @@ const resources = {
     AccountSettingsScreen: frAccountSettingsScreen,
     ScheduleScreen: frScheduleScreen,
     SettingsScreen: frSettingsScreen,
+    SupportScreen: frSupportScreen,
   },
   es: {
     HomePageScreen: esHomePageScreen,
@@ -76,6 +84,7 @@ const resources = {
     AccountSettingsScreen: esAccountSettingsScreen,
     ScheduleScreen: esScheduleScreen,
     SettingsScreen: esSettingsScreen,
+    SupportScreen: esSupportScreen,
   },
   it: {
     HomePageScreen: itHomePageScreen,
@@ -84,6 +93,7 @@ const resources = {
     AccountSettingsScreen: itAccountSettingsScreen,
     ScheduleScreen: itScheduleScreen,
     SettingsScreen: itSettingsScreen,
+    SupportScreen: itSupportScreen,
   },
   he: {
     HomePageScreen: heHomePageScreen,
@@ -92,6 +102,7 @@ const resources = {
     AccountSettingsScreen: heAccountSettingsScreen,
     ScheduleScreen: heScheduleScreen,
     SettingsScreen: heSettingsScreen,
+    SupportScreen: heSupportScreen,
   },
   ar: {
     HomePageScreen: arHomePageScreen,
@@ -99,7 +110,8 @@ const resources = {
     CampusMap: arCampusMap,
     AccountSettingsScreen: arAccountSettingsScreen,
     ScheduleScreen: arScheduleScreen,
-    SettingsScreen: arSettingsScreen
+    SettingsScreen: arSettingsScreen,
+    SupportScreen: arSupportScreen,
   },
 };
 

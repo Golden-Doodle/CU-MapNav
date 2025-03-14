@@ -34,6 +34,7 @@ const getLanguage = async () => {
       "AccountSettingsScreen",
       "ScheduleScreen",
       "SettingsScreen",
+      "SupportScreen",
     ], // Define namespaces based on screen names, Remember to add the screen json to the resourses object that is imported
     defaultNS: "HomePageScreen",
     interpolation: { escapeValue: false },
