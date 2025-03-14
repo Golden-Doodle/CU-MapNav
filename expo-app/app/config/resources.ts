@@ -49,6 +49,13 @@ import itSupportScreen from "@/app/locales/it/SupportScreen.json";
 import heSupportScreen from "@/app/locales/he/SupportScreen.json";
 import arSupportScreen from "@/app/locales/ar/SupportScreen.json";
 
+import enSettingsHeader from "@/app/locales/en/SettingsHeader.json";
+import frSettingsHeader from "@/app/locales/fr/SettingsHeader.json";
+import esSettingsHeader from "@/app/locales/es/SettingsHeader.json";
+import itSettingsHeader from "@/app/locales/it/SettingsHeader.json";
+import heSettingsHeader from "@/app/locales/he/SettingsHeader.json";
+import arSettingsHeader from "@/app/locales/ar/SettingsHeader.json";
+
 
 /*
  * Define your resources here
@@ -67,6 +74,7 @@ const resources = {
     ScheduleScreen: enScheduleScreen,
     SettingsScreen: enSettingsScreen,
     SupportScreen: enSupportScreen,
+    SettingsHeader: enSettingsHeader,
   },
   fr: {
     HomePageScreen: frHomePageScreen,
@@ -76,6 +84,7 @@ const resources = {
     ScheduleScreen: frScheduleScreen,
     SettingsScreen: frSettingsScreen,
     SupportScreen: frSupportScreen,
+    SettingsHeader: frSettingsHeader,
   },
   es: {
     HomePageScreen: esHomePageScreen,
@@ -85,6 +94,7 @@ const resources = {
     ScheduleScreen: esScheduleScreen,
     SettingsScreen: esSettingsScreen,
     SupportScreen: esSupportScreen,
+    SettingsHeader: esSettingsHeader,
   },
   it: {
     HomePageScreen: itHomePageScreen,
@@ -94,6 +104,7 @@ const resources = {
     ScheduleScreen: itScheduleScreen,
     SettingsScreen: itSettingsScreen,
     SupportScreen: itSupportScreen,
+    SettingsHeader: itSettingsHeader,
   },
   he: {
     HomePageScreen: heHomePageScreen,
@@ -103,6 +114,7 @@ const resources = {
     ScheduleScreen: heScheduleScreen,
     SettingsScreen: heSettingsScreen,
     SupportScreen: heSupportScreen,
+    SettingsHeader: heSettingsHeader
   },
   ar: {
     HomePageScreen: arHomePageScreen,
@@ -112,6 +124,7 @@ const resources = {
     ScheduleScreen: arScheduleScreen,
     SettingsScreen: arSettingsScreen,
     SupportScreen: arSupportScreen,
+    SettingsHeader: arSettingsHeader
   },
 };
 
