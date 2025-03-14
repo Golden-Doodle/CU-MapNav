@@ -27,6 +27,14 @@ import itAccountSettingsScreen from "@/app/locales/it/AccountSettingsScreen.json
 import heAccountSettingsScreen from "@/app/locales/he/AccountSettingsScreen.json";
 import arAccountSettingsScreen from "@/app/locales/ar/AccountSettingsScreen.json";
 
+import enScheduleScreen from "@/app/locales/en/ScheduleScreen.json";
+import frScheduleScreen from "@/app/locales/fr/ScheduleScreen.json";
+import esScheduleScreen from "@/app/locales/es/ScheduleScreen.json";
+import itScheduleScreen from "@/app/locales/it/ScheduleScreen.json";
+import heScheduleScreen from "@/app/locales/he/ScheduleScreen.json";
+import arScheduleScreen from "@/app/locales/ar/ScheduleScreen.json";
+
+
 /*
  * Define your resources here
  * The key is the language code
@@ -41,36 +49,42 @@ const resources = {
     HomeMenuScreen: enHomeMenuScreen,
     CampusMap: enCampusMap,
     AccountSettingsScreen: enAccountSettingsScreen,
+    ScheduleScreen: enScheduleScreen,
   },
   fr: {
     HomePageScreen: frHomePageScreen,
     HomeMenuScreen: frHomeMenuScreen,
     CampusMap: frCampusMap,
     AccountSettingsScreen: frAccountSettingsScreen,
+    ScheduleScreen: frScheduleScreen,
   },
   es: {
     HomePageScreen: esHomePageScreen,
     HomeMenuScreen: esHomeMenuScreen,
     CampusMap: esCampusMap,
     AccountSettingsScreen: esAccountSettingsScreen,
+    ScheduleScreen: esScheduleScreen,
   },
   it: {
     HomePageScreen: itHomePageScreen,
     HomeMenuScreen: itHomeMenuScreen,
     CampusMap: itCampusMap,
     AccountSettingsScreen: itAccountSettingsScreen,
+    ScheduleScreen: itScheduleScreen,
   },
   he: {
     HomePageScreen: heHomePageScreen,
     HomeMenuScreen: heHomeMenuScreen,
     CampusMap: heCampusMap,
     AccountSettingsScreen: heAccountSettingsScreen,
+    ScheduleScreen: heScheduleScreen,
   },
   ar: {
     HomePageScreen: arHomePageScreen,
     HomeMenuScreen: arHomeMenuScreen,
     CampusMap: arCampusMap,
     AccountSettingsScreen: arAccountSettingsScreen,
+    ScheduleScreen: arScheduleScreen,
   },
 };
 
