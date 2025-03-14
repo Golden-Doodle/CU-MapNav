@@ -35,6 +35,15 @@ import heScheduleScreen from "@/app/locales/he/ScheduleScreen.json";
 import arScheduleScreen from "@/app/locales/ar/ScheduleScreen.json";
 
 
+import enSettingsScreen from "@/app/locales/en/SettingsScreen.json";
+import frSettingsScreen from "@/app/locales/fr/SettingsScreen.json";
+import esSettingsScreen from "@/app/locales/es/SettingsScreen.json";
+import itSettingsScreen from "@/app/locales/it/SettingsScreen.json";
+import heSettingsScreen from "@/app/locales/he/SettingsScreen.json";
+import arSettingsScreen from "@/app/locales/ar/SettingsScreen.json";
+import SettingsScreen from "../screens/Settings/SettingsScreen";
+
+
 /*
  * Define your resources here
  * The key is the language code
@@ -50,6 +59,7 @@ const resources = {
     CampusMap: enCampusMap,
     AccountSettingsScreen: enAccountSettingsScreen,
     ScheduleScreen: enScheduleScreen,
+    SettingsScreen: enSettingsScreen,
   },
   fr: {
     HomePageScreen: frHomePageScreen,
@@ -57,6 +67,7 @@ const resources = {
     CampusMap: frCampusMap,
     AccountSettingsScreen: frAccountSettingsScreen,
     ScheduleScreen: frScheduleScreen,
+    SettingsScreen: frSettingsScreen,
   },
   es: {
     HomePageScreen: esHomePageScreen,
@@ -64,6 +75,7 @@ const resources = {
     CampusMap: esCampusMap,
     AccountSettingsScreen: esAccountSettingsScreen,
     ScheduleScreen: esScheduleScreen,
+    SettingsScreen: esSettingsScreen,
   },
   it: {
     HomePageScreen: itHomePageScreen,
@@ -71,6 +83,7 @@ const resources = {
     CampusMap: itCampusMap,
     AccountSettingsScreen: itAccountSettingsScreen,
     ScheduleScreen: itScheduleScreen,
+    SettingsScreen: itSettingsScreen,
   },
   he: {
     HomePageScreen: heHomePageScreen,
@@ -78,6 +91,7 @@ const resources = {
     CampusMap: heCampusMap,
     AccountSettingsScreen: heAccountSettingsScreen,
     ScheduleScreen: heScheduleScreen,
+    SettingsScreen: heSettingsScreen,
   },
   ar: {
     HomePageScreen: arHomePageScreen,
@@ -85,6 +99,7 @@ const resources = {
     CampusMap: arCampusMap,
     AccountSettingsScreen: arAccountSettingsScreen,
     ScheduleScreen: arScheduleScreen,
+    SettingsScreen: arSettingsScreen
   },
 };
 

@@ -14,8 +14,12 @@ import auth from "@react-native-firebase/auth";
 import SettingsHeader from "../../components/Settings/SettingsHeader"; 
 import BottomNavigation from "../../components/BottomNavigation/BottomNavigation"; 
 import LanguageSelector from "@/app/components/LanguagePicker/LanguagePicker";
+import { useTranslation } from "react-i18next";
 
 export default function SettingsScreen() {
+
+    const {t} = useTranslation("SettingsScreen");
+
     const router = useRouter();
 
     const [notificationsEnabled, setNotificationsEnabled] = useState(false);
@@ -40,7 +44,7 @@ export default function SettingsScreen() {
                     setDarkMode(false);  // default to false if not set
                 }
             } catch (error) {
-                console.error("Error loading settings:", error);
+                console.error(t("Error loading settings:"), error);
             }
         };
         loadSettings();
@@ -65,14 +69,14 @@ export default function SettingsScreen() {
                     testID="schedule-button"
                 >
                     <FontAwesome5 name="clock" size={18} color="#912338" />
-                    <Text style={styles.settingText}>Schedule</Text>
+                    <Text style={styles.settingText}>{t("Schedule")}</Text>
                     <FontAwesome5 name="chevron-right" size={16} color="#912338" />
                 </TouchableOpacity>
 
                 {/* Notifications */}
                 <View style={styles.settingOption} testID="notifications-setting">
                     <FontAwesome5 name="bell" size={18} color="#912338" />
-                    <Text style={styles.settingText}>Notifications</Text>
+                    <Text style={styles.settingText}>{t("Notifications")}</Text>
                     <Switch
                         value={notificationsEnabled}
                         onValueChange={(value) => {
@@ -86,7 +90,7 @@ export default function SettingsScreen() {
                 {/* Dark Mode */}
                 <View style={styles.settingOption} testID="dark-mode-setting">
                     <FontAwesome5 name="moon" size={18} color="#912338" />
-                    <Text style={styles.settingText}>Dark Mode</Text>
+                    <Text style={styles.settingText}>{t("Dark Mode")}</Text>
                     <Switch
                         value={darkMode}
                         onValueChange={(value) => {
@@ -107,7 +111,7 @@ export default function SettingsScreen() {
                     testID="account-details-button"
                 >
                     <FontAwesome5 name="user" size={18} color="#912338" />
-                    <Text style={styles.settingText}>Account details</Text>
+                    <Text style={styles.settingText}>{t("Account details")}</Text>
                     <FontAwesome5 name="chevron-right" size={16} color="#912338" />
                 </TouchableOpacity>
 
@@ -118,7 +122,7 @@ export default function SettingsScreen() {
                     testID="support-button"
                 >
                     <FontAwesome5 name="question-circle" size={18} color="#912338" />
-                    <Text style={styles.settingText}>Support</Text>
+                    <Text style={styles.settingText}>{t("Support")}</Text>
                     <FontAwesome5 name="chevron-right" size={16} color="#912338" />
                 </TouchableOpacity>
 
@@ -138,7 +142,7 @@ export default function SettingsScreen() {
                     testID="logout-button"
                 >
                     <FontAwesome5 name="sign-out-alt" size={18} color="#912338" />
-                    <Text style={styles.settingText}>Logout</Text>
+                    <Text style={styles.settingText}>{t("Logout")}</Text>
                     <FontAwesome5 name="chevron-right" size={16} color="#912338" />
                 </TouchableOpacity>
 
@@ -149,7 +153,7 @@ export default function SettingsScreen() {
                     testID="delete-account-button"
                 >
                     <FontAwesome5 name="trash-alt" size={18} color="red" />
-                    <Text style={[styles.settingText, { color: "red" }]}>Delete Account</Text>
+                    <Text style={[styles.settingText, { color: "red" }]}>{t("Delete Account")}</Text>
                     <FontAwesome5 name="chevron-right" size={16} color="red" />
                 </TouchableOpacity>
 

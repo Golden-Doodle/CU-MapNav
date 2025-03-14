@@ -27,7 +27,14 @@ const getLanguage = async () => {
     resources,
     lng,
     fallbackLng: "en",
-    ns: ["HomePageScreen", "HomeMenuScreen", "CampusMap", "AccountSettingsScreen", "ScheduleScreen"], // Define namespaces based on screen names, Remember to add the screen json to the resourses object that is imported
+    ns: [
+      "HomePageScreen",
+      "HomeMenuScreen",
+      "CampusMap",
+      "AccountSettingsScreen",
+      "ScheduleScreen",
+      "SettingsScreen",
+    ], // Define namespaces based on screen names, Remember to add the screen json to the resourses object that is imported
     defaultNS: "HomePageScreen",
     interpolation: { escapeValue: false },
   });
