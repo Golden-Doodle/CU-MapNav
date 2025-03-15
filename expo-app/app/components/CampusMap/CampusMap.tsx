@@ -262,26 +262,26 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
                   onPress={() => handleMarkerPress(marker)}
                 />
               ))}
-            {buildings.map((building) => (
-              <Polygon
-                key={building.id}
-                coordinates={building.coordinates}
-                fillColor={
-                  currentBuilding && currentBuilding.id === building.id
-                    ? "rgb(255, 0, 47)"
-                    : getFillColorWithOpacity(building, destination)
-                }
-                strokeColor={
-                  currentBuilding && currentBuilding.id === building.id
-                    ? "rgb(255, 0, 47)"
-                    : getFillColorWithOpacity(building, destination)
-                }
-                strokeWidth={2}
-                tappable={true}
-                onPress={handleBuildingPressed(building)}
-                testID={`building-polygon-${building.id}`}
-              />
-            ))}
+           {buildings.map((building) => (
+            <Polygon
+              key={building.id}
+              coordinates={building.coordinates}
+              fillColor={
+                currentBuilding && currentBuilding.id === building.id
+                  ? "rgb(255, 0, 47)"
+                  : getFillColorWithOpacity(building, destination)
+              }
+              strokeColor={
+                currentBuilding && currentBuilding.id === building.id
+                  ? "rgb(255, 0, 47)"
+                  : getFillColorWithOpacity(building, destination)
+              }
+              strokeWidth={2}
+              tappable={true}
+              onPress={handleBuildingPressed(building)}
+              testID={`building-marker-${building.id}-marker`} 
+            />
+          ))}
           </>
         )}
 
