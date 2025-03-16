@@ -65,15 +65,6 @@ export const coordinatesFromRoomLocation = (
       location.campus === building.campus && building.name === location.building.name
   )?.coordinates[0];
 
-  // const coordinates: Coordinates | undefined =
-  //   location.campus === "SGW"
-  //     ? SGWBuildings.find(
-  //         (building: Building) => building.name === location.building.name
-  //       )?.coordinates[0]
-  //     : LoyolaBuildings.find(
-  //         (building) => building.name === location.building.name
-  //       )?.coordinates[0];
-
   if (!coordinates) {
     return;
   }
