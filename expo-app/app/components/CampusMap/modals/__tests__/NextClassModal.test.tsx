@@ -3,7 +3,7 @@ import { render, fireEvent, waitFor, act } from "@testing-library/react-native";
 import NextClassModal from "../NextClassModal";
 import { fetchTodaysEventsFromSelectedSchedule } from "@/app/services/GoogleCalendar/fetchingUserCalendarData";
 import { GoogleCalendarEvent } from "@/app/utils/types";
-import { SGWBuildings } from "../../data/buildingData";
+import { buildings } from "../../data/buildingData";
 
 jest.mock("@react-native-async-storage/async-storage", () => ({
   getItem: jest.fn(),
@@ -116,7 +116,7 @@ describe("NextClassModal", () => {
     const { getByTestId } = renderComponent();
 
     await waitFor(() => {
-      expect(getByTestId("next-class-modal-building-value")).toHaveTextContent(SGWBuildings[0].name);
+      expect(getByTestId("next-class-modal-building-value")).toHaveTextContent(buildings[0].name);
     });
   });
 

@@ -18,10 +18,10 @@ export type Building = {
 };
 export type CustomMarkerType = {
   id: string;
-  title: string;
+  name: string;
   description?: string;
   coordinate: Coordinates;
-  campus?: Campus;
+  campus: Campus;
   photoUrl?: string; 
   rating?: number; 
 };
@@ -113,4 +113,19 @@ export type GooglePlace = {
     photo_reference: string;
     imageUrl: string; 
   }[];
+};
+
+export type RegionType = {
+  SGW: {
+    latitude: number;
+    longitude: number;
+    latitudeDelta: number;
+    longitudeDelta: number;
+  };
+  LOY: {
+    latitude: number;
+    longitude: number;
+    latitudeDelta: number;
+    longitudeDelta: number;
+  };
 };

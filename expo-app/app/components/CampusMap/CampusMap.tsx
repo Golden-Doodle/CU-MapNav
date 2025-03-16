@@ -2,9 +2,10 @@ import React, { useState, useEffect, useCallback } from "react";
 import { View, Alert, StyleSheet, ActivityIndicator } from "react-native";
 import MapView, { Marker, Polygon, Polyline } from "react-native-maps";
 import CustomMarker from "./CustomMarker";
-import { SGWBuildings, LoyolaBuildings } from "./data/buildingData";
+import { buildings } from "./data/buildingData";
 import { getDirections } from "@/app/utils/directions";
-import { initialRegion, SGWMarkers, LoyolaMarkers } from "./data/customMarkerData";
+import { initialRegion } from "./data/initialRegion";
+import { markers } from "./data/customMarkerData";
 import NavTab from "./CampusMapNavTab";
 import * as Location from "expo-location";
 import BuildingInfoModal from "./modals/BuildingInfoModal";
@@ -36,9 +37,6 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   const [mapRegion, setMapRegion] = useState(initialRegion[campus]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const markers = campus === "SGW" ? SGWMarkers : LoyolaMarkers;
-  const buildings = campus === "SGW" ? SGWBuildings : LoyolaBuildings;
-
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -59,6 +57,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
     })();
   }, []);
 
+  // Fetch nearby restaurants when user location is available using Google Places API
   useEffect(() => {
     if (userLocation && viewEatingOnCampus) {
       setIsLoading(true);
@@ -70,10 +69,11 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
               latitude: place.geometry.location.lat,
               longitude: place.geometry.location.lng,
             },
-            title: place.name,
+            name: place.name,
             description: place.vicinity,
             photoUrl: place.photos?.[0]?.imageUrl,
             rating: place.rating,
+            campus
           }));
           setRestaurantMarkers(restaurantMarkers);
         })
@@ -89,7 +89,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   const handleMarkerPress = useCallback((marker: CustomMarkerType) => {
     const markerToBuilding: Building = {
       id: marker.id,
-      name: marker.title,
+      name: marker.name,
       description: marker.description,
       coordinates: [marker.coordinate],
       strokeColor: "blue",
@@ -200,7 +200,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
                 key={marker.id}
                 testID={`building-marker-${marker.id}`}
                 coordinate={marker.coordinate}
-                title={marker.title}
+                name={marker.name}
                 description={marker.description}
                 onPress={() => handleMarkerPress(marker)}
               />
@@ -212,7 +212,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
                 key={marker.id}
                 testID={`restaurant-marker-${marker.id}`}
                 coordinate={marker.coordinate}
-                title={marker.title}
+                name={marker.name}
                 description={marker.description}
                 isFoodLocation={true}
                 onPress={() => handleMarkerPress(marker)}
