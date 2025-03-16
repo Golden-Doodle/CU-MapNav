@@ -4,28 +4,32 @@ interface UseSearchProps<T> {
   data: T[];
   searchKey: keyof T;
   debounceTime?: number;
+  returnDataOnEmptyQuery?: boolean;
 }
 
 const useSearch = <T extends {}>({
   data,
   searchKey,
   debounceTime = 300,
+  returnDataOnEmptyQuery = false,
 }: UseSearchProps<T>) => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [filteredData, setFilteredData] = useState<T[]>([]);
 
   useEffect(() => {
     if (!searchQuery.trim()) {
-      setFilteredData([]); // Reset results when input is empty
+      if (returnDataOnEmptyQuery) {
+        setFilteredData(data); // Show all data when input is empty
+      } else {
+        setFilteredData([]); // Reset results when input is empty
+      }
       return;
     }
 
     const timeout = setTimeout(() => {
       // Filter data based on the search query
       const results = data.filter((item) =>
-        String(item[searchKey])
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase())
+        String(item[searchKey]).toLowerCase().includes(searchQuery.toLowerCase())
       );
       setFilteredData(results);
     }, debounceTime); // Debounce time

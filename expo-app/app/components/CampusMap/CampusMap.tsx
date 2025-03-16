@@ -69,7 +69,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
               latitude: place.geometry.location.lat,
               longitude: place.geometry.location.lng,
             },
-            title: place.name,
+            name: place.name,
             description: place.vicinity,
             photoUrl: place.photos?.[0]?.imageUrl,
             rating: place.rating,
@@ -89,7 +89,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   const handleMarkerPress = useCallback((marker: CustomMarkerType) => {
     const markerToBuilding: Building = {
       id: marker.id,
-      name: marker.title,
+      name: marker.name,
       description: marker.description,
       coordinates: [marker.coordinate],
       strokeColor: "blue",
@@ -200,7 +200,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
                 key={marker.id}
                 testID={`building-marker-${marker.id}`}
                 coordinate={marker.coordinate}
-                title={marker.title}
+                name={marker.name}
                 description={marker.description}
                 onPress={() => handleMarkerPress(marker)}
               />
@@ -212,7 +212,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
                 key={marker.id}
                 testID={`restaurant-marker-${marker.id}`}
                 coordinate={marker.coordinate}
-                title={marker.title}
+                name={marker.name}
                 description={marker.description}
                 isFoodLocation={true}
                 onPress={() => handleMarkerPress(marker)}
