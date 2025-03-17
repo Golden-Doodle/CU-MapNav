@@ -307,7 +307,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
                 ))}
               </>
             )}
-            {buildings.map((building) => (
+            {buildings.map((building: Building) => (
               <Polygon
                 key={building.id}
                 coordinates={building.coordinates}
