@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { Building } from "@/app/utils/types";
+import { useTranslation } from "react-i18next";
 
 type BuildingInfoModalProps = {
   visible: boolean;
@@ -28,6 +29,8 @@ const BuildingInfoModal: React.FC<BuildingInfoModalProps> = ({
   testID,
   onUseAsOrigin,
 }) => {
+  const { t } = useTranslation("CampusMap");
+
   const [isImageLoading, setIsImageLoading] = useState<boolean>(false);
 
   if (!selectedBuilding) return null;
@@ -90,7 +93,7 @@ const BuildingInfoModal: React.FC<BuildingInfoModalProps> = ({
             )}
             {/* Display building/restaurant description */}
             <Text style={styles.modalDescription} testID={`${testID}-description`}>
-              {selectedBuilding.description || "No description available"}
+              {selectedBuilding.description || t("No description available")}
             </Text>
 
             {/* Display restaurant rating if available */}

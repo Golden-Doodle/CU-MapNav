@@ -14,14 +14,8 @@ import HamburgerWidget from "./HamburgerWidget";
 import TransitModal from "./modals/TransitModal";
 import SearchModal from "./modals/SearchModal";
 import { fetchNearbyRestaurants } from "@/app/services/GoogleMap/googlePlacesService";
-import {
-  Campus,
-  Coordinates,
-  LocationType,
-  CustomMarkerType,
-  Building,
-  GooglePlace,
-} from "@/app/utils/types";
+import { Campus, Coordinates, LocationType, CustomMarkerType, Building, GooglePlace } from "@/app/utils/types";
+import { useTranslation } from "react-i18next";
 import RadiusAdjuster from "./RadiusAdjuster";
 
 import { calculateDistance, isPointInPolygon } from "@/app/utils/MapUtils";
@@ -55,12 +49,15 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   const markers = campus === "SGW" ? SGWMarkers : LoyolaMarkers;
   const buildings = campus === "SGW" ? SGWBuildings : LoyolaBuildings;
 
+
+  const {t} = useTranslation("CampusMap");
+
   useEffect(() => {
     let subscription: Location.LocationSubscription;
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        Alert.alert("Permission Denied", "Allow location access to navigate.");
+        Alert.alert(t("Permission Denied"), t("Allow location access to navigate."));
         return;
       }
       subscription = await Location.watchPositionAsync(
@@ -197,11 +194,11 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
 
   const fetchRoute = useCallback(async () => {
     if (!origin) {
-      Alert.alert("Cannot fetch route without a starting location");
+      Alert.alert(t("Cannot fetch route without a starting location"));
       return;
     }
     if (!destination) {
-      Alert.alert("Select a destination point");
+      Alert.alert(t("Select a destination point"));
       return;
     }
     const route = await getDirections(origin.coordinates, destination.coordinates);

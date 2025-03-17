@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import { View, TextInput, StyleSheet } from "react-native";
 import { Feather } from "@expo/vector-icons"; // Search icon
+import { useTranslation } from "react-i18next"; // Translation
 
 export default function SearchBar() {
+
+  const { t } = useTranslation("HomePageScreen");
 
   const [searchText, setSearchText] = useState("");
 
@@ -10,7 +13,7 @@ export default function SearchBar() {
     <View style={styles.searchContainer}>
       <Feather name="search" size={20} color="#999" style={styles.icon} />
       <TextInput
-        placeholder="Search for anything nearby"
+        placeholder={t("Search for anything nearby")}
         placeholderTextColor="#999"
         style={styles.searchInput}
         testID="search-input"
