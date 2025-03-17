@@ -2,10 +2,6 @@ import { getFillColorWithOpacity } from "../helperFunctions";
 import {
   Building,
   Coordinates,
-  LOY_FILL_COLOR,
-  SGW_FILL_COLOR,
-  SGW_STROKE_COLOR,
-  LOY_STROKE_COLOR,
 } from "../types";
 
 describe("getFillColorWithOpacity", () => {
