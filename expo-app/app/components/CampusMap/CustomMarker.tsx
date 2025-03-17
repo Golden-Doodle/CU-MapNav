@@ -7,7 +7,7 @@ type CustomMarkerProps = {
     latitude: number;
     longitude: number;
   };
-  title?: string;
+  name?: string;
   description?: string;
   isFoodLocation?: boolean;
   onPress?: () => void;
@@ -16,11 +16,11 @@ type CustomMarkerProps = {
 
 const CustomMarker: React.FC<CustomMarkerProps> = ({
   coordinate,
-  title = "Unknown Location",
+  name = "Unknown Location",
   description = "No description available",
   isFoodLocation = false,
   onPress,
-  testID, // Destructure testID prop
+  testID, 
 }) => {
   return (
     <Marker coordinate={coordinate} onPress={onPress} tappable={true} testID={`${testID}-marker`}>

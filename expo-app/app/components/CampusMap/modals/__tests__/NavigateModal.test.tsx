@@ -40,7 +40,7 @@ describe('SearchModal', () => {
   const markers: CustomMarkerType[] = [
     {
       id: '1',
-      title: 'Marker 1',
+      name: 'Marker 1',
       description: 'Description for marker 1',
       coordinate: { latitude: 45.497, longitude: -73.579 },
       campus: 'SGW',

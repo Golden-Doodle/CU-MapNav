@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Alert, StyleSheet, ActivityIndicator, Text } from "react-native";
+import { View, Alert, StyleSheet, ActivityIndicator } from "react-native";
 import MapView, { Marker, Polygon, Polyline } from "react-native-maps";
 import CustomMarker from "./CustomMarker";
-import { SGWBuildings, LoyolaBuildings } from "./data/buildingData";
+import { buildings } from "./data/buildingData";
 import { getDirections } from "@/app/utils/directions";
-import { initialRegion, SGWMarkers, LoyolaMarkers } from "./data/customMarkerData";
+import { initialRegion } from "./data/initialRegion";
+import { markers } from "./data/customMarkerData";
 import NavTab from "./CampusMapNavTab";
 import * as Location from "expo-location";
 import BuildingInfoModal from "./modals/BuildingInfoModal";
@@ -35,92 +36,28 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   const [restaurantMarkers, setRestaurantMarkers] = useState<CustomMarkerType[]>([]);
   const [mapRegion, setMapRegion] = useState(initialRegion[campus]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [currentBuilding, setCurrentBuilding] = useState<Building | null>(null);
-
-  const markers = campus === "SGW" ? SGWMarkers : LoyolaMarkers;
-  const buildings = campus === "SGW" ? SGWBuildings : LoyolaBuildings;
-
-  const isPointInPolygon = (point: Coordinates, polygon: Coordinates[]) => {
-    const { latitude: x, longitude: y } = point;
-    let inside = false;
-    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-      const xi = polygon[i].latitude,
-            yi = polygon[i].longitude;
-      const xj = polygon[j].latitude,
-            yj = polygon[j].longitude;
-      const intersect =
-        (yi > y) !== (yj > y) &&
-        (x < ((xj - xi) * (y - yi)) / (yj - yi) + xi);
-      if (intersect) inside = !inside;
-    }
-    return inside;
-  };
-
-  const getPolygonCenter = (polygon: Coordinates[]) => {
-    const sum = polygon.reduce(
-      (acc, point) => ({
-        latitude: acc.latitude + point.latitude,
-        longitude: acc.longitude + point.longitude,
-      }),
-      { latitude: 0, longitude: 0 }
-    );
-    return {
-      latitude: sum.latitude / polygon.length,
-      longitude: sum.longitude / polygon.length,
-    };
-  };
 
   useEffect(() => {
-    let subscription: Location.LocationSubscription;
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         Alert.alert("Permission Denied", "Allow location access to navigate.");
         return;
       }
-      subscription = await Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.High,
-          timeInterval: 5000,
-          distanceInterval: 10,
+
+      let location = await Location.getCurrentPositionAsync({});
+      setUserLocation(location.coords);
+      setOrigin({
+        userLocation: true,
+        coordinates: {
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
         },
-        (location) => {
-          setUserLocation(location.coords);
-          setOrigin({
-            userLocation: true,
-            coordinates: {
-              latitude: location.coords.latitude,
-              longitude: location.coords.longitude,
-            },
-          });
-          const foundBuilding = buildings.find((building) =>
-            isPointInPolygon(location.coords, building.coordinates)
-          );
-          setCurrentBuilding(foundBuilding || null);
-        }
-      );
+      });
     })();
+  }, []);
 
-    return () => {
-      if (subscription) {
-        subscription.remove();
-      }
-    };
-  }, [buildings, campus]);
-
-  useEffect(() => {
-    if (!userLocation) {
-      const fallbackLocation = { latitude: mapRegion.latitude, longitude: mapRegion.longitude };
-      const foundBuilding = buildings.find((building) =>
-        isPointInPolygon(fallbackLocation, building.coordinates)
-      );
-      if (foundBuilding) {
-        setCurrentBuilding(foundBuilding);
-      }
-    }
-  }, [userLocation, mapRegion, buildings]);
-
-  // Fetch nearby restaurants if needed
+  // Fetch nearby restaurants when user location is available using Google Places API
   useEffect(() => {
     if (userLocation && viewEatingOnCampus) {
       setIsLoading(true);
@@ -132,10 +69,11 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
               latitude: place.geometry.location.lat,
               longitude: place.geometry.location.lng,
             },
-            title: place.name,
+            name: place.name,
             description: place.vicinity,
             photoUrl: place.photos?.[0]?.imageUrl,
             rating: place.rating,
+            campus
           }));
           setRestaurantMarkers(restaurantMarkers);
         })
@@ -151,7 +89,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   const handleMarkerPress = useCallback((marker: CustomMarkerType) => {
     const markerToBuilding: Building = {
       id: marker.id,
-      name: marker.title,
+      name: marker.name,
       description: marker.description,
       coordinates: [marker.coordinate],
       strokeColor: "blue",
@@ -183,8 +121,10 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
       setIsBuildingInfoModalVisible(false);
       return;
     }
+
     setDestination({ building, coordinates: building.coordinates[0], selectedBuilding: true });
     setIsBuildingInfoModalVisible(true);
+
     setMapRegion({
       latitude: building.coordinates[0].latitude,
       longitude: building.coordinates[0].longitude,
@@ -198,11 +138,14 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
       Alert.alert("Cannot fetch route without a starting location");
       return;
     }
+
     if (!destination) {
       Alert.alert("Select a destination point");
       return;
     }
+
     const route = await getDirections(origin.coordinates, destination.coordinates);
+
     if (route) {
       setRouteCoordinates(route);
     }
@@ -230,6 +173,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
 
   return (
     <View style={styles.container}>
+      {/* Movable Hamburger Widget */}
       <HamburgerWidget
         testID="toggle-campus-button"
         toggleCampus={toggleCampus}
@@ -250,41 +194,48 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
       >
         {viewCampusMap && (
           <>
-            {viewEatingOnCampus &&
-              restaurantMarkers.map((marker) => (
-                <CustomMarker
-                  key={marker.id}
-                  testID={`restaurant-marker-${marker.id}`}
-                  coordinate={marker.coordinate}
-                  title={marker.title}
-                  description={marker.description}
-                  isFoodLocation={true}
-                  onPress={() => handleMarkerPress(marker)}
-                />
-              ))}
-           {buildings.map((building) => (
-            <Polygon
-              key={building.id}
-              coordinates={building.coordinates}
-              fillColor={
-                currentBuilding && currentBuilding.id === building.id
-                  ? "rgb(255, 0, 47)"
-                  : getFillColorWithOpacity(building, destination)
-              }
-              strokeColor={
-                currentBuilding && currentBuilding.id === building.id
-                  ? "rgb(255, 0, 47)"
-                  : getFillColorWithOpacity(building, destination)
-              }
-              strokeWidth={2}
-              tappable={true}
-              onPress={handleBuildingPressed(building)}
-              testID={`building-marker-${building.id}-marker`} 
-            />
-          ))}
+            {/* Render Markers */}
+            {markers.map((marker) => (
+              <CustomMarker
+                key={marker.id}
+                testID={`building-marker-${marker.id}`}
+                coordinate={marker.coordinate}
+                name={marker.name}
+                description={marker.description}
+                onPress={() => handleMarkerPress(marker)}
+              />
+            ))}
+
+            {/* Conditionally render Restaurant Markers */}
+            {viewEatingOnCampus && restaurantMarkers.map((marker) => (
+              <CustomMarker
+                key={marker.id}
+                testID={`restaurant-marker-${marker.id}`}
+                coordinate={marker.coordinate}
+                name={marker.name}
+                description={marker.description}
+                isFoodLocation={true}
+                onPress={() => handleMarkerPress(marker)}
+              />
+            ))}
+
+            {/* Render Polygons (Buildings) */}
+            {buildings.map((building) => (
+              <Polygon
+                key={building.id}
+                coordinates={building.coordinates}
+                fillColor={getFillColorWithOpacity(building, destination)}
+                strokeColor={building.strokeColor}
+                strokeWidth={2}
+                tappable={true}
+                onPress={handleBuildingPressed(building)}
+                testID={`building-polygon-${building.id}`}
+              />
+            ))}
           </>
         )}
 
+        {/* Render Polyline for Route */}
         {routeCoordinates.length > 0 && (
           <Polyline
             coordinates={routeCoordinates}
@@ -294,25 +245,16 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
           />
         )}
 
+        {/* Render Destination Marker */}
         {destination && !destination.selectedBuilding && (
-          <Marker
-            coordinate={destination.coordinates}
-            pinColor="red"
-            title="Destination"
-            testID="destination-marker"
-          />
+          <Marker coordinate={destination.coordinates} pinColor="red" title="Destination" testID="destination-marker" />
         )}
       </MapView>
 
-      {isLoading && (
-        <ActivityIndicator
-          size="large"
-          color="#3498db"
-          style={styles.spinner}
-          testID="loading-spinner"
-        />
-      )}
+      {/* Show loading spinner if data is being fetched */}
+      {isLoading && <ActivityIndicator size="large" color="#912338" style={styles.spinner} testID="loading-spinner" />}
 
+      {/* Modal for Building Info */}
       <BuildingInfoModal
         visible={isBuildingInfoModalVisible}
         onClose={() => setIsBuildingInfoModalVisible(false)}
@@ -321,6 +263,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         testID="building-info-modal"
       />
 
+      {/* Search Modal */}
       <SearchModal
         visible={isSearchModalVisible}
         onClose={() => setIsSearchModalVisible(false)}
@@ -340,6 +283,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         testID="search-modal"
       />
 
+      {/* Transit Modal */}
       <TransitModal
         onClose={() => setIsTransitModalVisible(false)}
         visible={isTransitModalVisible}
@@ -361,12 +305,6 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         setDestination={setDestination}
         testID="next-class-modal"
       />
-
-      {currentBuilding && (
-        <View style={styles.buildingTextContainer}>
-          <Text style={styles.buildingText}>I'm inside {currentBuilding.name}</Text>
-        </View>
-      )}
 
       <NavTab
         campus={campus}
@@ -394,21 +332,6 @@ const styles = StyleSheet.create({
     left: "50%",
     marginLeft: -25,
     marginTop: -25,
-  },
-  buildingTextContainer: {
-    position: "absolute",
-    bottom: 100, 
-    left: 0,
-    width: "100%",
-    backgroundColor: "rgba(128,128,128,0.7)",
-    padding: 10,
-    alignItems: "center",
-    zIndex: 1500,
-  },
-  buildingText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#fff",
   },
 });
 

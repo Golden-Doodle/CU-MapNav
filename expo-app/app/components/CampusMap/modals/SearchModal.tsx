@@ -45,8 +45,9 @@ const SearchModal: React.FC<SearchModalProps> = ({
     setSearchQuery,
     filteredData: filteredBuildings,
   } = useSearch({
-    data: buildingData,
+    data: buildingData, // Need to add markerData to the data array
     searchKey: "name", // The key to search by in the Building object
+    returnDataOnEmptyQuery: false, // Return all data when input is empty
   });
 
   return (
