@@ -97,9 +97,12 @@ const TransitModal = ({
   // This has to be wrong? -- Need to look into this, it works though
   const onSwitchPress = () => {
     resetIsSearching();
-    setOrigin(destination);
-    setDestination(origin);
+    setOrigin((prevOrigin) => {
+      setDestination(prevOrigin);
+      return destination;
+    });
   };
+
 
   const handleOnSelectLocation = (location: Building) => () => {
     if (isSearching === "origin") {

@@ -173,8 +173,10 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
 
   const handleOnUseAsOrigin = () => {
     // This works but shouldnt, must investigate, has to do with the asynchronous nature of the state update
-    setDestination(origin);
-    setOrigin(destination);
+    setOrigin((prevOrigin) => {
+      setDestination(prevOrigin);
+      return destination;
+    });
     setIsBuildingInfoModalVisible(false);
     onDirectionsPress();
   };  
