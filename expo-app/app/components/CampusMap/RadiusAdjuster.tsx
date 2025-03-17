@@ -25,12 +25,13 @@ const RadiusAdjuster: React.FC<RadiusAdjusterProps> = ({
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContainer}>
-          <Text style={styles.title}>Set Search Radius</Text>
-          <Text style={styles.radiusText}>{radius} meters</Text>
+      <View style={styles.modalOverlay} testID="modal-overlay">
+        <View style={styles.modalContainer} testID="modal-container">
+          <Text style={styles.title} testID="title-text">Set Search Radius</Text>
+          <Text style={styles.radiusText} testID="radius-text">{radius} meters</Text>
           <Slider
             style={styles.slider}
+            testID="radius-slider"
             minimumValue={100}
             maximumValue={2000}
             value={radius}
@@ -40,13 +41,14 @@ const RadiusAdjuster: React.FC<RadiusAdjusterProps> = ({
             maximumTrackTintColor="#d3d3d3"
             thumbTintColor="rgba(145,35,56,1)"
           />
-          <View style={styles.buttonContainer}>
+          <View style={styles.buttonContainer} testID="button-container">
             <TouchableOpacity
               style={[styles.button, styles.resetButton]}
               onPress={() => {
                 setRadius(100);
                 onReset();
               }}
+              testID="reset-button"
             >
               <Text style={styles.buttonText}>Reset</Text>
             </TouchableOpacity>
@@ -56,11 +58,12 @@ const RadiusAdjuster: React.FC<RadiusAdjusterProps> = ({
                 onApply(radius);
                 onClose();
               }}
+              testID="apply-button"
             >
               <Text style={styles.buttonText}>Apply</Text>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+          <TouchableOpacity style={styles.closeButton} onPress={onClose} testID="close-button">
             <Text style={styles.closeText}>Close</Text>
           </TouchableOpacity>
         </View>
