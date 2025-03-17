@@ -5,6 +5,7 @@ import { Building } from "../../../../utils/types";
 
 const mockNavigate = jest.fn();
 const mockOnClose = jest.fn();
+const mockUseAsOrigin = jest.fn();
 
 export type Campus = "SGW" | "LOY";
 
@@ -29,6 +30,7 @@ describe("BuildingInfoModal", () => {
         selectedBuilding={building}
         onNavigate={mockNavigate}
         testID="building-info-modal"
+        onUseAsOrigin={mockUseAsOrigin}
       />
     );
 
@@ -45,6 +47,7 @@ describe("BuildingInfoModal", () => {
         selectedBuilding={building}
         onNavigate={mockNavigate}
         testID="building-info-modal"
+        onUseAsOrigin={mockUseAsOrigin}
       />
     );
 
@@ -61,6 +64,7 @@ describe("BuildingInfoModal", () => {
         selectedBuilding={building}
         onNavigate={mockNavigate}
         testID="building-info-modal"
+        onUseAsOrigin={mockUseAsOrigin}
       />
     );
 
@@ -76,6 +80,7 @@ describe("BuildingInfoModal", () => {
         selectedBuilding={null}
         onNavigate={mockNavigate}
         testID="building-info-modal"
+        onUseAsOrigin={mockUseAsOrigin}
       />
     );
   
@@ -89,6 +94,7 @@ describe("BuildingInfoModal", () => {
         selectedBuilding={undefined}
         onNavigate={mockNavigate}
         testID="building-info-modal"
+        onUseAsOrigin={mockUseAsOrigin}
       />
     );
   
