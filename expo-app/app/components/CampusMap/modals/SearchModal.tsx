@@ -1,13 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import {
-  Modal,
-  View,
-  Text,
-  TextInput,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";
+import { Modal, View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from "react-native";
 import {
   Building,
   concordiaBurgendyColor,
@@ -56,17 +48,17 @@ const SearchModal: React.FC<SearchModalProps> = ({
   // Ref for the TextInput
   const searchInputRef = useRef<TextInput>(null);
 
-  // Focus on input when the modal becomes visible
-  useEffect(() => {
-    if (visible) {
-      setTimeout(() => {
-        searchInputRef.current?.focus();
-      }, 300); // Small delay ensures modal animation doesn't interfere
-    }
-  }, [visible]);
-
   return (
-    <Modal visible={visible} animationType="slide" transparent testID={testID}>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent
+      testID={testID}
+      onShow={() => {
+        searchInputRef.current?.blur();
+        searchInputRef.current?.focus();
+      }}
+    >
       <View style={styles.overlay} testID={`${testID}-overlay`}>
         <View style={styles.modalContainer} testID={`${testID}-modal-container`}>
           {/* Header */}
