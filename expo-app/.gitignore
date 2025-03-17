@@ -40,6 +40,9 @@ app-example
 # Android
 android/
 
+# iOS
+ios/
+
 # Google APIs Keys
 app/hooks/googlePlatFormConfig.ts
 
