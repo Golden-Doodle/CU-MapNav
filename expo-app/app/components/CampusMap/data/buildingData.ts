@@ -171,8 +171,8 @@ export const buildings: Building[] = [
     campus: "SGW",
   },
   {
-    id: "CW",
-    name: "Central Wing",
+    id: 'CW',
+    name: 'Central Wing',
     coordinates: [
       { latitude: 45.45843, longitude: -73.64142 },
       { latitude: 45.45934, longitude: -73.64074 },
@@ -186,8 +186,8 @@ export const buildings: Building[] = [
     campus: "LOY",
   },
   {
-    id: "LW",
-    name: "Left Wing",
+    id: 'LW',
+    name: 'Left Wing',
     coordinates: [
       { latitude: 45.45843, longitude: -73.64142 },
       { latitude: 45.45755, longitude: -73.63923 },
@@ -201,8 +201,8 @@ export const buildings: Building[] = [
     campus: "LOY",
   },
   {
-    id: "RW",
-    name: "Right Wing",
+    id: 'RW',
+    name: 'Right Wing',
     coordinates: [
       { latitude: 45.45934, longitude: -73.64074 },
       { latitude: 45.45838, longitude: -73.6383 },
@@ -216,8 +216,8 @@ export const buildings: Building[] = [
     campus: "LOY",
   },
   {
-    id: "NW",
-    name: "North Wing",
+    id: 'NW',
+    name: 'North Wing',
     coordinates: [
       { latitude: 45.45959, longitude: -73.64064 },
       { latitude: 45.45799, longitude: -73.64187 },
@@ -233,8 +233,8 @@ export const buildings: Building[] = [
     campus: "LOY",
   },
   {
-    id: "SW",
-    name: "South Wing",
+    id: 'SW',
+    name: 'South Wing',
     coordinates: [
       { latitude: 45.45718, longitude: -73.63945 },
       { latitude: 45.45668, longitude: -73.63819 },
