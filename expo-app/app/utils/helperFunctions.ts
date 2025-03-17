@@ -2,7 +2,7 @@ import { Building, concordiaBurgendyColor, LocationType } from "./types";
 
 export const getFillColorWithOpacity = (
   building: Building,
-  currentBuilding: Building | null,
+  currentBuilding: Building | null = null,
   selectedBuilding: Building | null = null
 ) => {
   // If the user is inside the building, make it red
