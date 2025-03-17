@@ -35,7 +35,7 @@ export default function ShuttleScreen() {
             {/* 🔄 Shuttle Schedule */}
             <ShuttleSchedule route={selectedRoute} testID="ShuttleSchedule" />
 
-            <BottomNavigation />
+            <BottomNavigation testID="bottom-navigation"/>
         </View>
     );
 }

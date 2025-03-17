@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { Building, Campus, LocationType } from "@/app/utils/types";
+import { useTranslation } from "react-i18next";
 
 interface NavTabProps {
   campus: Campus;
@@ -30,32 +31,34 @@ const NavTab: React.FC<NavTabProps> = ({
   onDirectionsPress,
   testID, 
 }) => {
+
+  const {t} = useTranslation("CampusMap");
   const [activeTab, setActiveTab] = useState<string | null>(null);
 
   const getNavItems = () => {
     // No Destination
     if (!destination) return [
-        { label: "Search", icon: "search", action: onSearchPress },
+        { label: t("Search"), icon: "search", action: onSearchPress },
         {
           label: campus,
           icon: "location-arrow",
           action: onTravelPress,
         },
-        { label: "Eat", icon: "utensils", action: onEatPress },
-        { label: "Class", icon: "calendar-alt", action: onNextClassPress },
-        { label: "More", icon: "ellipsis-h", action: onMoreOptionsPress },
+        { label: t("Eat"), icon: "utensils", action: onEatPress },
+        { label: t("Class"), icon: "calendar-alt", action: onNextClassPress },
+        { label: t("More"), icon: "ellipsis-h", action: onMoreOptionsPress },
       ];
       
     // Selected Building
     if (destination.building) return [
-        { label: "Back", icon: "arrow-left", action: onBackPress },
-        { label: "Info", icon: "info-circle", action: onInfoPress },
-        { label: "Directions", icon: "route", action: onDirectionsPress },
+        { label: t("Back"), icon: "arrow-left", action: onBackPress },
+        { label: t("Info"), icon: "info-circle", action: onInfoPress },
+        { label: t("Directions"), icon: "route", action: onDirectionsPress },
       ];
     
     if (destination.coordinates) return [
-        { label: "Back", icon: "arrow-left", action: onBackPress },
-        { label: "Directions", icon: "route", action: onDirectionsPress },
+        { label: t("Back"), icon: "arrow-left", action: onBackPress },
+        { label: t("Directions"), icon: "route", action: onDirectionsPress },
       ];
 
     return [];

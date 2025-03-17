@@ -57,6 +57,6 @@ describe("HomeMenuScreen", () => {
     expect(mockPush).toHaveBeenCalledWith("/screens/Shuttle/ShuttleScreen");
 
     fireEvent.press(getByTestId("study-spots-button"));
-    expect(mockPush).toHaveBeenCalledWith("/screens/Home/StudySpotsScreen");
+    expect(mockPush).toHaveBeenCalledWith("/screens/StudySpots/StudySpotScreen");
   });
 });
