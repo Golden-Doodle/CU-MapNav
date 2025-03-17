@@ -11,7 +11,7 @@ type CustomMarkerProps = {
   description?: string;
   isFoodLocation?: boolean;
   onPress?: () => void;
-  testID: string; // Added testID as a required parameter
+  testID: string; 
 };
 
 const CustomMarker: React.FC<CustomMarkerProps> = ({
@@ -28,7 +28,7 @@ const CustomMarker: React.FC<CustomMarkerProps> = ({
         <Image
           source={{ uri: "https://maps.google.com/mapfiles/ms/icons/restaurant.png" }}
           style={styles.foodMarker}
-          testID={`${testID}-food-marker`} // Added testID for food marker
+          testID={`${testID}-food-marker`} 
         />
       ) : (
         <Image

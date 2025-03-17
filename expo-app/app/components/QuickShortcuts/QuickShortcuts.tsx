@@ -1,23 +1,27 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 
 const QuickShortcuts = () => {
+
+  const {t} = useTranslation("HomePageScreen");
+
   return (
     <View style={styles.container} testID="quick-shortcuts-container">
       <TouchableOpacity style={styles.shortcut} testID="food-shortcut">
         <FontAwesome5 name="utensils" size={24} color="#912338" testID="food-icon" />
-        <Text style={styles.text}>Food</Text>
+        <Text style={styles.text}>{t("Food")}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.shortcut} testID="bathroom-shortcut">
         <FontAwesome5 name="toilet" size={24} color="#912338" testID="bathroom-icon" />
-        <Text style={styles.text}>Bathroom</Text>
+        <Text style={styles.text}>{t("Bathroom")}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.shortcut} testID="bar-shortcut">
         <FontAwesome5 name="cocktail" size={24} color="#912338" testID="bar-icon" />
-        <Text style={styles.text}>Bar</Text>
+        <Text style={styles.text}>{t("Bar")}</Text>
       </TouchableOpacity>
     </View>
   );

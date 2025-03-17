@@ -3,11 +3,15 @@ import { View, Text, TouchableOpacity, StyleSheet, Switch } from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { Campus } from "@/app/utils/types";
 
+const primaryColor = "rgba(145,35,56,1)";
+
 interface HamburgerWidgetProps {
   toggleCampus: () => void;
   viewCampusMap: boolean;
   campus: Campus;
   setViewCampusMap: React.Dispatch<React.SetStateAction<boolean>>;
+  darkMode: boolean;
+  onDarkModeChange: (value: boolean) => void;
   testID: string; 
 }
 
@@ -16,29 +20,31 @@ const HamburgerWidget: React.FC<HamburgerWidgetProps> = ({
   viewCampusMap,
   setViewCampusMap,
   campus,
+  darkMode,
+  onDarkModeChange,
   testID, 
 }) => {
   const [isVisible, setIsVisible] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
 
   const toggleVisibility = () => {
     setIsVisible((prev) => !prev);
   };
 
-  const handleThemeChange = (value: boolean) => {
-    setIsDarkMode(value);
+  const handleDarkModeChange = (value: boolean) => {
+    console.log("Dark mode toggled:", value);
+    onDarkModeChange(value);
+    // Do not change isVisible here; let the menu remain open if desired.
   };
 
   return (
     <View style={styles.container} testID={`${testID}-container`}>
-      
       {/* Hamburger Button Fixed on the Right */}
       <TouchableOpacity
         style={styles.hamburgerButton}
         onPress={toggleVisibility}
         testID={`${testID}-hamburger-button`}
       >
-        <MaterialIcons name="menu" size={25} color="black" />
+        <MaterialIcons name="menu" size={25} color="#fff" />
       </TouchableOpacity>
 
       {/* The hidden menu options */}
@@ -50,9 +56,9 @@ const HamburgerWidget: React.FC<HamburgerWidgetProps> = ({
             testID={`${testID}-toggle-campus-button`}
           >
             <View style={styles.row}>
-              <MaterialIcons name="arrow-upward" size={16} color="black" />
-              <MaterialIcons name="arrow-downward" size={16} color="black" />
-              <Text style={styles.buttonText} testID={`campus-name`}>
+              <MaterialIcons name="arrow-upward" size={16} color={primaryColor} />
+              <MaterialIcons name="arrow-downward" size={16} color={primaryColor} />
+              <Text style={styles.buttonText} testID="campus-name">
                 View {campus === "SGW" ? "Loyola Campus" : "SGW Campus"}
               </Text>
             </View>
@@ -60,26 +66,33 @@ const HamburgerWidget: React.FC<HamburgerWidgetProps> = ({
 
           {/* Campus Map Switch */}
           <View style={styles.switchContainer} testID={`${testID}-campus-map-switch-container`}>
-            <Text style={styles.switchText} testID={`${testID}-switch-text`}>View Campus Map</Text>
+            <Text style={styles.switchText} testID={`${testID}-switch-text`}>
+              View Campus Map
+            </Text>
             <Switch
               value={viewCampusMap}
-              onValueChange={() => setViewCampusMap((prevValue: boolean) => !prevValue)}
+              onValueChange={() => setViewCampusMap((prev) => !prev)}
+              trackColor={{ false: "#d3d3d3", true: primaryColor }}
+              thumbColor="#fff"
               testID={`${testID}-campus-map-switch`}
             />
           </View>
 
           {/* Dark Mode Switch */}
           <View style={styles.switchContainer} testID={`${testID}-dark-mode-switch-container`}>
-            <Text style={styles.switchText} testID={`${testID}-dark-mode-text`}>Dark Mode</Text>
+            <Text style={styles.switchText} testID={`${testID}-dark-mode-text`}>
+              Dark Mode
+            </Text>
             <Switch
-              value={isDarkMode}
-              onValueChange={handleThemeChange}
+              value={darkMode}
+              onValueChange={handleDarkModeChange}
+              trackColor={{ false: "#d3d3d3", true: primaryColor }}
+              thumbColor="#fff"
               testID={`${testID}-dark-mode-switch`}
             />
           </View>
         </View>
       )}
-
     </View>
   );
 };
@@ -89,38 +102,38 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 55,
     right: 5,
-    alignItems: "flex-end", 
+    alignItems: "flex-end",
     zIndex: 10,
   },
   hamburgerButton: {
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    backgroundColor: primaryColor,
     padding: 10,
     borderRadius: 8,
-    elevation: 3, 
+    elevation: 3,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
   },
   exposedOptions: {
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backgroundColor: "#fff",
     padding: 15,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: "gray",
+    borderColor: primaryColor,
     marginTop: 10,
     width: 220,
-    elevation: 5, 
+    elevation: 5,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
   },
   buttonContainer: {
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    backgroundColor: "#fff",
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "black",
+    borderColor: primaryColor,
     paddingVertical: 10,
     paddingHorizontal: 12,
     marginBottom: 10,
@@ -134,16 +147,17 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 10,
     fontWeight: "bold",
-    marginLeft: 8, 
+    marginLeft: 8,
+    color: primaryColor,
   },
   switchContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    backgroundColor: "#fff",
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "black",
+    borderColor: primaryColor,
     paddingVertical: 10,
     paddingHorizontal: 12,
     marginBottom: 10,
@@ -151,6 +165,7 @@ const styles = StyleSheet.create({
   switchText: {
     fontSize: 10,
     fontWeight: "bold",
+    color: primaryColor,
   },
 });
 

@@ -2,12 +2,16 @@ import React from "react";
 import { View, Text, ImageBackground, StyleSheet, TouchableOpacity } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useRouter } from "expo-router"; 
+import { useTranslation } from "react-i18next";
 
 interface SettingsHeaderProps {
     testID: string;  
 }
 
 const SettingsHeader: React.FC<SettingsHeaderProps> = ({ testID }) => {
+    
+    const {t } = useTranslation("SettingsHeader");
+
     const router = useRouter(); 
 
     return (
@@ -26,12 +30,12 @@ const SettingsHeader: React.FC<SettingsHeaderProps> = ({ testID }) => {
 
             <View style={styles.container}>
                 {/* Report Title */}
-                <Text style={styles.reportTitle}>Settings</Text>
+                <Text style={styles.reportTitle}>{t("Settings")}</Text>
 
                 {/* Anonymous Notice */}
                 <View style={styles.noticeContainer}>
                     <FontAwesome5 name="exclamation-circle" size={18} color="#912338" />
-                    <Text style={styles.noticeText}>Configurations are Permanent.</Text>
+                    <Text style={styles.noticeText}>{t("Configurations are Permanent.")}</Text>
                 </View>
             </View>
         </ImageBackground>
