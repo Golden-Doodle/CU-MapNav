@@ -16,7 +16,7 @@ describe("ShuttleSchedule Component", () => {
   it("renders the ID card notice at the top", () => {
     const { getByText, getByTestId } = render(<ShuttleSchedule route="LOY" testID="LOY" />);
     
-    expect(getByText("ID Card is obligatory to board the shuttle")).toBeTruthy();
+    expect(getByText("ID Card is obligatory to board the shuttle.")).toBeTruthy();
     expect(getByTestId("LOY-id-card-icon")).toBeTruthy();
   });
   
