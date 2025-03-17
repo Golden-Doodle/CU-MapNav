@@ -55,6 +55,15 @@ export default function HomeMenuScreen() {
       >
         <Text style={styles.menuText}>📖 Study Spots</Text>
       </TouchableOpacity>
+
+      <TouchableOpacity 
+        style={styles.menuItem} 
+        activeOpacity={0.8} 
+        onPress={() => router.push("/screens/IndoorMap/IndoorMap")}
+        testID="indoor-nav-button"
+      >
+        <Text style={styles.menuText}>🏢 Indoor Navigation</Text>
+      </TouchableOpacity>
     </View>
   );
 }
