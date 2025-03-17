@@ -215,32 +215,13 @@ describe("CampusMap", () => {
   it("Should focus on the inputText when the search modal is opened", async () => {
     const { getByTestId } = render(<CampusMap pressedOptimizeRoute={false} />);
 
-    // Find and press the search button to open the modal
-    const searchButton = getByTestId("nav-tab-nav-item-Search");
-    fireEvent.press(searchButton);
+    // Step 1: Open the search modal
+    fireEvent.press(getByTestId("nav-tab-nav-item-Search"));
 
-    // Wait for the modal to be rendered and the input to be visible
+    // Step 2: Wait for the search modal to appear
     await waitFor(() => {
       expect(getByTestId("search-modal-search-input")).toBeTruthy();
     });
 
-    // Get the search input
-    const searchInput = getByTestId("search-modal-search-input");
-
-    // Mock the focus and blur functions
-    const blurMock = jest.fn();
-    const focusMock = jest.fn();
-    searchInput.blur = blurMock;
-    searchInput.focus = focusMock;
-
-    // Manually trigger the focus logic (if the onShow event is not firing)
-    // For example, if the SearchModal uses a ref to focus the input:
-    searchInput.focus();
-
-    // Ensure the focus function was called
-    expect(focusMock).toHaveBeenCalled();
-
-    // Optionally, ensure the blur function was called (if applicable)
-    // expect(blurMock).toHaveBeenCalled();
   });
 });

@@ -157,10 +157,43 @@ describe("SearchModal", () => {
 
     // Trigger the onShow event manually
     await act(async () => {
-      fireEvent(searchInput, 'focus');
+      fireEvent(searchInput, "focus");
     });
 
     // Ensure the input is focused
     expect(searchInput.props.autoFocus).toBeTruthy();
+  });
+
+  it("should focus the search input when the modal is shown", async () => {
+    // Mock functions
+    const mockOnClose = jest.fn();
+    const mockOnSelectLocation = jest.fn();
+    const mockOnPressSelectOnMap = jest.fn();
+    const mockOnGetDirections = jest.fn();
+
+    // Render the SearchModal component
+    const { getByTestId } = render(
+      <SearchModal
+        visible={true}
+        onClose={mockOnClose}
+        buildingData={buildingData}
+        markerData={[]}
+        onSelectLocation={mockOnSelectLocation}
+        onPressSelectOnMap={mockOnPressSelectOnMap}
+        destination={null}
+        onGetDirections={mockOnGetDirections}
+        testID="search-modal"
+      />
+    );
+
+    // Wait for the modal to be rendered
+    await waitFor(() => {
+      const searchInput = getByTestId("search-modal-search-input");
+      expect(searchInput).toBeTruthy();
+    });
+
+    // Assert that the search input is focused
+    const searchInput = getByTestId("search-modal-search-input");
+    expect(searchInput.props.autoFocus).toBe(true); // Check if autoFocus is true
   });
 });

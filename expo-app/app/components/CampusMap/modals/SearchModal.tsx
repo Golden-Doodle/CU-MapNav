@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { Modal, View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from "react-native";
 import {
   Building,
@@ -48,6 +48,14 @@ const SearchModal: React.FC<SearchModalProps> = ({
   // Ref for the TextInput
   const searchInputRef = useRef<TextInput>(null);
 
+  useEffect(() => {
+    if (visible) {
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 100);
+    }
+  }, [visible]);
+
   return (
     <Modal
       visible={visible}
@@ -55,7 +63,6 @@ const SearchModal: React.FC<SearchModalProps> = ({
       transparent
       testID={testID}
       onShow={() => {
-        searchInputRef.current?.blur();
         searchInputRef.current?.focus();
       }}
     >
