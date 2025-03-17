@@ -130,4 +130,37 @@ describe("SearchModal", () => {
     // Check if the input is focused
     expect(searchInput).toBeTruthy();
   });
+
+  it("focuses search input when the modal is visible", async () => {
+    const { getByTestId } = render(
+      <SearchModal
+        visible={true}
+        onClose={mockOnClose}
+        buildingData={buildingData}
+        markerData={[]}
+        onSelectLocation={mockOnSelectLocation}
+        onPressSelectOnMap={mockOnPressSelectOnMap}
+        destination={null}
+        onGetDirections={mockOnGetDirections}
+        testID="search-modal"
+      />
+    );
+
+    // Wait for the modal to be rendered
+    await waitFor(() => {
+      expect(getByTestId("search-modal-modal-container")).toBeTruthy();
+    });
+
+    // Check if the search input is focused
+    const searchInput = getByTestId("search-modal-search-input");
+    expect(searchInput).toBeTruthy();
+
+    // Trigger the onShow event manually
+    await act(async () => {
+      fireEvent(searchInput, 'focus');
+    });
+
+    // Ensure the input is focused
+    expect(searchInput.props.autoFocus).toBeTruthy();
+  });
 });

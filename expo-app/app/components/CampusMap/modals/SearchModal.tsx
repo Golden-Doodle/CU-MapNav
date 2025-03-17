@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { Modal, View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from "react-native";
 import {
   Building,
@@ -86,6 +86,7 @@ const SearchModal: React.FC<SearchModalProps> = ({
               value={searchQuery}
               onChangeText={setSearchQuery}
               testID={`${testID}-search-input`}
+              autoFocus
             />
           </View>
 
