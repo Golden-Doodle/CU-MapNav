@@ -56,15 +56,16 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
 
   const resetOriginAndDestinationToDefault = async () => {
     setDestination(null);
-    const location = await getUserLocation();
-    if (!location) return;
-
-    setUserLocation(location.coords);
+    if (!userLocation) {
+      const location = await getUserLocation();
+      if (!location) setUserLocation(null);
+      return;
+    }
     setOrigin({
       userLocation: true,
       coordinates: {
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
+        latitude: userLocation.latitude,
+        longitude: userLocation.longitude,
       },
     });
   };
