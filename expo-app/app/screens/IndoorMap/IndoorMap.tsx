@@ -18,7 +18,7 @@ const options = {
   //secret: 'mis_toNhLLj9mmlK5rJzJHebi3km4rjI9V3x3VUzgpPCYbq9a2410c7',
 };
 
-const App = () => {
+const IndoorMapScreen = () => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Text>Test</Text>
@@ -27,4 +27,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default IndoorMapScreen;
