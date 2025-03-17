@@ -13,7 +13,7 @@ export const getFillColorWithOpacity = (
   }
 
   // Get the building's original fill color
-  let fillColor = building.fillColor || "rgba(0,0,0,0)";
+  let fillColor = building.fillColor || "rgba(0, 0, 0, 0)";
 
   // Convert hex color to rgba if necessary
   if (fillColor.startsWith("#")) {
