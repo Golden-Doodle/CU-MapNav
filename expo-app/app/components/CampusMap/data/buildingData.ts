@@ -1,9 +1,6 @@
 import { Building } from '../../../utils/types';
+import { SGW_FILL_COLOR, SGW_STROKE_COLOR, LOY_FILL_COLOR, LOY_STROKE_COLOR } from '@/app/utils/types';
 
-const SGW_FILL_COLOR = "rgba(0, 0, 255, 1)";
-const SGW_STROKE_COLOR = "rgba(0, 0, 255, 1)";
-const LOY_FILL_COLOR = "rgba(255, 165, 0, 0.5)";
-const LOY_STROKE_COLOR = "rgba(255, 140, 0, 1)";
 
 /**
  * SGW Campus Buildings

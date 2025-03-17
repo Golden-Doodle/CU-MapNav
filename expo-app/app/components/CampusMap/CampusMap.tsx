@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Alert, StyleSheet, ActivityIndicator, Text } from "react-native";
-import MapView, { Marker, Polygon, Polyline } from "react-native-maps";
+import { View, Alert, StyleSheet, ActivityIndicator, Text, TouchableOpacity } from "react-native";
+import MapView, { Marker, Polygon, Polyline, Circle } from "react-native-maps";
 import CustomMarker from "./CustomMarker";
 import { SGWBuildings, LoyolaBuildings } from "./data/buildingData";
 import { getDirections } from "@/app/utils/directions";
@@ -8,13 +8,18 @@ import { initialRegion, SGWMarkers, LoyolaMarkers } from "./data/customMarkerDat
 import NavTab from "./CampusMapNavTab";
 import * as Location from "expo-location";
 import BuildingInfoModal from "./modals/BuildingInfoModal";
-import { getFillColorWithOpacity } from "@/app/utils/helperFunctions";
+import { getCustomMapStyle } from "./styles/MapStyles";
 import NextClassModal from "./modals/NextClassModal";
 import HamburgerWidget from "./HamburgerWidget";
 import TransitModal from "./modals/TransitModal";
 import SearchModal from "./modals/SearchModal";
 import { fetchNearbyRestaurants } from "@/app/services/GoogleMap/googlePlacesService";
 import { Campus, Coordinates, LocationType, CustomMarkerType, Building, GooglePlace } from "@/app/utils/types";
+import { useTranslation } from "react-i18next";
+import RadiusAdjuster from "./RadiusAdjuster";
+
+import { calculateDistance, isPointInPolygon } from "@/app/utils/MapUtils";
+import { getFillColorWithOpacity } from "@/app/utils/helperFunctions";
 
 interface CampusMapProps {
   pressedOptimizeRoute: boolean;
@@ -33,49 +38,26 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   const [isSearchModalVisible, setIsSearchModalVisible] = useState<boolean>(false);
   const [isTransitModalVisible, setIsTransitModalVisible] = useState<boolean>(false);
   const [restaurantMarkers, setRestaurantMarkers] = useState<CustomMarkerType[]>([]);
+  const [allRestaurantMarkers, setAllRestaurantMarkers] = useState<CustomMarkerType[]>([]);
   const [mapRegion, setMapRegion] = useState(initialRegion[campus]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [currentBuilding, setCurrentBuilding] = useState<Building | null>(null);
+  const [selectedDistance, setSelectedDistance] = useState<number>(100);
+  const [isRadiusAdjusterVisible, setIsRadiusAdjusterVisible] = useState<boolean>(false);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
 
   const markers = campus === "SGW" ? SGWMarkers : LoyolaMarkers;
   const buildings = campus === "SGW" ? SGWBuildings : LoyolaBuildings;
 
-  const isPointInPolygon = (point: Coordinates, polygon: Coordinates[]) => {
-    const { latitude: x, longitude: y } = point;
-    let inside = false;
-    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-      const xi = polygon[i].latitude,
-            yi = polygon[i].longitude;
-      const xj = polygon[j].latitude,
-            yj = polygon[j].longitude;
-      const intersect =
-        (yi > y) !== (yj > y) &&
-        (x < ((xj - xi) * (y - yi)) / (yj - yi) + xi);
-      if (intersect) inside = !inside;
-    }
-    return inside;
-  };
 
-  const getPolygonCenter = (polygon: Coordinates[]) => {
-    const sum = polygon.reduce(
-      (acc, point) => ({
-        latitude: acc.latitude + point.latitude,
-        longitude: acc.longitude + point.longitude,
-      }),
-      { latitude: 0, longitude: 0 }
-    );
-    return {
-      latitude: sum.latitude / polygon.length,
-      longitude: sum.longitude / polygon.length,
-    };
-  };
+  const {t} = useTranslation("CampusMap");
 
   useEffect(() => {
     let subscription: Location.LocationSubscription;
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        Alert.alert("Permission Denied", "Allow location access to navigate.");
+        Alert.alert(t("Permission Denied"), t("Allow location access to navigate."));
         return;
       }
       subscription = await Location.watchPositionAsync(
@@ -100,7 +82,6 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         }
       );
     })();
-
     return () => {
       if (subscription) {
         subscription.remove();
@@ -120,13 +101,12 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
     }
   }, [userLocation, mapRegion, buildings]);
 
-  // Fetch nearby restaurants if needed
   useEffect(() => {
     if (userLocation && viewEatingOnCampus) {
       setIsLoading(true);
       fetchNearbyRestaurants(userLocation)
         .then((restaurants) => {
-          const restaurantMarkers = restaurants.map((place: GooglePlace) => ({
+          const markers = restaurants.map((place: GooglePlace) => ({
             id: place.place_id,
             coordinate: {
               latitude: place.geometry.location.lat,
@@ -136,8 +116,9 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
             description: place.vicinity,
             photoUrl: place.photos?.[0]?.imageUrl,
             rating: place.rating,
+            campus,
           }));
-          setRestaurantMarkers(restaurantMarkers);
+          setAllRestaurantMarkers(markers);
         })
         .catch((error) => {
           console.error("Error fetching nearby restaurants: ", error);
@@ -147,6 +128,21 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         });
     }
   }, [userLocation, viewEatingOnCampus]);
+
+  useEffect(() => {
+    if (userLocation && allRestaurantMarkers.length > 0) {
+      const filteredMarkers = allRestaurantMarkers.filter((marker) => {
+        const distance = calculateDistance(
+          userLocation.latitude,
+          userLocation.longitude,
+          marker.coordinate.latitude,
+          marker.coordinate.longitude
+        );
+        return distance <= selectedDistance;
+      });
+      setRestaurantMarkers(filteredMarkers);
+    }
+  }, [selectedDistance, userLocation, allRestaurantMarkers]);
 
   const handleMarkerPress = useCallback((marker: CustomMarkerType) => {
     const markerToBuilding: Building = {
@@ -160,7 +156,6 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
       photoUrl: marker.photoUrl,
       rating: marker.rating,
     };
-
     setDestination({
       building: markerToBuilding,
       coordinates: marker.coordinate,
@@ -183,7 +178,11 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
       setIsBuildingInfoModalVisible(false);
       return;
     }
-    setDestination({ building, coordinates: building.coordinates[0], selectedBuilding: true });
+    setDestination({
+      building,
+      coordinates: building.coordinates[0],
+      selectedBuilding: true,
+    });
     setIsBuildingInfoModalVisible(true);
     setMapRegion({
       latitude: building.coordinates[0].latitude,
@@ -195,11 +194,11 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
 
   const fetchRoute = useCallback(async () => {
     if (!origin) {
-      Alert.alert("Cannot fetch route without a starting location");
+      Alert.alert(t("Cannot fetch route without a starting location"));
       return;
     }
     if (!destination) {
-      Alert.alert("Select a destination point");
+      Alert.alert(t("Select a destination point"));
       return;
     }
     const route = await getDirections(origin.coordinates, destination.coordinates);
@@ -228,6 +227,34 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
     setViewEatingOnCampus((prevState) => !prevState);
   };
 
+  const customMapStyle = getCustomMapStyle(isDarkMode);
+
+  const handleOnUseAsOrigin = () => {
+    // Store previous values in temp variables
+    const prevOrigin = origin;
+    const prevDestination = destination;
+
+    // Swap values
+    setOrigin(prevDestination);
+    setDestination(prevOrigin);
+
+    setIsBuildingInfoModalVisible(false);
+    onDirectionsPress();
+  };
+
+  const handleNavTabBackPress = () => {
+    if (userLocation) {
+      setOrigin({
+        userLocation: true,
+        coordinates: {
+          latitude: userLocation.latitude,
+          longitude: userLocation.longitude,
+        },
+      });
+    }
+    setDestination(null);
+  };
+
   return (
     <View style={styles.container}>
       <HamburgerWidget
@@ -236,11 +263,14 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         viewCampusMap={viewCampusMap}
         setViewCampusMap={setViewCampusMap}
         campus={campus}
+        darkMode={isDarkMode}
+        onDarkModeChange={setIsDarkMode}
       />
 
       <MapView
         style={styles.map}
         region={mapRegion}
+        customMapStyle={customMapStyle}
         showsUserLocation={true}
         loadingEnabled={true}
         scrollEnabled={true}
@@ -250,38 +280,50 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
       >
         {viewCampusMap && (
           <>
-            {viewEatingOnCampus &&
-              restaurantMarkers.map((marker) => (
-                <CustomMarker
-                  key={marker.id}
-                  testID={`restaurant-marker-${marker.id}`}
-                  coordinate={marker.coordinate}
-                  title={marker.title}
-                  description={marker.description}
-                  isFoodLocation={true}
-                  onPress={() => handleMarkerPress(marker)}
+            {viewEatingOnCampus && userLocation && (
+              <>
+                <Circle
+                  center={userLocation}
+                  radius={selectedDistance}
+                  strokeColor="rgba(145,35,56,0.5)"
+                  fillColor="rgba(145,35,56,0.2)"
+                  zIndex={1000}
                 />
-              ))}
-           {buildings.map((building) => (
-            <Polygon
-              key={building.id}
-              coordinates={building.coordinates}
-              fillColor={
-                currentBuilding && currentBuilding.id === building.id
-                  ? "rgb(255, 0, 47)"
-                  : getFillColorWithOpacity(building, destination)
-              }
-              strokeColor={
-                currentBuilding && currentBuilding.id === building.id
-                  ? "rgb(255, 0, 47)"
-                  : getFillColorWithOpacity(building, destination)
-              }
-              strokeWidth={2}
-              tappable={true}
-              onPress={handleBuildingPressed(building)}
-              testID={`building-marker-${building.id}-marker`} 
-            />
-          ))}
+                {restaurantMarkers.map((marker) => (
+                  <CustomMarker
+                    key={marker.id}
+                    testID={`restaurant-marker-${marker.id}`}
+                    coordinate={marker.coordinate}
+                    title={marker.title}
+                    description={marker.description}
+                    isFoodLocation={true}
+                    onPress={() => handleMarkerPress(marker)}
+                  />
+                ))}
+              </>
+            )}
+            {buildings.map((building: Building) => (
+              <Polygon
+                key={building.id}
+                coordinates={building.coordinates}
+                fillColor={getFillColorWithOpacity(
+                  building,
+                  currentBuilding,
+                  destination?.selectedBuilding ? destination.building : null
+                )}
+                strokeColor={
+                  isDarkMode
+                    ? "#fff"
+                    : currentBuilding && currentBuilding.id === building.id
+                    ? "rgb(0, 0, 0)"
+                    : building.strokeColor
+                }
+                strokeWidth={2}
+                tappable={true}
+                onPress={handleBuildingPressed(building)}
+                testID={`building-marker-${building.id}-marker`}
+              />
+            ))}
           </>
         )}
 
@@ -304,10 +346,19 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         )}
       </MapView>
 
+      {viewEatingOnCampus && (
+        <TouchableOpacity
+          style={styles.radiusButton}
+          onPress={() => setIsRadiusAdjusterVisible(true)}
+        >
+          <Text style={styles.radiusButtonText}>Adjust Search Radius</Text>
+        </TouchableOpacity>
+      )}
+
       {isLoading && (
         <ActivityIndicator
           size="large"
-          color="#3498db"
+          color="rgba(145,35,56,1)"
           style={styles.spinner}
           testID="loading-spinner"
         />
@@ -318,6 +369,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         onClose={() => setIsBuildingInfoModalVisible(false)}
         selectedBuilding={destination?.building}
         onNavigate={onDirectionsPress}
+        onUseAsOrigin={handleOnUseAsOrigin}
         testID="building-info-modal"
       />
 
@@ -377,9 +429,17 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         onNextClassPress={() => setIsNextClassModalVisible(true)}
         onMoreOptionsPress={() => Alert.alert("More Options pressed")}
         onInfoPress={() => setIsBuildingInfoModalVisible(true)}
-        onBackPress={() => setDestination(null)}
+        onBackPress={handleNavTabBackPress}
         onDirectionsPress={onDirectionsPress}
         testID="nav-tab"
+      />
+
+      <RadiusAdjuster
+        visible={isRadiusAdjusterVisible}
+        initialValue={selectedDistance}
+        onApply={(value) => setSelectedDistance(value)}
+        onReset={() => setSelectedDistance(100)}
+        onClose={() => setIsRadiusAdjusterVisible(false)}
       />
     </View>
   );
@@ -397,7 +457,7 @@ const styles = StyleSheet.create({
   },
   buildingTextContainer: {
     position: "absolute",
-    bottom: 100, 
+    bottom: 100,
     left: 0,
     width: "100%",
     backgroundColor: "rgba(128,128,128,0.7)",
@@ -409,6 +469,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#fff",
+  },
+  radiusButton: {
+    position: "absolute",
+    bottom: 160,
+    left: 10,
+    right: 10,
+    backgroundColor: "rgba(145,35,56,1)",
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    zIndex: 2100,
+    elevation: 5,
+  },
+  radiusButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
 

@@ -1,34 +1,30 @@
-import React, { useCallback, useState } from "react";
-import { View, TouchableOpacity, StyleSheet, SafeAreaView } from "react-native";
+import React from "react";
+import { View, TouchableOpacity, StyleSheet, SafeAreaView, Text } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
-import CampusMapping from "../../components/CampusMap/CampusMap";
 import { useRouter } from "expo-router";
-import { useLocalSearchParams, useFocusEffect } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
+import CampusMap from "../../components/CampusMap/CampusMap";
 
 export default function CampusMapScreen() {
   const router = useRouter();
-
   const { pressedOptimizeRoute } = useLocalSearchParams();
-  
+
   return (
     <View style={styles.container}>
-      {/* Title & Back Button Overlay */}
       <SafeAreaView style={styles.header}>
         {/* Back Button */}
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <FontAwesome5 name="arrow-left" size={30} color="#fff" />
+          {/* Added label for translation */}
         </TouchableOpacity>
 
-        {/* Placeholder View for Symmetry */}
+        {/* Placeholder View for symmetry */}
         <View style={{ width: 40 }} />
       </SafeAreaView>
 
-      {/* Map should take full remaining space */}
+      {/* Map Content */}
       <View style={styles.mapContainer}>
-        <CampusMapping pressedOptimizeRoute={pressedOptimizeRoute === 'true'} />
+        <CampusMap pressedOptimizeRoute={pressedOptimizeRoute === "true"} />
       </View>
     </View>
   );
@@ -40,11 +36,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   header: {
-    position: "relative",
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10,
     backgroundColor: "#912338",
     paddingVertical: 12,
     borderBottomWidth: 2,
@@ -55,12 +46,22 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   backButton: {
-    paddingHorizontal: 10,
-    paddingBottom: 5,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  backButtonText: {
+    color: "#fff",
+    fontSize: 18,
+    marginLeft: 8,
   },
   titleContainer: {
     flex: 1,
     alignItems: "center",
+  },
+  titleText: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "bold",
   },
   mapContainer: {
     flex: 1,

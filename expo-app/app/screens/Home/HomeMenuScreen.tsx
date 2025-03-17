@@ -3,12 +3,16 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { FontAwesome5 } from "@expo/vector-icons";
 
+import { useTranslation } from "react-i18next";
+
 export default function HomeMenuScreen() {
   const router = useRouter();
 
+  const { t } = useTranslation("HomeMenuScreen");
+
   return (
     <View style={styles.container}>
-      {/* Back Button in the Top-Left Corner */}
+      {/* Back Button in the Top-Left Corner (icon only, no text) */}
       <TouchableOpacity
         style={styles.backButton}
         onPress={() => router.back()}
@@ -17,25 +21,27 @@ export default function HomeMenuScreen() {
         <FontAwesome5 name="arrow-left" size={30} color="#fff" />
       </TouchableOpacity>
 
-      <Text style={styles.title} testID="menu-title">Menu</Text>
+      {/* Menu Title */}
+      <Text style={styles.title} testID="menu-title">{t("Menu")}</Text>
 
       {/* Navigation Options */}
-      <TouchableOpacity 
-        style={styles.menuItem} 
-        activeOpacity={0.8} 
+      <TouchableOpacity
+        style={styles.menuItem}
+        activeOpacity={0.8}
         onPress={() => router.push("/screens/Home/CampusMapScreen")}
         testID="campus-map-button"
       >
-        <Text style={styles.menuText}>📍 Campus Map</Text>
+        {/* We keep the emoji, but the text itself is translated */}
+        <Text style={styles.menuText}>📍 {t("Campus Map")}</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity 
-        style={styles.menuItem} 
-        activeOpacity={0.8} 
+      <TouchableOpacity
+        style={styles.menuItem}
+        activeOpacity={0.8}
         onPress={() => router.push("/screens/Chatbot/ChatBotScreen")}
         testID="chatbot-button"
       >
-        <Text style={styles.menuText}>💬 Chatbot</Text>
+        <Text style={styles.menuText}>💬 {t("Chatbot")}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity 
@@ -44,16 +50,16 @@ export default function HomeMenuScreen() {
         onPress={() => router.push("/screens/Shuttle/ShuttleScreen")}
         testID="shuttle-button"
       >
-        <Text style={styles.menuText}>🚌 Shuttle Schedule</Text>
+        <Text style={styles.menuText}>🚌 {t("Shuttle Schedule")}</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity 
-        style={styles.menuItem} 
-        activeOpacity={0.8} 
-        onPress={() => router.push("/screens/Home/StudySpotsScreen")}
+      <TouchableOpacity
+        style={styles.menuItem}
+        activeOpacity={0.8}
+        onPress={() => router.push("/screens/StudySpots/StudySpotScreen")}
         testID="study-spots-button"
       >
-        <Text style={styles.menuText}>📖 Study Spots</Text>
+        <Text style={styles.menuText}>📖 {t("Study Spots")}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity 

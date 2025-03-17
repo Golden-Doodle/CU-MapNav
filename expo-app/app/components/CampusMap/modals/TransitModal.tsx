@@ -9,19 +9,12 @@ import {
 } from "@/app/utils/types";
 import { FontAwesome5 } from "@expo/vector-icons";
 import React, { useEffect, useRef } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  Modal,
-  TouchableOpacity,
-  TextInput,
-} from "react-native";
+import { View, Text, FlatList, StyleSheet, Modal, TouchableOpacity, TextInput } from "react-native";
 import { Card, TextInput as PaperTextInput } from "react-native-paper";
 import { fetchAllRoutes } from "@/app/utils/directions";
 import useLocationDisplay from "@/app/hooks/useLocationDisplay";
 import useSearch from "@/app/hooks/useSearch";
+import { useTranslation } from "react-i18next";
 
 interface TransitModalProps {
   visible: boolean;
@@ -34,7 +27,7 @@ interface TransitModalProps {
   buildingData: Building[];
   markerData: CustomMarkerType[];
   userLocation: Coordinates | null;
-  testID: string; 
+  testID: string;
 }
 
 const TransitModal = ({
@@ -48,8 +41,10 @@ const TransitModal = ({
   buildingData,
   markerData,
   userLocation,
-  testID, 
+  testID,
 }: TransitModalProps) => {
+  const { t } = useTranslation("CampusMap");
+
   const locationDisplayOrigin = useLocationDisplay(origin);
   const locationDisplayDestination = useLocationDisplay(destination);
   const [routeOptions, setRouteOptions] = React.useState<RouteOption[]>([]);
@@ -69,26 +64,60 @@ const TransitModal = ({
         const routes = await fetchAllRoutes(origin, destination);
         setRouteOptions(routes);
       } catch (error) {
-        console.error("Failed to fetch routes", error);
-        setRouteOptions([]); 
+        console.error(t("Failed to fetch routes"), error);
+        setRouteOptions([]);
       }
     };
     fetchRoutes();
   }, [origin, destination]);
-  
 
   const getTransportIcon = (mode: TransportMode) => {
     switch (mode) {
       case "transit":
-        return <FontAwesome5 name="bus" size={24} color="#007BFF" testID={`${testID}-transport-icon-bus`} />;
+        return (
+          <FontAwesome5
+            name="bus"
+            size={24}
+            color="#007BFF"
+            testID={`${testID}-transport-icon-bus`}
+          />
+        );
       case "shuttle":
-        return <FontAwesome5 name="shuttle-van" size={24} color="#28A745" testID={`${testID}-transport-icon-shuttle`} />;
+        return (
+          <FontAwesome5
+            name="shuttle-van"
+            size={24}
+            color="#28A745"
+            testID={`${testID}-transport-icon-shuttle`}
+          />
+        );
       case "walking":
-        return <FontAwesome5 name="walking" size={24} color="#6C757D" testID={`${testID}-transport-icon-walking`} />;
+        return (
+          <FontAwesome5
+            name="walking"
+            size={24}
+            color="#6C757D"
+            testID={`${testID}-transport-icon-walking`}
+          />
+        );
       case "driving":
-        return <FontAwesome5 name="car" size={24} color="#DC3545" testID={`${testID}-transport-icon-driving`} />;
+        return (
+          <FontAwesome5
+            name="car"
+            size={24}
+            color="#DC3545"
+            testID={`${testID}-transport-icon-driving`}
+          />
+        );
       case "bicycling":
-        return <FontAwesome5 name="bicycle" size={24} color="#FFC107" testID={`${testID}-transport-icon-bicycling`} />;
+        return (
+          <FontAwesome5
+            name="bicycle"
+            size={24}
+            color="#FFC107"
+            testID={`${testID}-transport-icon-bicycling`}
+          />
+        );
       default:
         return null;
     }
@@ -96,9 +125,17 @@ const TransitModal = ({
 
   const onSwitchPress = () => {
     resetIsSearching();
-    setOrigin(destination);
-    setDestination(origin);
+
+    // Store previous values in temp variables
+    const prevOrigin = origin;
+    const prevDestination = destination;
+
+    // Swap values
+    setOrigin(prevDestination);
+    setDestination(prevOrigin);
   };
+
+
 
   const handleOnSelectLocation = (location: Building) => () => {
     if (isSearching === "origin") {
@@ -145,17 +182,35 @@ const TransitModal = ({
       <View style={styles.container} testID={`${testID}-container`}>
         <View style={styles.header} testID={`${testID}-modal-header`}>
           <View style={styles.closeButtonContainer} testID={`${testID}-close-button-container`}>
-            <TouchableOpacity onPress={() => {
+            <TouchableOpacity
+              onPress={() => {
                 onClose();
                 resetIsSearching();
-              }} testID={`${testID}-close-button`}>
+              }}
+              testID={`${testID}-close-button`}
+            >
               <FontAwesome5 name="arrow-left" size={24} color="#fff" />
             </TouchableOpacity>
           </View>
           <View style={styles.mapPinContainer} testID={`${testID}-map-pin-container`}>
-            <FontAwesome5 name="dot-circle" size={26} color="#fff" testID={`${testID}-dot-circle`} />
-            <FontAwesome5 name="ellipsis-v" size={16} color="#fff" testID={`${testID}-ellipsis-v`} />
-            <FontAwesome5 name="map-marker-alt" size={24} color="#fff" testID={`${testID}-map-marker`} />
+            <FontAwesome5
+              name="dot-circle"
+              size={26}
+              color="#fff"
+              testID={`${testID}-dot-circle`}
+            />
+            <FontAwesome5
+              name="ellipsis-v"
+              size={16}
+              color="#fff"
+              testID={`${testID}-ellipsis-v`}
+            />
+            <FontAwesome5
+              name="map-marker-alt"
+              size={24}
+              color="#fff"
+              testID={`${testID}-map-marker`}
+            />
           </View>
 
           <View style={styles.locationContainer} testID={`${testID}-location-container`}>
@@ -171,7 +226,7 @@ const TransitModal = ({
               onChangeText={setSearchQuery}
               onSubmitEditing={() => {
                 searchQuery.trim() === "" && resetIsSearching();
-              }} 
+              }}
               testID={`${testID}-origin-input`}
             />
             <View style={styles.seperationLine} testID={`${testID}-seperation-line`}></View>
@@ -187,27 +242,48 @@ const TransitModal = ({
               onChangeText={setSearchQuery}
               onSubmitEditing={() => {
                 searchQuery.trim() === "" && resetIsSearching();
-              }} 
+              }}
               testID={`${testID}-destination-input`}
             />
           </View>
           <View style={styles.switchContainer} testID={`${testID}-switch-container`}>
             <TouchableOpacity onPress={onSwitchPress} testID={`${testID}-switch-button`}>
-              <FontAwesome5 name="exchange-alt" size={22} color="#fff" style={{ marginLeft: 0, transform: [{ rotate: "90deg" }] }} />
+              <FontAwesome5
+                name="exchange-alt"
+                size={22}
+                color="#fff"
+                style={{ marginLeft: 0, transform: [{ rotate: "90deg" }] }}
+              />
             </TouchableOpacity>
           </View>
         </View>
 
         {isSearching ? (
           <>
-            <TouchableOpacity onPress={handleSetLocationToUserLocation()} testID={`${testID}-use-current-location`}>
+            <TouchableOpacity
+              onPress={handleSetLocationToUserLocation()}
+              testID={`${testID}-use-current-location`}
+            >
               <Card style={styles.card} testID={`${testID}-use-current-location-card`}>
                 <Card.Content style={styles.cardContent} testID={`${testID}-card-content`}>
-                  <View style={styles.iconContainer} testID={`${testID}-location-arrow-icon-container`}>
-                    <FontAwesome5 name="location-arrow" size={24} color="#007BFF" testID={`${testID}-location-arrow-icon`} />
+                  <View
+                    style={styles.iconContainer}
+                    testID={`${testID}-location-arrow-icon-container`}
+                  >
+                    <FontAwesome5
+                      name="location-arrow"
+                      size={24}
+                      color="#007BFF"
+                      testID={`${testID}-location-arrow-icon`}
+                    />
                   </View>
-                  <View style={styles.textContainer} testID={`${testID}-current-location-text-container`}>
-                    <Text style={styles.time} testID={`${testID}-use-current-location-text`}>Use Current Location</Text>
+                  <View
+                    style={styles.textContainer}
+                    testID={`${testID}-current-location-text-container`}
+                  >
+                    <Text style={styles.time} testID={`${testID}-use-current-location-text`}>
+                      {t("Use current location")}
+                    </Text>
                   </View>
                 </Card.Content>
               </Card>
@@ -216,14 +292,33 @@ const TransitModal = ({
               data={filteredData}
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
-                <TouchableOpacity onPress={handleOnSelectLocation(item)} testID={`${testID}-search-result-${item.id}`}>
+                <TouchableOpacity
+                  onPress={handleOnSelectLocation(item)}
+                  testID={`${testID}-search-result-${item.id}`}
+                >
                   <Card style={styles.card} testID={`${testID}-card-${item.id}`}>
-                    <Card.Content style={styles.cardContent} testID={`${testID}-card-content-${item.id}`}>
-                      <View style={styles.iconContainer} testID={`${testID}-icon-container-${item.id}`}>
-                        <FontAwesome5 name="map-marker-alt" size={24} color="#007BFF" testID={`${testID}-marker-icon-${item.id}`} />
+                    <Card.Content
+                      style={styles.cardContent}
+                      testID={`${testID}-card-content-${item.id}`}
+                    >
+                      <View
+                        style={styles.iconContainer}
+                        testID={`${testID}-icon-container-${item.id}`}
+                      >
+                        <FontAwesome5
+                          name="map-marker-alt"
+                          size={24}
+                          color="#007BFF"
+                          testID={`${testID}-marker-icon-${item.id}`}
+                        />
                       </View>
-                      <View style={styles.textContainer} testID={`${testID}-text-container-${item.id}`}>
-                        <Text style={styles.time} testID={`${testID}-result-name-${item.id}`}>{item.name}</Text>
+                      <View
+                        style={styles.textContainer}
+                        testID={`${testID}-text-container-${item.id}`}
+                      >
+                        <Text style={styles.time} testID={`${testID}-result-name-${item.id}`}>
+                          {item.name}
+                        </Text>
                       </View>
                     </Card.Content>
                   </Card>
@@ -237,41 +332,67 @@ const TransitModal = ({
             data={routeOptions}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
-              <TouchableOpacity onPress={() => { setRouteCoordinates(item.routeCoordinates); onClose(); }} testID={`${testID}-route-option-${item.id}`}>
+              <TouchableOpacity
+                onPress={() => {
+                  setRouteCoordinates(item.routeCoordinates);
+                  onClose();
+                }}
+                testID={`${testID}-route-option-${item.id}`}
+              >
                 <Card style={styles.card} testID={`${testID}-route-card-${item.id}`}>
-                  <Card.Content style={styles.cardContent} testID={`${testID}-route-card-content-${item.id}`}>
-                    <View style={styles.iconContainer} testID={`${testID}-route-icon-container-${item.id}`}>
+                  <Card.Content
+                    style={styles.cardContent}
+                    testID={`${testID}-route-card-content-${item.id}`}
+                  >
+                    <View
+                      style={styles.iconContainer}
+                      testID={`${testID}-route-icon-container-${item.id}`}
+                    >
                       {getTransportIcon(item.mode)}
                     </View>
-                    <View style={styles.textContainer} testID={`${testID}-route-text-container-${item.id}`}>
+                    <View
+                      style={styles.textContainer}
+                      testID={`${testID}-route-text-container-${item.id}`}
+                    >
                       <Text style={styles.time} testID={`${testID}-route-time-${item.id}`}>
                         {item?.arrival_time && item?.departure_time
                           ? `${item.departure_time.text} - ${item.arrival_time.text}`
-                          : `${new Date().toLocaleTimeString("us-EN", { hour: "2-digit", minute: "2-digit" })} - ${new Date(Date.now() + item.durationValue * 1000).toLocaleTimeString("us-EN", { hour: "2-digit", minute: "2-digit" })}`}
+                          : `${new Date().toLocaleTimeString("us-EN", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })} - ${new Date(
+                              Date.now() + item.durationValue * 1000
+                            ).toLocaleTimeString("us-EN", { hour: "2-digit", minute: "2-digit" })}`}
                       </Text>
                       {item.distance !== "N/A" && (
                         <Text style={styles.details} testID={`${testID}-route-distance-${item.id}`}>
-                          Distance: {item.distance}
+                          {t("Distance")}: {item.distance}
                         </Text>
                       )}
-                    {Boolean(item.duration) && (
-                      <Text style={styles.details} testID={`${testID}-route-duration-${item.id}`}>
-                        {item.duration} - Mode: {item.mode}
-                      </Text>
-                    )}
+                      {Boolean(item.duration) && (
+                        <Text style={styles.details} testID={`${testID}-route-duration-${item.id}`}>
+                          {item.duration} - {t("Mode")}: {item.mode}
+                        </Text>
+                      )}
                       {item.transport && (
-                        <Text style={styles.details} testID={`${testID}-route-transport-${item.id}`}>
-                          Transport: {item.transport}
+                        <Text
+                          style={styles.details}
+                          testID={`${testID}-route-transport-${item.id}`}
+                        >
+                          {t("Transport")}: {item.transport}
                         </Text>
                       )}
                       {item.cost && (
                         <Text style={styles.details} testID={`${testID}-route-cost-${item.id}`}>
-                          Cost: {item.cost}
+                          {t("Cost")}: {item.cost}
                         </Text>
                       )}
                       {item.frequency && (
-                        <Text style={styles.details} testID={`${testID}-route-frequency-${item.id}`}>
-                          Frequency: {item.frequency}
+                        <Text
+                          style={styles.details}
+                          testID={`${testID}-route-frequency-${item.id}`}
+                        >
+                          {t("Frequency")}: {item.frequency}
                         </Text>
                       )}
                     </View>
