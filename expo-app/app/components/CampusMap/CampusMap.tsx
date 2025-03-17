@@ -171,6 +171,12 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
     setViewEatingOnCampus((prevState) => !prevState);
   };
 
+  const handleOnUseAsOrigin = () => {
+    setOrigin(destination);
+    setIsBuildingInfoModalVisible(false);
+    onDirectionsPress();
+  };  
+
   return (
     <View style={styles.container}>
       {/* Movable Hamburger Widget */}
@@ -260,6 +266,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         onClose={() => setIsBuildingInfoModalVisible(false)}
         selectedBuilding={destination?.building}
         onNavigate={onDirectionsPress}
+        onUseAsOrigin={handleOnUseAsOrigin}
         testID="building-info-modal"
       />
 

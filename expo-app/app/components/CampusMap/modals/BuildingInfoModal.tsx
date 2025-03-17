@@ -15,8 +15,9 @@ type BuildingInfoModalProps = {
   visible: boolean;
   onClose: () => void;
   selectedBuilding: Building | null | undefined;
-  onNavigate?: (latitude: number, longitude: number) => void;
-  testID?: string;
+  onNavigate: (latitude: number, longitude: number) => void;
+  testID: string;
+  onUseAsOrigin: () => void;
 };
 
 const BuildingInfoModal: React.FC<BuildingInfoModalProps> = ({
@@ -25,6 +26,7 @@ const BuildingInfoModal: React.FC<BuildingInfoModalProps> = ({
   selectedBuilding,
   onNavigate,
   testID,
+  onUseAsOrigin,
 }) => {
   const [isImageLoading, setIsImageLoading] = useState<boolean>(false);
 
@@ -101,11 +103,11 @@ const BuildingInfoModal: React.FC<BuildingInfoModalProps> = ({
 
           {/* Modal Footer */}
           <View style={styles.modalFooter} testID={`${testID}-footer`}>
-            {onNavigate && selectedBuilding.coordinates.length > 0 && (
+            {selectedBuilding.coordinates.length > 0 && (
               <>
                 <TouchableOpacity
                   style={styles.navigateButton}
-                  onPress={()=>{}} // Need to implement logic
+                  onPress={onUseAsOrigin} 
                   testID={`${testID}-use-as-origin-button`}
                 >
                   <Text style={styles.navigateButtonText}>Use as origin</Text>
