@@ -97,7 +97,7 @@ describe("CampusMap", () => {
   
   it("should display building markers on the map and open modal when clicked", async () => {
     const { getByTestId, queryByTestId } = render(<CampusMap pressedOptimizeRoute={false} />);
-    const buildingMarker = getByTestId("building-marker-FB-marker");
+    const buildingMarker = getByTestId("building-marker-1-marker");
     expect(buildingMarker).toBeTruthy();
     fireEvent.press(buildingMarker);
     await waitFor(() => {
