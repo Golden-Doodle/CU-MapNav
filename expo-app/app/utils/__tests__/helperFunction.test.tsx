@@ -63,6 +63,6 @@ describe("getFillColorWithOpacity", () => {
       selectedBuilding
     );
 
-    expect(result).toBe("rgba(NaN, NaN, 35, 0.4)");
+    expect(result).toBe("rgba(0, 0, 0, 0.4)");
   });
 });
