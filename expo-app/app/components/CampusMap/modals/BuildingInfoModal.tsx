@@ -16,8 +16,9 @@ type BuildingInfoModalProps = {
   visible: boolean;
   onClose: () => void;
   selectedBuilding: Building | null | undefined;
-  onNavigate?: (latitude: number, longitude: number) => void;
-  testID?: string;
+  onNavigate: (latitude: number, longitude: number) => void;
+  testID: string;
+  onUseAsOrigin: () => void;
 };
 
 const BuildingInfoModal: React.FC<BuildingInfoModalProps> = ({
@@ -26,6 +27,7 @@ const BuildingInfoModal: React.FC<BuildingInfoModalProps> = ({
   selectedBuilding,
   onNavigate,
   testID,
+  onUseAsOrigin,
 }) => {
   const { t } = useTranslation("CampusMap");
 
@@ -97,21 +99,30 @@ const BuildingInfoModal: React.FC<BuildingInfoModalProps> = ({
             {/* Display restaurant rating if available */}
             {selectedBuilding?.rating && (
               <Text style={styles.rating} testID={`${testID}-rating`}>
-                Rating: {selectedBuilding.rating} ★
+                {t("Rating")}: {selectedBuilding.rating} ★
               </Text>
             )}
           </View>
 
           {/* Modal Footer */}
           <View style={styles.modalFooter} testID={`${testID}-footer`}>
-            {onNavigate && selectedBuilding.coordinates.length > 0 && (
-              <TouchableOpacity
-                style={styles.navigateButton}
-                onPress={handleNavigate}
-                testID={`${testID}-navigate-button`}
-              >
-                <Text style={styles.navigateButtonText}>{t("Navigate to this Building")}</Text>
-              </TouchableOpacity>
+            {selectedBuilding.coordinates.length > 0 && (
+              <>
+                <TouchableOpacity
+                  style={styles.navigateButton}
+                  onPress={onUseAsOrigin}
+                  testID={`${testID}-use-as-origin-button`}
+                >
+                  <Text style={styles.navigateButtonText}>{t("Use as origin")}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.navigateButton}
+                  onPress={handleNavigate}
+                  testID={`${testID}-navigate-button`}
+                >
+                  <Text style={styles.navigateButtonText}>{t("Navigate to this Building")}</Text>
+                </TouchableOpacity>
+              </>
             )}
           </View>
         </View>
@@ -194,9 +205,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#912338",
     paddingVertical: 12,
     paddingHorizontal: 25,
+    marginVertical: 5,
     borderRadius: 8,
     elevation: 3,
     alignItems: "center",
+    width: "100%",
   },
   navigateButtonText: {
     color: "#fff",

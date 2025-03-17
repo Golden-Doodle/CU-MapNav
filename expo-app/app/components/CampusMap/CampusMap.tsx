@@ -1,12 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  View,
-  Alert,
-  StyleSheet,
-  ActivityIndicator,
-  Text,
-  TouchableOpacity,
-} from "react-native";
+import { View, Alert, StyleSheet, ActivityIndicator, Text, TouchableOpacity } from "react-native";
 import MapView, { Marker, Polygon, Polyline, Circle } from "react-native-maps";
 import CustomMarker from "./CustomMarker";
 import { SGWBuildings, LoyolaBuildings } from "./data/buildingData";
@@ -26,6 +19,7 @@ import { useTranslation } from "react-i18next";
 import RadiusAdjuster from "./RadiusAdjuster";
 
 import { calculateDistance, isPointInPolygon } from "@/app/utils/MapUtils";
+import { getFillColorWithOpacity } from "@/app/utils/helperFunctions";
 
 interface CampusMapProps {
   pressedOptimizeRoute: boolean;
@@ -122,6 +116,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
             description: place.vicinity,
             photoUrl: place.photos?.[0]?.imageUrl,
             rating: place.rating,
+            campus,
           }));
           setAllRestaurantMarkers(markers);
         })
@@ -234,6 +229,32 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
 
   const customMapStyle = getCustomMapStyle(isDarkMode);
 
+  const handleOnUseAsOrigin = () => {
+    // Store previous values in temp variables
+    const prevOrigin = origin;
+    const prevDestination = destination;
+
+    // Swap values
+    setOrigin(prevDestination);
+    setDestination(prevOrigin);
+
+    setIsBuildingInfoModalVisible(false);
+    onDirectionsPress();
+  };
+
+  const handleNavTabBackPress = () => {
+    if (userLocation) {
+      setOrigin({
+        userLocation: true,
+        coordinates: {
+          latitude: userLocation.latitude,
+          longitude: userLocation.longitude,
+        },
+      });
+    }
+    setDestination(null);
+  };
+
   return (
     <View style={styles.container}>
       <HamburgerWidget
@@ -281,17 +302,15 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
                 ))}
               </>
             )}
-            {buildings.map((building) => (
+            {buildings.map((building: Building) => (
               <Polygon
                 key={building.id}
                 coordinates={building.coordinates}
-                fillColor={
-                  currentBuilding && currentBuilding.id === building.id
-                    ? "rgb(255, 0, 47)"
-                    : building.fillColor
-                      ? building.fillColor
-                      : "rgba(0,0,0,0)"
-                }
+                fillColor={getFillColorWithOpacity(
+                  building,
+                  currentBuilding,
+                  destination?.selectedBuilding ? destination.building : null
+                )}
                 strokeColor={
                   isDarkMode
                     ? "#fff"
@@ -350,6 +369,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         onClose={() => setIsBuildingInfoModalVisible(false)}
         selectedBuilding={destination?.building}
         onNavigate={onDirectionsPress}
+        onUseAsOrigin={handleOnUseAsOrigin}
         testID="building-info-modal"
       />
 
@@ -409,7 +429,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         onNextClassPress={() => setIsNextClassModalVisible(true)}
         onMoreOptionsPress={() => Alert.alert("More Options pressed")}
         onInfoPress={() => setIsBuildingInfoModalVisible(true)}
-        onBackPress={() => setDestination(null)}
+        onBackPress={handleNavTabBackPress}
         onDirectionsPress={onDirectionsPress}
         testID="nav-tab"
       />
