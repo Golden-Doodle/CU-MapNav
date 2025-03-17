@@ -61,7 +61,6 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   const markers = campus === "SGW" ? SGWMarkers : LoyolaMarkers;
   const buildings = campus === "SGW" ? SGWBuildings : LoyolaBuildings;
 
-
   useEffect(() => {
     let subscription: Location.LocationSubscription;
     (async () => {
@@ -240,13 +239,25 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   const customMapStyle = getCustomMapStyle(isDarkMode);
 
   const handleOnUseAsOrigin = () => {
-    // This works but shouldnt, must investigate, has to do with the asynchronous nature of the state update
     setOrigin((prevOrigin) => {
       setDestination(prevOrigin);
       return destination;
     });
     setIsBuildingInfoModalVisible(false);
     onDirectionsPress();
+  };
+
+  const handleNavTabBackPress = () => {
+    if (userLocation) {
+      setOrigin({
+        userLocation: true,
+        coordinates: {
+          latitude: userLocation.latitude,
+          longitude: userLocation.longitude,
+        },
+      });
+    }
+    setDestination(null);
   };
 
   return (
@@ -425,7 +436,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         onNextClassPress={() => setIsNextClassModalVisible(true)}
         onMoreOptionsPress={() => Alert.alert("More Options pressed")}
         onInfoPress={() => setIsBuildingInfoModalVisible(true)}
-        onBackPress={resetOriginAndDestinationToDefault}
+        onBackPress={handleNavTabBackPress}
         onDirectionsPress={onDirectionsPress}
         testID="nav-tab"
       />
