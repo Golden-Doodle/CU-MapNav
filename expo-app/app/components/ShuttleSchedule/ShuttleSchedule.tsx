@@ -77,16 +77,16 @@ export default function ShuttleSchedule({ route, testID }: ShuttleScheduleProps)
 
   const renderInfoPanel = () => (
     <View style={styles.infoPanel} testID={testID ? `${testID}-info-panel` : undefined}>
-      <Text style={styles.infoPanelTitle}>{t("pickup_location")}</Text>
+      <Text style={styles.infoPanelTitle}>{t("Pickup Location")}</Text>
       <Text style={styles.infoPanelDetails}>Henry F Hall building, front doors</Text>
       <Text style={styles.infoPanelDetails}>1455 De Maisonneuve Blvd. W</Text>
 
       <View style={styles.badgeRow}>
         <View style={[styles.badge, styles.badgeYellow]}>
-          <Text style={styles.badgeText}>{t("limited_seats")}</Text>
+          <Text style={styles.badgeText}>{t("Limited Seats")}</Text>
         </View>
         <View style={[styles.badge, styles.badgeGreen]}>
-          <Text style={styles.badgeText}>{t("on_time")}</Text>
+          <Text style={styles.badgeText}>{t("On Time")}</Text>
         </View>
       </View>
     </View>
@@ -94,29 +94,37 @@ export default function ShuttleSchedule({ route, testID }: ShuttleScheduleProps)
 
   if (!schedule || schedule.length === 0) {
     return (
-      <View style={styles.noScheduleContainer} testID={testID ? `${testID}-no-schedule-container` : undefined}>
-        <Text style={styles.errorText}>{t("no_schedule_available")}</Text>
+      <View
+        style={styles.noScheduleContainer}
+        testID={testID ? `${testID}-no-schedule-container` : undefined}
+      >
+        <Text style={styles.errorText}>{t("No schedule available.")}</Text>
       </View>
     );
   }
 
   return (
     <View style={{ flex: 1 }} testID={testID ? `${testID}-shuttle-schedule-container` : undefined}>
-      
       {/* NEW: ID Card Notice at top */}
       <View style={styles.idCardNotice} testID={testID ? `${testID}-id-card-notice` : undefined}>
-        <FontAwesome5 
-          name="id-card" 
-          size={18} 
-          color="#666" 
-          style={styles.idCardIcon} 
+        <FontAwesome5
+          name="id-card"
+          size={18}
+          color="#666"
+          style={styles.idCardIcon}
           testID={testID ? `${testID}-id-card-icon` : undefined}
         />
-        <Text style={styles.idCardNoticeText} testID={testID ? `${testID}-id-card-notice-text` : undefined}>
-          {t("id_card_is_obligatory_to_board_the_shuttle")}
+        <Text
+          style={styles.idCardNoticeText}
+          testID={testID ? `${testID}-id-card-notice-text` : undefined}
+        >
+          {t("ID Card is obligatory to board the shuttle.")}
         </Text>
       </View>
-      <ScrollView contentContainerStyle={styles.scrollContent} testID={testID ? `${testID}-schedule-scrollview` : undefined}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        testID={testID ? `${testID}-schedule-scrollview` : undefined}
+      >
         {/**
          * Map over all times. For each time:
          * - If it's in the past, show grey (and disable).
@@ -129,12 +137,13 @@ export default function ShuttleSchedule({ route, testID }: ShuttleScheduleProps)
           const past = isPastTime(time);
           const isSelected = time === selectedTime;
           return (
-            <View key={idx} style={styles.timeRow} testID={testID ? `${testID}-time-row-${time}` : undefined}>
+            <View
+              key={idx}
+              style={styles.timeRow}
+              testID={testID ? `${testID}-time-row-${time}` : undefined}
+            >
               <TouchableOpacity
-                style={[
-                  styles.timeButton,
-                  past ? styles.timeButtonPast : styles.timeButtonFuture,
-                ]}
+                style={[styles.timeButton, past ? styles.timeButtonPast : styles.timeButtonFuture]}
                 disabled={past}
                 onPress={() => {
                   if (isSelected) {

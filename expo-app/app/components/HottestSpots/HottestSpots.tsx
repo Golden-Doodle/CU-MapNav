@@ -14,7 +14,7 @@ const HottestSpots = () => {
 
       {/* Title */}
       <Text style={styles.text}>
-        {t("concordia_s_hottest_spots_of_the_week_will_show_up_here")}
+        {t("Concordia's hottest spots of the week will show up here.")}
       </Text>
     </View>
   );

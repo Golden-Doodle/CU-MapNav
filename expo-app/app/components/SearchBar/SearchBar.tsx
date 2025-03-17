@@ -13,7 +13,7 @@ export default function SearchBar() {
     <View style={styles.searchContainer}>
       <Feather name="search" size={20} color="#999" style={styles.icon} />
       <TextInput
-        placeholder={t("search_for_anything_nearby")}
+        placeholder={t("Search for anything nearby")}
         placeholderTextColor="#999"
         style={styles.searchInput}
         testID="search-input"

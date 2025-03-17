@@ -21,7 +21,7 @@ export default function Header({
   calendarEvents,
 }: HeaderProps) {
 
-  const { t } = useTranslation('HomePageScreen'); // Used for tranlation
+  const { t } = useTranslation("HomePageScreen"); // Used for tranlation
 
   const router = useRouter();
   const auth = React.useContext(AuthContext);
@@ -56,11 +56,7 @@ export default function Header({
             onPress={!user ? () => router.push("/") : signOut}
             testID={!user ? "login-button" : "logout-button"}
           >
-            <Feather
-              name={!user ? "log-in" : "log-out"}
-              size={22}
-              color="white"
-            />
+            <Feather name={!user ? "log-in" : "log-out"} size={22} color="white" />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -75,9 +71,7 @@ export default function Header({
         {/* Header Content */}
         <View style={styles.headerContent} testID="header-content">
           <Text style={styles.welcomeText} testID="welcome-text">
-            {user?.displayName
-              ? `${t("welcome_back")}, ${user.displayName}`
-              : `${t("welcome")}!`}
+            {user?.displayName ? `${t("Welcome Back")}, ${user.displayName}` : `${t("Welcome")}!`}
           </Text>
           <NextClassComponent
             calendarEvents={calendarEvents}
@@ -90,20 +84,17 @@ export default function Header({
           {/* Optimize Routes Button - Disabled if no classes */}
           {user && (
             <TouchableOpacity
-              style={[
-                styles.routeButton,
-                !nextClass && styles.disabledRouteButton,
-              ]}
+              style={[styles.routeButton, !nextClass && styles.disabledRouteButton]}
               onPress={onOptimizeRoutePress}
               disabled={!nextClass}
               testID="optimize-route-button"
             >
-              <Text style={styles.routeButtonText}>{t("optimize_route")}</Text>
+              <Text style={styles.routeButtonText}>{t("Optimize Route")}</Text>
             </TouchableOpacity>
           )}
 
           <Text style={styles.studySpotText} testID="study-spot-text">
-            {t("find_your_next_study_spot_or_coffee_stop")}
+            {t("Find your next study spot or coffee stop.")}
           </Text>
         </View>
       </View>

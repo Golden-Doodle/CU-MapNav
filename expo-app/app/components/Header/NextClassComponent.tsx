@@ -19,24 +19,23 @@ export default function NextClassComponent({
   setNextClass,
   testID,
 }: NextClassComponentProps) {
+  const { t } = useTranslation("HomePageScreen");
 
-  const { t } = useTranslation('HomePageScreen');
-  
   const auth = React.useContext(AuthContext);
-  const user = auth?.user ?? null; 
-  
+  const user = auth?.user ?? null;
+
   const [timeUntilNextClass, setTimeUntilNextClass] = useState<string | null>(null);
-  
+
   useEffect(() => {
     if (!user) {
       setNextClass(null);
-      setTimeUntilNextClass(t("please_login_to_see_the_next_class"));
+      setTimeUntilNextClass(t("Please login to see the next class"));
       return;
     }
 
     if (!calendarEvents || calendarEvents.length === 0) {
       setNextClass(null);
-      setTimeUntilNextClass(t("no_classes_scheduled_for_today"));
+      setTimeUntilNextClass(t("No classes scheduled for today."));
       return;
     }
 
@@ -50,7 +49,7 @@ export default function NextClassComponent({
       setTimeUntilNextClass(timeDiff);
     } else {
       setNextClass(null);
-      setTimeUntilNextClass(t("no_classes_scheduled_for_today"));
+      setTimeUntilNextClass(t("No classes scheduled for today."));
     }
   }, [calendarEvents, user]);
 
@@ -60,7 +59,7 @@ export default function NextClassComponent({
     const classEnd = new Date(endTime);
 
     if (classStart <= now && classEnd > now) {
-      return `${t("class_is_ongoing")} (${t("started_at")} ${classStart.toLocaleTimeString([], {
+      return `${t("Class is ongoing")} (${t("Started at")} ${classStart.toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
       })})`;
@@ -70,14 +69,16 @@ export default function NextClassComponent({
     const timeDiffMinutes = Math.floor(timeDiffMs / (1000 * 60));
 
     if (timeDiffMinutes <= 0) {
-      return `${t("class_started")} ${Math.abs(timeDiffMinutes)} minutes ago`; // Need to fix for translation
+      return `${t("Class started")} ${Math.abs(timeDiffMinutes)} ${t("minutes ago")}`; // Need to fix for translation
     } else if (timeDiffMinutes <= 60) {
-      return `${t("next_class_in")} ${timeDiffMinutes} minutes at ${classStart.toLocaleTimeString([], {
+      return `${t("Next class in")} ${timeDiffMinutes} ${t("minutes at")} ${classStart.toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
       })}`; // Need to fix for translation
     } else {
-      return `${t("next_class_in")} ${Math.floor(timeDiffMinutes / 60)} hours at ${classStart.toLocaleTimeString([], {
+      return `${t("Next class in")} ${Math.floor(timeDiffMinutes / 60)} ${t(
+        "hours at"
+      )} ${classStart.toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
       })}`; // Need to fix for translation
@@ -96,17 +97,13 @@ export default function NextClassComponent({
     const todayEvents = events.filter((event) => {
       const eventStart = new Date(event.start.dateTime);
       const eventEnd = new Date(event.end.dateTime);
-      return (
-        (eventStart >= now || (eventStart <= now && eventEnd > now)) &&
-        eventStart <= endOfDay
-      );
+      return (eventStart >= now || (eventStart <= now && eventEnd > now)) && eventStart <= endOfDay;
     });
 
     if (todayEvents.length === 0) return null;
 
     return todayEvents.sort(
-      (a, b) =>
-        new Date(a.start.dateTime).getTime() - new Date(b.start.dateTime).getTime()
+      (a, b) => new Date(a.start.dateTime).getTime() - new Date(b.start.dateTime).getTime()
     )[0];
   };
 

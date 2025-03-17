@@ -9,12 +9,12 @@ export default function ButtonSection() {
     <View style={styles.container}>
       {/* TODO: Give functionality to buttons */}
       <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>{t("study_spot")}</Text>
+        <Text style={styles.buttonText}>{t("Study Spot")}</Text>
       </TouchableOpacity>
       
       {/* TODO: Give funcationality to buttons */}
       <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>{t("coffee_stop")}</Text>
+        <Text style={styles.buttonText}>{t("Coffee Stop")}</Text>
       </TouchableOpacity>
     </View>
   );
