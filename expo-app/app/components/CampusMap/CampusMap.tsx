@@ -1,12 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  View,
-  Alert,
-  StyleSheet,
-  ActivityIndicator,
-  Text,
-  TouchableOpacity,
-} from "react-native";
+import { View, Alert, StyleSheet, ActivityIndicator, Text, TouchableOpacity } from "react-native";
 import MapView, { Marker, Polygon, Polyline, Circle } from "react-native-maps";
 import CustomMarker from "./CustomMarker";
 import { SGWBuildings, LoyolaBuildings } from "./data/buildingData";
@@ -240,10 +233,14 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   const customMapStyle = getCustomMapStyle(isDarkMode);
 
   const handleOnUseAsOrigin = () => {
-    setOrigin((prevOrigin) => {
-      setDestination(prevOrigin);
-      return destination;
-    });
+    // Store previous values in temp variables
+    const prevOrigin = origin;
+    const prevDestination = destination;
+
+    // Swap values
+    setOrigin(prevDestination);
+    setDestination(prevOrigin);
+
     setIsBuildingInfoModalVisible(false);
     onDirectionsPress();
   };
@@ -312,9 +309,11 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
               <Polygon
                 key={building.id}
                 coordinates={building.coordinates}
-                fillColor={
-                  getFillColorWithOpacity(building, currentBuilding, destination?.selectedBuilding ? destination.building : null) 
-                }
+                fillColor={getFillColorWithOpacity(
+                  building,
+                  currentBuilding,
+                  destination?.selectedBuilding ? destination.building : null
+                )}
                 strokeColor={
                   isDarkMode
                     ? "#fff"
