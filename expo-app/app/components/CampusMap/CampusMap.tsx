@@ -32,6 +32,7 @@ import {
 import RadiusAdjuster from "./RadiusAdjuster";
 
 import { calculateDistance, isPointInPolygon } from "@/app/utils/MapUtils";
+import { getFillColorWithOpacity } from "@/app/utils/helperFunctions";
 
 interface CampusMapProps {
   pressedOptimizeRoute: boolean;
@@ -312,11 +313,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
                 key={building.id}
                 coordinates={building.coordinates}
                 fillColor={
-                  currentBuilding && currentBuilding.id === building.id
-                    ? "rgb(255, 0, 47)"
-                    : building.fillColor
-                      ? building.fillColor
-                      : "rgba(0,0,0,0)"
+                  getFillColorWithOpacity(building, destination, currentBuilding)
                 }
                 strokeColor={
                   isDarkMode
