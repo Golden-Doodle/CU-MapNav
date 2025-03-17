@@ -16,7 +16,7 @@
     "preset": "jest-expo",
     "setupFiles": [
       "<rootDir>/jest.setup.js"
-    ] 
+    ]
   },
   "dependencies": {
     "@expo/config-plugins": "^9.0.15",
@@ -24,6 +24,7 @@
     "@mapbox/polyline": "^1.2.1",
     "@react-native-async-storage/async-storage": "^1.23.1",
     "@react-native-community/datetimepicker": "8.2.0",
+    "@react-native-community/slider": "4.5.5",
     "@react-native-firebase/app": "^21.10.0",
     "@react-native-firebase/auth": "^21.10.0",
     "@react-native-google-signin/google-signin": "^13.2.0",
@@ -51,7 +52,7 @@
     "expo-symbols": "~0.2.1",
     "expo-system-ui": "~4.0.7",
     "expo-web-browser": "~14.0.2",
-    "i18next": "^24.2.2",
+    "i18next": "^24.2.3",
     "lottie-react-native": "7.1.0",
     "react": "18.3.1",
     "react-dom": "^18.3.1",

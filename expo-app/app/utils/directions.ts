@@ -8,7 +8,7 @@ import {
   LocationType,
   TransportMode,
 } from "@/app/utils/types";
-import polyline from "@mapbox/polyline";
+import polyline from "@mapbox/polyline"; 
 import { RouteOption } from "@/app/utils/types";
 
 const GOOGLE_MAPS_API_KEY = Constants.expoConfig?.extra?.googleMapsApiKey;
@@ -40,7 +40,8 @@ export const getDirections = async (
 
 export const coordinatesFromRoomLocation = (
   location: RoomLocation | null,
-  buildings: Building[]
+  SGWBuildings: Building[],
+  LoyolaBuildings: Building[]
 ): Coordinates | undefined => {
   if (!location) {
     return;
@@ -60,10 +61,14 @@ export const coordinatesFromRoomLocation = (
 
   validateCampus();
 
-  const coordinates: Coordinates | undefined = buildings.find(
-    (building: Building) =>
-      location.campus === building.campus && building.name === location.building.name
-  )?.coordinates[0];
+  const coordinates: Coordinates | undefined =
+    location.campus === "SGW"
+      ? SGWBuildings.find(
+          (building: Building) => building.name === location.building.name
+        )?.coordinates[0]
+      : LoyolaBuildings.find(
+          (building) => building.name === location.building.name
+        )?.coordinates[0];
 
   if (!coordinates) {
     return;
@@ -74,7 +79,7 @@ export const coordinatesFromRoomLocation = (
 
 export const fetchAllRoutes = async (
   origin: LocationType,
-  destination: LocationType
+  destination: LocationType,
 ): Promise<RouteOption[]> => {
   if (!origin || !destination || !origin.coordinates || !destination.coordinates) {
     console.error("Invalid origin or destination");
@@ -103,7 +108,9 @@ export const fetchAllRoutes = async (
             if (step.transit_details) {
               const line = step.transit_details.line;
               if (line) {
-                transportDetails.push(`${line.vehicle.name} ${line.short_name}`);
+                transportDetails.push(
+                  `${line.vehicle.name} ${line.short_name}`
+                );
               }
             }
           });
@@ -119,7 +126,8 @@ export const fetchAllRoutes = async (
           routeCoordinates: polyline
             .decode(route.overview_polyline.points)
             .map(([lat, lng]) => ({ latitude: lat, longitude: lng })),
-          transport: mode === "transit" ? transportDetails.join(" & ") : undefined,
+          transport:
+            mode === "transit" ? transportDetails.join(" & ") : undefined,
           departure_time: mode === "transit" ? legs.departure_time : undefined,
           arrival_time: mode === "transit" ? legs.arrival_time : undefined,
           cost: mode === "transit" ? legs.fare?.text : undefined,
@@ -136,7 +144,10 @@ export const fetchAllRoutes = async (
         duration: "25 min",
         durationValue: 1500,
         distance: "N/A",
-        steps: ["Board the Concordia Shuttle at Loyola Campus", "Arrive at SGW Campus"],
+        steps: [
+          "Board the Concordia Shuttle at Loyola Campus",
+          "Arrive at SGW Campus",
+        ],
         routeCoordinates: [
           {
             latitude: origin.coordinates.latitude,

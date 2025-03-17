@@ -1,30 +1,30 @@
-import { getDirections, coordinatesFromRoomLocation, fetchAllRoutes } from "../directions";
-import { RoomLocation, Building, Coordinates, LocationType, Campus } from "@/app/utils/types";
+import { getDirections, coordinatesFromRoomLocation, fetchAllRoutes } from '../directions';
+import { RoomLocation, Building, Coordinates, LocationType, Campus } from '@/app/utils/types';
 
-jest.mock("expo-constants", () => ({
+jest.mock('expo-constants', () => ({
   expoConfig: {
     extra: {
-      googleMapsApiKey: "fake-api-key",
+      googleMapsApiKey: 'fake-api-key', 
     },
   },
 }));
 
-jest.mock("@mapbox/polyline", () => ({
+jest.mock('@mapbox/polyline', () => ({
   decode: jest.fn().mockReturnValue([
-    [45.0, -73.0],
-    [45.1, -73.1],
+    [45.0, -73.0], 
+    [45.1, -73.1],  
   ]),
 }));
 
 global.fetch = jest.fn();
 
-describe("getDirections", () => {
-  it("should return decoded coordinates for a valid response", async () => {
+describe('getDirections', () => {
+  it('should return decoded coordinates for a valid response', async () => {
     global.fetch = jest.fn().mockResolvedValue({
       json: jest.fn().mockResolvedValue({
         routes: [
           {
-            overview_polyline: { points: "abc123" },
+            overview_polyline: { points: 'abc123' },
           },
         ],
       }),
@@ -41,7 +41,7 @@ describe("getDirections", () => {
     ]);
   });
 
-  it("should return an empty array if no routes are found", async () => {
+  it('should return an empty array if no routes are found', async () => {
     global.fetch = jest.fn().mockResolvedValue({
       json: jest.fn().mockResolvedValue({ routes: [] }),
     });
@@ -54,8 +54,8 @@ describe("getDirections", () => {
     expect(result).toEqual([]);
   });
 
-  it("should return an empty array if there is an error in fetching directions", async () => {
-    global.fetch = jest.fn().mockRejectedValue(new Error("Network error"));
+  it('should return an empty array if there is an error in fetching directions', async () => {
+    global.fetch = jest.fn().mockRejectedValue(new Error('Network error'));
 
     const origin: Coordinates = { latitude: 45.0, longitude: -73.0 };
     const destination: Coordinates = { latitude: 45.1, longitude: -73.1 };
@@ -65,7 +65,7 @@ describe("getDirections", () => {
     expect(result).toEqual([]);
   });
 
-  it("should return an empty array if the polyline is missing", async () => {
+  it('should return an empty array if the polyline is missing', async () => {
     global.fetch = jest.fn().mockResolvedValue({
       json: jest.fn().mockResolvedValue({
         routes: [{ overview_polyline: null }],
@@ -80,20 +80,20 @@ describe("getDirections", () => {
     expect(result).toEqual([]);
   });
 
-  it("should return empty array if polyline decoding fails", async () => {
+  it('should return empty array if polyline decoding fails', async () => {
     global.fetch = jest.fn().mockResolvedValue({
       json: jest.fn().mockResolvedValue({
         routes: [
           {
-            overview_polyline: { points: "invalid_polyline" },
+            overview_polyline: { points: 'invalid_polyline' },
           },
         ],
       }),
     });
 
-    const mockDecode = require("@mapbox/polyline").decode;
+    const mockDecode = require('@mapbox/polyline').decode;
     mockDecode.mockImplementationOnce(() => {
-      throw new Error("Invalid polyline");
+      throw new Error('Invalid polyline');
     });
 
     const origin: Coordinates = { latitude: 45.0, longitude: -73.0 };
@@ -105,175 +105,176 @@ describe("getDirections", () => {
   });
 });
 
-describe("coordinatesFromRoomLocation", () => {
-  const buildings: Building[] = [
+describe('coordinatesFromRoomLocation', () => {
+  const SGWBuildings: Building[] = [
     {
-      id: "1",
-      name: "Building1",
+      id: '1',
+      name: 'Building1',
       coordinates: [{ latitude: 45.0, longitude: -73.0 }],
-      fillColor: "#FFFFFF",
-      strokeColor: "#000000",
-      campus: "SGW" as Campus,
+      fillColor: '#FFFFFF',
+      strokeColor: '#000000',
+      campus: 'SGW' as Campus,
     },
     {
-      id: "2",
-      name: "Building2",
+      id: '2',
+      name: 'Building2',
       coordinates: [{ latitude: 45.1, longitude: -73.1 }],
-      fillColor: "#FFFFFF",
-      strokeColor: "#000000",
-      campus: "SGW" as Campus,
-    },
-    {
-      id: "A",
-      name: "BuildingA",
-      coordinates: [{ latitude: 45.2, longitude: -73.2 }],
-      fillColor: "#FFFFFF",
-      strokeColor: "#000000",
-      campus: "LOY" as Campus,
-    },
-    {
-      id: "B",
-      name: "BuildingB",
-      coordinates: [{ latitude: 45.3, longitude: -73.3 }],
-      fillColor: "#FFFFFF",
-      strokeColor: "#000000",
-      campus: "LOY" as Campus,
+      fillColor: '#FFFFFF',
+      strokeColor: '#000000',
+      campus: 'SGW' as Campus,
     },
   ];
 
-  it("should return the correct coordinates for SGW campus", () => {
-    const building = buildings.find((building) => building.name === "Building1");
+  const LoyolaBuildings: Building[] = [
+    {
+      id: 'A',
+      name: 'BuildingA',
+      coordinates: [{ latitude: 45.2, longitude: -73.2 }],
+      fillColor: '#FFFFFF',
+      strokeColor: '#000000',
+      campus: 'LOY' as Campus,
+    },
+    {
+      id: 'B',
+      name: 'BuildingB',
+      coordinates: [{ latitude: 45.3, longitude: -73.3 }],
+      fillColor: '#FFFFFF',
+      strokeColor: '#000000',
+      campus: 'LOY' as Campus,
+    },
+  ];
+
+  it('should return the correct coordinates for SGW campus', () => {
+    const building = SGWBuildings.find(building => building.name === 'Building1');
 
     if (!building) {
-      throw new Error("Building not found");
+      throw new Error('Building not found');
     }
 
     const location: RoomLocation = {
-      campus: "SGW" as Campus,
+      campus: 'SGW' as Campus,
       building,
-      room: "101",
+      room: '101',
     };
 
-    const result = coordinatesFromRoomLocation(location, buildings);
+    const result = coordinatesFromRoomLocation(location, SGWBuildings, LoyolaBuildings);
 
     expect(result).toEqual({ latitude: 45.0, longitude: -73.0 });
   });
 
-  it("should return the correct coordinates for Loyola campus", () => {
-    const building = buildings.find((building) => building.name === "BuildingA");
+  it('should return the correct coordinates for Loyola campus', () => {
+    const building = LoyolaBuildings.find(building => building.name === 'BuildingA');
 
     if (!building) {
-      throw new Error("Building not found");
+      throw new Error('Building not found');
     }
 
     const location: RoomLocation = {
-      campus: "LOY" as Campus,
+      campus: 'LOY' as Campus,
       building,
-      room: "202",
+      room: '202',
     };
 
-    const result = coordinatesFromRoomLocation(location, buildings);
+    const result = coordinatesFromRoomLocation(location, SGWBuildings, LoyolaBuildings);
 
     expect(result).toEqual({ latitude: 45.2, longitude: -73.2 });
   });
 
-  it("should handle null location", () => {
+  it('should handle null location', () => {
     const location = null;
 
-    const result = coordinatesFromRoomLocation(location, buildings);
+    const result = coordinatesFromRoomLocation(location, SGWBuildings, LoyolaBuildings);
 
     expect(result).toBeUndefined();
   });
 
-  it("should handle invalid campus and update it", () => {
-    const building = buildings.find((building) => building.name === "Building1");
+  it('should handle invalid campus and update it', () => {
+    const building = SGWBuildings.find(building => building.name === 'Building1');
 
     if (!building) {
-      throw new Error("Building not found");
+      throw new Error('Building not found');
     }
 
     const location: RoomLocation = {
-      campus: "SGW" as Campus,
+      campus: 'SGW' as Campus,
       building,
-      room: "101",
+      room: '101',
     };
 
-    const result = coordinatesFromRoomLocation(location, buildings);
+    const result = coordinatesFromRoomLocation(location, SGWBuildings, LoyolaBuildings);
 
-    expect(location.campus).toBe("SGW");
+    expect(location.campus).toBe('SGW');
     expect(result).toEqual({ latitude: 45.0, longitude: -73.0 });
   });
 
-  it("should return undefined if building coordinates are not found", () => {
-    const building = buildings.find((building) => building.name === "Building3");
+  it('should return undefined if building coordinates are not found', () => {
+    const building = SGWBuildings.find(building => building.name === 'Building3');
 
     if (!building) {
       const location: RoomLocation = {
-        campus: "SGW" as Campus,
+        campus: 'SGW' as Campus,
         building: {
-          id: "default",
-          name: "Default Building",
+          id: 'default',
+          name: 'Default Building',
           coordinates: [{ latitude: 0, longitude: 0 }],
-          fillColor: "#FFFFFF",
-          strokeColor: "#000000",
-          campus: "SGW" as Campus,
+          fillColor: '#FFFFFF',
+          strokeColor: '#000000',
+          campus: 'SGW' as Campus,
         },
-        room: "303",
+        room: '303',
       };
 
-      const result = coordinatesFromRoomLocation(location, buildings);
+      const result = coordinatesFromRoomLocation(location, SGWBuildings, LoyolaBuildings);
 
       expect(result).toBeUndefined();
       return;
     }
 
     const location: RoomLocation = {
-      campus: "SGW" as Campus,
+      campus: 'SGW' as Campus,
       building,
-      room: "303",
+      room: '303',
     };
 
-    const result = coordinatesFromRoomLocation(location, buildings);
+    const result = coordinatesFromRoomLocation(location, SGWBuildings, LoyolaBuildings);
     expect(result).toBeUndefined();
   });
 
-  it("should return undefined if an invalid campus is used", () => {
-    const building = buildings.find((building) => building.name === "Building1");
+  it('should return undefined if an invalid campus is used', () => {
+    const building = SGWBuildings.find(building => building.name === 'Building1');
 
     if (!building) {
-      throw new Error("Building not found");
+      throw new Error('Building not found');
     }
 
     const location: RoomLocation = {
       campus: "INVALID" as Campus,
       building,
-      room: "101",
+      room: '101',
     };
 
-    const result = coordinatesFromRoomLocation(location, buildings);
+    const result = coordinatesFromRoomLocation(location, SGWBuildings, LoyolaBuildings);
 
     expect(result).toBeUndefined();
   });
 });
 
-describe("fetchAllRoutes", () => {
+describe('fetchAllRoutes', () => {
   const origin: LocationType = { coordinates: { latitude: 45.0, longitude: -73.0 } };
   const destination: LocationType = { coordinates: { latitude: 45.1, longitude: -73.1 } };
 
-  it("should fetch and return all available routes (shuttle)", async () => {
+  it('should fetch and return all available routes (shuttle)', async () => {
     global.fetch = jest.fn().mockResolvedValue({
       json: jest.fn().mockResolvedValue({
         status: "OK",
         routes: [
           {
-            overview_polyline: { points: "abc123" },
-            legs: [
-              {
-                duration: { text: "25 min", value: 600 },
-                distance: { text: "1 km" },
-                steps: [{ html_instructions: "Turn left" }],
-              },
-            ],
+            overview_polyline: { points: 'abc123' },
+            legs: [{
+              duration: { text: '25 min', value: 600 },
+              distance: { text: '1 km' },
+              steps: [{ html_instructions: 'Turn left' }],
+            }],
           },
         ],
       }),
@@ -286,28 +287,27 @@ describe("fetchAllRoutes", () => {
     expect(result[0].duration).toBe("25 min");
   });
 
-  it("should handle invalid origin or destination", async () => {
-    const invalidOrigin: LocationType = { coordinates: { latitude: 44.0, longitude: -71.0 } };
+  it('should handle invalid origin or destination', async () => {
+    const invalidOrigin: LocationType = { coordinates: { latitude: 44.0, longitude: -71.0 } }; 
     const result = await fetchAllRoutes(invalidOrigin, destination);
-
-    expect(result.length).toBeGreaterThan(0);
+  
+    expect(result.length).toBeGreaterThan(0); 
   });
+  
 
-  it("should handle shuttle route correctly (shuttle)", async () => {
+  it('should handle shuttle route correctly (shuttle)', async () => {
     const result = await fetchAllRoutes(origin, destination);
-    expect(result).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          mode: "shuttle",
-          duration: "25 min",
-          frequency: "Every 15 min",
-        }),
-      ])
-    );
+    expect(result).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        mode: 'shuttle',
+        duration: '25 min',
+        frequency: 'Every 15 min',
+      }),
+    ]));
   });
 
-  it("should return empty array if fetch fails", async () => {
-    global.fetch = jest.fn().mockRejectedValue(new Error("Network error"));
+  it('should return empty array if fetch fails', async () => {
+    global.fetch = jest.fn().mockRejectedValue(new Error('Network error'));
     const result = await fetchAllRoutes(origin, destination);
     expect(result).toEqual([]);
   });
