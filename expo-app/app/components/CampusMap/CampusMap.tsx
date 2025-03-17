@@ -39,13 +39,12 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
 
   useEffect(() => {
     const getUserLocation = async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
+      const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         Alert.alert("Permission Denied", "Allow location access to navigate.");
         return;
       }
-
-      let location = await Location.getCurrentPositionAsync({});
+      const location = await Location.getCurrentPositionAsync({});
       setUserLocation(location.coords);
       setOrigin({
         userLocation: true,
