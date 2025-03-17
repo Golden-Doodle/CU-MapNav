@@ -7,6 +7,7 @@ import { styles } from "./Header.styles";
 import { AuthContext } from "@/app/contexts/AuthContext";
 import NextClassComponent from "./NextClassComponent";
 import { GoogleCalendarEvent } from "@/app/utils/types";
+import { useTranslation } from "react-i18next";
 
 interface HeaderProps {
   refreshCalendarEvents: () => void;
@@ -19,6 +20,9 @@ export default function Header({
   isLoading,
   calendarEvents,
 }: HeaderProps) {
+
+  const { t } = useTranslation("HomePageScreen"); // Used for tranlation
+
   const router = useRouter();
   const auth = React.useContext(AuthContext);
   const user = auth?.user || null;
@@ -67,7 +71,7 @@ export default function Header({
         {/* Header Content */}
         <View style={styles.headerContent} testID="header-content">
           <Text style={styles.welcomeText} testID="welcome-text">
-            {user?.displayName ? `Welcome Back, ${user.displayName}` : "Welcome!"}
+            {user?.displayName ? `${t("Welcome Back")}, ${user.displayName}` : `${t("Welcome")}!`}
           </Text>
           <NextClassComponent
             calendarEvents={calendarEvents}
@@ -80,20 +84,17 @@ export default function Header({
           {/* Optimize Routes Button - Disabled if no classes */}
           {user && (
             <TouchableOpacity
-              style={[
-                styles.routeButton,
-                !nextClass && styles.disabledRouteButton,
-              ]}
+              style={[styles.routeButton, !nextClass && styles.disabledRouteButton]}
               onPress={onOptimizeRoutePress}
               disabled={!nextClass}
               testID="optimize-route-button"
             >
-              <Text style={styles.routeButtonText}>Optimize Route</Text>
+              <Text style={styles.routeButtonText}>{t("Optimize Route")}</Text>
             </TouchableOpacity>
           )}
 
           <Text style={styles.studySpotText} testID="study-spot-text">
-            Find your next study spot or coffee stop.
+            {t("Find your next study spot or coffee stop.")}
           </Text>
         </View>
       </View>

@@ -7,20 +7,20 @@ type CustomMarkerProps = {
     latitude: number;
     longitude: number;
   };
-  name?: string;
+  title?: string;
   description?: string;
   isFoodLocation?: boolean;
   onPress?: () => void;
-  testID: string; // Added testID as a required parameter
+  testID: string; 
 };
 
 const CustomMarker: React.FC<CustomMarkerProps> = ({
   coordinate,
-  name = "Unknown Location",
+  title = "Unknown Location",
   description = "No description available",
   isFoodLocation = false,
   onPress,
-  testID, 
+  testID, // Destructure testID prop
 }) => {
   return (
     <Marker coordinate={coordinate} onPress={onPress} tappable={true} testID={`${testID}-marker`}>
@@ -28,7 +28,7 @@ const CustomMarker: React.FC<CustomMarkerProps> = ({
         <Image
           source={{ uri: "https://maps.google.com/mapfiles/ms/icons/restaurant.png" }}
           style={styles.foodMarker}
-          testID={`${testID}-food-marker`} // Added testID for food marker
+          testID={`${testID}-food-marker`} 
         />
       ) : (
         <Image

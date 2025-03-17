@@ -16,6 +16,7 @@ import {
 } from "@/app/utils/types";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import useSearch from "@/app/hooks/useSearch";
+import { useTranslation } from "react-i18next";
 
 interface SearchModalProps {
   visible: boolean;
@@ -40,6 +41,8 @@ const SearchModal: React.FC<SearchModalProps> = ({
   onGetDirections,
   testID, // Destructure testID prop
 }) => {
+  const { t } = useTranslation("CampusMap");
+
   const {
     searchQuery,
     setSearchQuery,
@@ -69,7 +72,7 @@ const SearchModal: React.FC<SearchModalProps> = ({
           {/* Header */}
           <View style={styles.header} testID={`${testID}-header`}>
             <Text style={styles.title} testID={`${testID}-modal-title`}>
-              Select Destination
+              {t("Select Destination")}
             </Text>
             <TouchableOpacity
               onPress={onClose}
@@ -86,7 +89,7 @@ const SearchModal: React.FC<SearchModalProps> = ({
             <TextInput
               ref={searchInputRef}
               style={styles.input}
-              placeholder="Search for destination..."
+              placeholder={t("Search for destination...")}
               placeholderTextColor="#888"
               value={searchQuery}
               onChangeText={setSearchQuery}
@@ -120,7 +123,7 @@ const SearchModal: React.FC<SearchModalProps> = ({
             )}
             ListEmptyComponent={
               <Text style={styles.noResultsText} testID={`${testID}-no-results-text`}>
-                No results found
+                {t("No results found")}
               </Text>
             }
             testID={`${testID}-result-list`}
@@ -135,7 +138,7 @@ const SearchModal: React.FC<SearchModalProps> = ({
                 testID={`${testID}-select-on-map-button`}
               >
                 <MaterialIcons name="map" size={20} color="#fff" />
-                <Text style={styles.selectOnMapText}>Select on Map</Text>
+                <Text style={styles.selectOnMapText}>{t("Select on Map")}</Text>
               </TouchableOpacity>
             ) : (
               <TouchableOpacity
@@ -144,7 +147,7 @@ const SearchModal: React.FC<SearchModalProps> = ({
                 testID={`${testID}-get-directions-button`}
               >
                 <MaterialIcons name="directions" size={20} color="#fff" />
-                <Text style={styles.getDirectionsText}>Get Directions</Text>
+                <Text style={styles.getDirectionsText}>{t("Get Directions")}</Text>
               </TouchableOpacity>
             )}
           </View>

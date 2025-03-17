@@ -11,12 +11,13 @@ import {
 import { useRouter } from "expo-router";
 import Svg, { Circle } from "react-native-svg";
 import { AuthContext } from "./contexts/AuthContext";
+import { useTranslation } from "react-i18next";
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 export default function SignInScreen() {
+  const {t} = useTranslation("SignInScreen");
   const router = useRouter();
-
   const authContext = React.useContext(AuthContext);
 
   if (!authContext) {
@@ -128,8 +129,8 @@ export default function SignInScreen() {
       />
 
       <View style={styles.textContainer}>
-        <Text style={styles.title}>Welcome to Concordia Navigator</Text>
-        <Text style={styles.subtitle}>Sign in or continue as a guest</Text>
+        <Text style={styles.title}>{t("Welcome to Concordia Navigator")}</Text>
+        <Text style={styles.subtitle}>{t("Sign in or continue as a guest")}</Text>
       </View>
 
       <View style={styles.buttonContainer}>
@@ -142,7 +143,7 @@ export default function SignInScreen() {
             source={require("../../expo-app/assets/images/google-logo.png")}
             style={styles.googleImage}
           />
-          <Text style={styles.googleButtonText}>Sign in with Google</Text>
+          <Text style={styles.googleButtonText}>{t("Sign in with Google")}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -150,7 +151,7 @@ export default function SignInScreen() {
           onPress={handleSignInAsGuest}
           activeOpacity={0.8}
         >
-          <Text style={styles.buttonText}>Continue as Guest</Text>
+          <Text style={styles.buttonText}>{t("Continue as Guest")}</Text>
         </TouchableOpacity>
       </View>
     </View>

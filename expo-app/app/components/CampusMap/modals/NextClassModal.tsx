@@ -12,9 +12,10 @@ import {
   LocationType,
   RoomLocation,
 } from "@/app/utils/types";
-import { buildings } from "../data/buildingData";
+import { SGWBuildings, LoyolaBuildings } from "../data/buildingData";
 import { fetchTodaysEventsFromSelectedSchedule } from "@/app/services/GoogleCalendar/fetchingUserCalendarData"; // Importing the new method
 import { coordinatesFromRoomLocation } from "@/app/utils/directions";
+import { useTranslation } from "react-i18next";
 
 interface NextClassModalProps {
   visible: boolean;
@@ -31,6 +32,9 @@ const NextClassModal: React.FC<NextClassModalProps> = ({
   setDestination,
   testID,
 }) => {
+
+  const {t} = useTranslation("NextClassModal");
+
   const [nextClass, setNextClass] = useState<GoogleCalendarEvent | null>(null);
   const [location, setLocation] = useState<RoomLocation | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -58,13 +62,13 @@ const NextClassModal: React.FC<NextClassModalProps> = ({
 
         if (parsedLocation?.building && typeof parsedLocation.building === 'string') {
           const buildingName = parsedLocation.building;
-          const building = buildings.find(
+          const building = [...SGWBuildings, ...LoyolaBuildings].find(
             (b) => b.name === buildingName
           );
           if (building) {
             parsedLocation.building = building;  
           } else {
-            parsedLocation.building = buildings[0]; 
+            parsedLocation.building = SGWBuildings[0]; 
           }
         }
 
@@ -85,7 +89,8 @@ const NextClassModal: React.FC<NextClassModalProps> = ({
 
     const coordinates = coordinatesFromRoomLocation(
       location,
-      buildings
+      SGWBuildings,
+      LoyolaBuildings
     );
 
     if (!coordinates) return;
@@ -100,7 +105,7 @@ const NextClassModal: React.FC<NextClassModalProps> = ({
   };
 
   const isButtonDisabled =
-    !location || !coordinatesFromRoomLocation(location, buildings);
+    !location || !coordinatesFromRoomLocation(location, SGWBuildings, LoyolaBuildings);
 
   if (!visible) return null;
 
@@ -114,13 +119,21 @@ const NextClassModal: React.FC<NextClassModalProps> = ({
     >
       <View style={styles.overlay} testID={`${testID}-overlay`}>
         <View style={styles.modalContainer} testID={`${testID}-modal-container`}>
-          <Text style={styles.title} testID={`${testID}-modal-title`}>Next Class</Text>
+          <Text style={styles.title} testID={`${testID}-modal-title`}>
+            {t("Next Class")}
+          </Text>
 
           {isLoading ? (
-            <ActivityIndicator size="large" color="#912338" testID={`${testID}-loading-indicator`} />
+            <ActivityIndicator
+              size="large"
+              color="#912338"
+              testID={`${testID}-loading-indicator`}
+            />
           ) : nextClass ? (
             <>
-              <Text style={styles.className} testID={`${testID}-class-name`}>{nextClass.summary}</Text>
+              <Text style={styles.className} testID={`${testID}-class-name`}>
+                {nextClass.summary}
+              </Text>
               <Text style={styles.time} testID={`${testID}-class-time`}>
                 {new Date(nextClass.start.dateTime).toLocaleTimeString([], {
                   hour: "2-digit",
@@ -134,18 +147,28 @@ const NextClassModal: React.FC<NextClassModalProps> = ({
               </Text>
 
               <View style={styles.infoContainer} testID={`${testID}-room-info`}>
-                <Text style={styles.label} testID={`${testID}-room-label`}>Room:</Text>
-                <Text style={styles.value} testID={`${testID}-room-value`}>{location?.room?.toUpperCase() || "N/A"}</Text>
+                <Text style={styles.label} testID={`${testID}-room-label`}>
+                  {t("Room")}:
+                </Text>
+                <Text style={styles.value} testID={`${testID}-room-value`}>
+                  {location?.room?.toUpperCase() || "N/A"}
+                </Text>
               </View>
               <View style={styles.infoContainer} testID={`${testID}-building-info`}>
-                <Text style={styles.label} testID={`${testID}-building-label`}>Building:</Text>
+                <Text style={styles.label} testID={`${testID}-building-label`}>
+                  {t("Building")}:
+                </Text>
                 <Text style={styles.value} testID={`${testID}-building-value`}>
                   {location?.building?.name || "N/A"}
                 </Text>
               </View>
               <View style={styles.infoContainer} testID={`${testID}-campus-info`}>
-                <Text style={styles.label} testID={`${testID}-campus-label`}>Campus:</Text>
-                <Text style={styles.value} testID={`${testID}-campus-value`}>{location?.campus || "Unknown"}</Text>
+                <Text style={styles.label} testID={`${testID}-campus-label`}>
+                  {t("Campus")}:
+                </Text>
+                <Text style={styles.value} testID={`${testID}-campus-value`}>
+                  {location?.campus || t("Unknown")}
+                </Text>
               </View>
 
               <TouchableOpacity
@@ -155,16 +178,24 @@ const NextClassModal: React.FC<NextClassModalProps> = ({
                 testID={`${testID}-get-directions-button`}
               >
                 <Text style={styles.buttonText} testID={`${testID}-get-directions-text`}>
-                  {isButtonDisabled ? "Location Not Available" : "Go to Location"}
+                  {isButtonDisabled ? t("Location Not Available") : t("Go to Location")}
                 </Text>
               </TouchableOpacity>
             </>
           ) : (
-            <Text style={styles.noClassText} testID={`${testID}-no-class-text`}>No upcoming classes found.</Text>
+            <Text style={styles.noClassText} testID={`${testID}-no-class-text`}>
+              {t("No upcoming classes found.")}
+            </Text>
           )}
 
-          <TouchableOpacity style={styles.closeButton} onPress={onClose} testID={`${testID}-close-button`}>
-            <Text style={styles.closeButtonText} testID={`${testID}-close-button-text`}>Close</Text>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={onClose}
+            testID={`${testID}-close-button`}
+          >
+            <Text style={styles.closeButtonText} testID={`${testID}-close-button-text`}>
+              {t("Close")}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
