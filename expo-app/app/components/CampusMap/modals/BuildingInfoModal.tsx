@@ -99,7 +99,7 @@ const BuildingInfoModal: React.FC<BuildingInfoModalProps> = ({
             {/* Display restaurant rating if available */}
             {selectedBuilding?.rating && (
               <Text style={styles.rating} testID={`${testID}-rating`}>
-                Rating: {selectedBuilding.rating} ★
+                {t("Rating")}: {selectedBuilding.rating} ★
               </Text>
             )}
           </View>
@@ -110,17 +110,17 @@ const BuildingInfoModal: React.FC<BuildingInfoModalProps> = ({
               <>
                 <TouchableOpacity
                   style={styles.navigateButton}
-                  onPress={onUseAsOrigin} 
+                  onPress={onUseAsOrigin}
                   testID={`${testID}-use-as-origin-button`}
                 >
-                  <Text style={styles.navigateButtonText}>Use as origin</Text>
+                  <Text style={styles.navigateButtonText}>{t("Use as origin")}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.navigateButton}
                   onPress={handleNavigate}
                   testID={`${testID}-navigate-button`}
                 >
-                  <Text style={styles.navigateButtonText}>Navigate to this Building</Text>
+                  <Text style={styles.navigateButtonText}>{t("Navigate to this Building")}</Text>
                 </TouchableOpacity>
               </>
             )}
