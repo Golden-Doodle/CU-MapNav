@@ -20,7 +20,7 @@ const CustomMarker: React.FC<CustomMarkerProps> = ({
   description = "No description available",
   isFoodLocation = false,
   onPress,
-  testID, 
+  testID, // Destructure testID prop
 }) => {
   return (
     <Marker coordinate={coordinate} onPress={onPress} tappable={true} testID={`${testID}-marker`}>
