@@ -8,7 +8,11 @@ export const getFillColorWithOpacity = (
   // If the user is inside the building, make it red
   if (currentBuilding && currentBuilding.id === building.id) {
     const opacity = selectedBuilding?.id === building.id ? 1 : 0.8;
-    return updateRgbaAlpha(hexToRgba(concordiaBurgendyColor, 1), opacity);
+    let fillColor = concordiaBurgendyColor;
+    if (fillColor.startsWith("#")) {
+      fillColor = hexToRgba(fillColor, 1);
+    }
+    return updateRgbaAlpha(fillColor, opacity);
   }
 
   // Get the building's original fill color
@@ -47,4 +51,3 @@ const hexToRgba = (hex: string, alpha: number): string => {
 
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
-
