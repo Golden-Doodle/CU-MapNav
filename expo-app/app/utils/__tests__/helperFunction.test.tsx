@@ -28,23 +28,20 @@ describe("getFillColorWithOpacity", () => {
 
   it("should handle different hex color and return correct RGBA with opacity 0.4 for unselected building", () => {
 
-    const result = getFillColorWithOpacity({...building, fillColor: undefined}, null, null);
+    const result = getFillColorWithOpacity({...building, fillColor: "rgba(244, 24, 24, 1)"}, null, null);
 
-    expect(result).toBe("rgba(0, 0, 0, 0.4)");
+    expect(result).toBe("rgba(244, 24, 24, 0.4)");
   });
 
   it("should handle selected building with a different hex color and return opacity 1", () => {
-    const building2: Building = {
-      id: "2",
-      name: "Building2",
-      fillColor: "#0000FF",
-      coordinates: [{ latitude: 45.1, longitude: -73.1 }],
-      strokeColor: "#000000",
-      campus: "SGW",
-    };  
-    const result = getFillColorWithOpacity(building2, null, building2);
 
-    expect(result).toBe("rgba(0, 0, 255, 1)");
+    const result = getFillColorWithOpacity(
+      { ...building, fillColor: "rgba(244, 24, 24, 1)" },
+      null,
+      building
+    );
+
+    expect(result).toBe("rgba(244, 24, 24, 1)");
   });
 
   it("should return undefined or handle invalid hex values gracefully", () => {
