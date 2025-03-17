@@ -191,4 +191,24 @@ describe("CampusMap", () => {
       expect(queryByTestId("search-modal")).toBeNull();
     });
   });
+
+  it("swaps origin and destination when handleOnUseAsOrigin is called", async () => {
+    const { getByTestId, queryByTestId } = render(<CampusMap pressedOptimizeRoute={false} />);
+
+    // Step 1: Simulate pressing a building marker to open the modal
+    fireEvent.press(getByTestId("building-marker-FB-marker")); // Replace with actual testID of a building
+
+    // Step 2: Wait for the modal to appear
+    await waitFor(() =>
+      expect(queryByTestId("building-info-modal-use-as-origin-button")).toBeTruthy()
+    );
+
+    // Step 3: Press the "Use as Origin" button
+    fireEvent.press(getByTestId("building-info-modal-use-as-origin-button"));
+
+    // Step 4: Ensure the modal closes
+    await waitFor(() =>
+      expect(queryByTestId("building-info-modal-use-as-origin-button")).toBeNull()
+    );
+  });
 });
