@@ -34,6 +34,17 @@ jest.mock("@react-native-firebase/auth", () => {
   });
 });
 
+jest.mock("instabug-reactnative", () => ({
+  init: jest.fn(),
+  setPrimaryColor: jest.fn(),
+  InvocationEvent: {
+    shake: "shake",
+    screenshot: "screenshot",
+    floatingButton: "floatingButton",
+  },
+}));
+
+
 describe("RootLayout", () => {
   it("renders the AuthProvider and Stack navigator correctly", async () => {
     await waitFor(() => {
