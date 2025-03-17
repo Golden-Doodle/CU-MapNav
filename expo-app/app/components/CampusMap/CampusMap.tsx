@@ -38,7 +38,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    (async () => {
+    const getUserLocation = async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         Alert.alert("Permission Denied", "Allow location access to navigate.");
@@ -54,7 +54,8 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
           longitude: location.coords.longitude,
         },
       });
-    })();
+    };
+    getUserLocation();
   }, []);
 
   // Fetch nearby restaurants when user location is available using Google Places API
@@ -179,7 +180,10 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
     });
     setIsBuildingInfoModalVisible(false);
     onDirectionsPress();
-  };  
+  };
+  
+  // const resetOriginAndDestinationToDefault = () => {
+  //   set
 
   return (
     <View style={styles.container}>
