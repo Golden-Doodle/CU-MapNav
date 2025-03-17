@@ -15,7 +15,7 @@ import { initialRegion, SGWMarkers, LoyolaMarkers } from "./data/customMarkerDat
 import NavTab from "./CampusMapNavTab";
 import * as Location from "expo-location";
 import BuildingInfoModal from "./modals/BuildingInfoModal";
-import { getFillColorWithOpacity } from "@/app/utils/helperFunctions";
+import { getCustomMapStyle } from "./styles/MapStyles";
 import NextClassModal from "./modals/NextClassModal";
 import HamburgerWidget from "./HamburgerWidget";
 import TransitModal from "./modals/TransitModal";
@@ -31,109 +31,7 @@ import {
 } from "@/app/utils/types";
 import RadiusAdjuster from "./RadiusAdjuster";
 
-// Base style to remove all POIs and transit labels
-const baseMapStyle = [
-  {
-    featureType: "poi",
-    elementType: "labels",
-    stylers: [{ visibility: "off" }],
-  },
-  {
-    featureType: "transit",
-    elementType: "labels",
-    stylers: [{ visibility: "off" }],
-  },
-  {
-    featureType: "transit.station",
-    elementType: "labels",
-    stylers: [{ visibility: "off" }],
-  },
-];
-
-// Your dark map style JSON
-const darkMapStyle = [
-  { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
-  { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-  { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
-  {
-    featureType: "administrative.locality",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#d59563" }],
-  },
-  {
-    featureType: "poi",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#d59563" }],
-  },
-  {
-    featureType: "poi.park",
-    elementType: "geometry",
-    stylers: [{ color: "#263c3f" }],
-  },
-  {
-    featureType: "poi.park",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#6b9a76" }],
-  },
-  {
-    featureType: "road",
-    elementType: "geometry",
-    stylers: [{ color: "#38414e" }],
-  },
-  {
-    featureType: "road",
-    elementType: "geometry.stroke",
-    stylers: [{ color: "#212a37" }],
-  },
-  {
-    featureType: "road",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#9ca5b3" }],
-  },
-  {
-    featureType: "road.highway",
-    elementType: "geometry",
-    stylers: [{ color: "#746855" }],
-  },
-  {
-    featureType: "road.highway",
-    elementType: "geometry.stroke",
-    stylers: [{ color: "#1f2835" }],
-  },
-  {
-    featureType: "road.highway",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#f3d19c" }],
-  },
-  {
-    featureType: "transit",
-    elementType: "geometry",
-    stylers: [{ color: "#2f3948" }],
-  },
-  {
-    featureType: "transit.station",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#d59563" }],
-  },
-  {
-    featureType: "water",
-    elementType: "geometry",
-    stylers: [{ color: "#17263c" }],
-  },
-  {
-    featureType: "water",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#515c6d" }],
-  },
-  {
-    featureType: "water",
-    elementType: "labels.text.stroke",
-    stylers: [{ color: "#17263c" }],
-  },
-];
-
-const getCustomMapStyle = (isDarkMode: boolean) =>
-  isDarkMode ? [...darkMapStyle, ...baseMapStyle] : baseMapStyle;
+import { calculateDistance, isPointInPolygon } from "@/app/utils/MapUtils";
 
 interface CampusMapProps {
   pressedOptimizeRoute: boolean;
@@ -163,43 +61,6 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   const markers = campus === "SGW" ? SGWMarkers : LoyolaMarkers;
   const buildings = campus === "SGW" ? SGWBuildings : LoyolaBuildings;
 
-  // Haversine formula helper
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
-    const toRad = (x: number) => (x * Math.PI) / 180;
-    const R = 6371000;
-    const dLat = toRad(lat2 - lat1);
-    const dLon = toRad(lon2 - lon1);
-    const a = Math.sin(dLat / 2) ** 2 +
-              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-              Math.sin(dLon / 2) ** 2;
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  };
-
-  const isPointInPolygon = (point: Coordinates, polygon: Coordinates[]) => {
-    const { latitude: x, longitude: y } = point;
-    let inside = false;
-    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-      const xi = polygon[i].latitude,
-            yi = polygon[i].longitude;
-      const xj = polygon[j].latitude,
-            yj = polygon[j].longitude;
-      const intersect = (yi > y) !== (yj > y) && (x < ((xj - xi) * (y - yi)) / (yj - yi) + xi);
-      if (intersect) inside = !inside;
-    }
-    return inside;
-  };
-
-  const getPolygonCenter = (polygon: Coordinates[]) => {
-    const sum = polygon.reduce((acc, point) => ({
-      latitude: acc.latitude + point.latitude,
-      longitude: acc.longitude + point.longitude,
-    }), { latitude: 0, longitude: 0 });
-    return {
-      latitude: sum.latitude / polygon.length,
-      longitude: sum.longitude / polygon.length,
-    };
-  };
 
   useEffect(() => {
     let subscription: Location.LocationSubscription;
@@ -431,7 +292,9 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
                 fillColor={
                   currentBuilding && currentBuilding.id === building.id
                     ? "rgb(255, 0, 47)"
-                    : getFillColorWithOpacity(building, destination)
+                    : building.fillColor
+                      ? building.fillColor
+                      : "rgba(0,0,0,0)"
                 }
                 strokeColor={
                   isDarkMode
