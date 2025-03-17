@@ -36,8 +36,8 @@ describe('TransitModal', () => {
   ];
   
   const mockMarkerData: CustomMarkerType[] = [
-    { id: '1', title: 'Marker 1', coordinate: { latitude: 45.423, longitude: -75.699 }, campus: "SGW" },
-    { id: '2', title: 'Marker 2', coordinate: { latitude: 45.424, longitude: -75.700 }, campus: "LOY" },
+    { id: '1', name: 'Marker 1', coordinate: { latitude: 45.423, longitude: -75.699 }, campus: "SGW" },
+    { id: '2', name: 'Marker 2', coordinate: { latitude: 45.424, longitude: -75.700 }, campus: "LOY" },
   ];
 
   const mockUserLocation: Coordinates = { latitude: 45.4215, longitude: -75.6992 };
