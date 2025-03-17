@@ -50,7 +50,9 @@ describe("CampusMap", () => {
   });
 
   it("should toggle between SGW and Loyola campuses when button pressed", async () => {
-    const { getByTestId, getByText } = render(<CampusMap pressedOptimizeRoute={false} />);
+    const { getByTestId, getByText } = render(
+      <CampusMap pressedOptimizeRoute={false} />
+    );
     const hamburgerButton = getByTestId("toggle-campus-button-hamburger-button");
     fireEvent.press(hamburgerButton);
     const toggleButton = getByTestId("toggle-campus-button-toggle-campus-button");
@@ -86,11 +88,11 @@ describe("CampusMap", () => {
     await waitFor(() => {
       expect(getByTestId("loading-spinner")).toBeTruthy();
     });
-  
+
     jest.advanceTimersByTime(1000);
-  
+
     const restaurantMarkers = await findAllByTestId(/restaurant-marker-.*/);
-    
+
     await waitFor(() => {
       expect(queryByTestId("loading-spinner")).toBeNull();
     });
@@ -100,8 +102,10 @@ describe("CampusMap", () => {
   });
 
   it("should display building markers on the map and open modal when clicked", async () => {
-    const { getByTestId, queryByTestId } = render(<CampusMap pressedOptimizeRoute={false} />);
-    const buildingMarker = getByTestId("building-marker-1-marker");
+    const { getByTestId, queryByTestId } = render(
+      <CampusMap pressedOptimizeRoute={false} />
+    );
+    const buildingMarker = getByTestId("building-marker-FB-marker");
     expect(buildingMarker).toBeTruthy();
     fireEvent.press(buildingMarker);
     await waitFor(() => {
@@ -113,9 +117,11 @@ describe("CampusMap", () => {
       expect(queryByTestId("building-info-modal-content")).toBeNull();
     });
   });
-  
+
   it("should open and close the TransitModal when the directions button is pressed", async () => {
-    const { getByTestId, queryByTestId } = render(<CampusMap pressedOptimizeRoute={false} />);
+    const { getByTestId, queryByTestId } = render(
+      <CampusMap pressedOptimizeRoute={false} />
+    );
     const map = getByTestId("campus-map");
     fireEvent(map, "onLongPress", {
       nativeEvent: {
@@ -136,9 +142,11 @@ describe("CampusMap", () => {
       expect(queryByTestId("transit-modal-modal")).toBeNull();
     });
   });
-  
+
   it("should open and close the NextClassModal when the next class button is pressed", async () => {
-    const { getByTestId, queryByTestId } = render(<CampusMap pressedOptimizeRoute={false} />);
+    const { getByTestId, queryByTestId } = render(
+      <CampusMap pressedOptimizeRoute={false} />
+    );
     const nextClassButton = getByTestId("nav-tab-nav-item-Class");
     fireEvent.press(nextClassButton);
     await waitFor(() => {
@@ -150,9 +158,11 @@ describe("CampusMap", () => {
       expect(queryByTestId("next-class-modal-overlay")).toBeNull();
     });
   });
-  
+
   it("should reset destination when back button is pressed in NavTab", async () => {
-    const { getByTestId, queryByTestId } = render(<CampusMap pressedOptimizeRoute={false} />);
+    const { getByTestId, queryByTestId } = render(
+      <CampusMap pressedOptimizeRoute={false} />
+    );
     fireEvent(getByTestId("campus-map"), "onLongPress", {
       nativeEvent: { coordinate: { latitude: 45.5017, longitude: -73.5673 } },
     });
@@ -165,9 +175,11 @@ describe("CampusMap", () => {
       expect(queryByTestId("destination-marker")).toBeNull();
     });
   });
-  
+
   it("should open and close the Search Modal when the search button is pressed", async () => {
-    const { getByTestId, queryByTestId } = render(<CampusMap pressedOptimizeRoute={false} />);
+    const { getByTestId, queryByTestId } = render(
+      <CampusMap pressedOptimizeRoute={false} />
+    );
     const searchButton = getByTestId("nav-tab-nav-item-Search");
     fireEvent.press(searchButton);
     await waitFor(() => {
