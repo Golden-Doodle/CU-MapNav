@@ -15,7 +15,14 @@ import HamburgerWidget from "./HamburgerWidget";
 import TransitModal from "./modals/TransitModal";
 import SearchModal from "./modals/SearchModal";
 import { fetchNearbyRestaurants } from "@/app/services/GoogleMap/googlePlacesService";
-import { Campus, Coordinates, LocationType, CustomMarkerType, Building, GooglePlace } from "@/app/utils/types";
+import {
+  Campus,
+  Coordinates,
+  LocationType,
+  CustomMarkerType,
+  Building,
+  GooglePlace,
+} from "@/app/utils/types";
 
 interface CampusMapProps {
   pressedOptimizeRoute: boolean;
@@ -37,14 +44,36 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   const [mapRegion, setMapRegion] = useState(initialRegion[campus]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  const getUserLocation = async (): Promise<Location.LocationObject | undefined> => {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission Denied", "Allow location access to navigate.");
+      return;
+    }
+    const location = await Location.getCurrentPositionAsync({});
+    return location;
+  };
+
+  const resetOriginAndDestinationToDefault = async () => {
+    setDestination(null);
+    const location = await getUserLocation();
+    if (!location) return;
+
+    setUserLocation(location.coords);
+    setOrigin({
+      userLocation: true,
+      coordinates: {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      },
+    });
+  };
+
   useEffect(() => {
-    const getUserLocation = async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert("Permission Denied", "Allow location access to navigate.");
-        return;
-      }
-      const location = await Location.getCurrentPositionAsync({});
+    (async () => {
+      const location = await getUserLocation();
+      if (!location) return;
+
       setUserLocation(location.coords);
       setOrigin({
         userLocation: true,
@@ -53,8 +82,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
           longitude: location.coords.longitude,
         },
       });
-    };
-    getUserLocation();
+    })();
   }, []);
 
   // Fetch nearby restaurants when user location is available using Google Places API
@@ -73,7 +101,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
             description: place.vicinity,
             photoUrl: place.photos?.[0]?.imageUrl,
             rating: place.rating,
-            campus
+            campus,
           }));
           setRestaurantMarkers(restaurantMarkers);
         })
@@ -180,9 +208,6 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
     setIsBuildingInfoModalVisible(false);
     onDirectionsPress();
   };
-  
-  // const resetOriginAndDestinationToDefault = () => {
-  //   set
 
   return (
     <View style={styles.container}>
@@ -220,17 +245,18 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
             ))}
 
             {/* Conditionally render Restaurant Markers */}
-            {viewEatingOnCampus && restaurantMarkers.map((marker) => (
-              <CustomMarker
-                key={marker.id}
-                testID={`restaurant-marker-${marker.id}`}
-                coordinate={marker.coordinate}
-                name={marker.name}
-                description={marker.description}
-                isFoodLocation={true}
-                onPress={() => handleMarkerPress(marker)}
-              />
-            ))}
+            {viewEatingOnCampus &&
+              restaurantMarkers.map((marker) => (
+                <CustomMarker
+                  key={marker.id}
+                  testID={`restaurant-marker-${marker.id}`}
+                  coordinate={marker.coordinate}
+                  name={marker.name}
+                  description={marker.description}
+                  isFoodLocation={true}
+                  onPress={() => handleMarkerPress(marker)}
+                />
+              ))}
 
             {/* Render Polygons (Buildings) */}
             {buildings.map((building) => (
@@ -260,12 +286,24 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
 
         {/* Render Destination Marker */}
         {destination && !destination.selectedBuilding && (
-          <Marker coordinate={destination.coordinates} pinColor="red" title="Destination" testID="destination-marker" />
+          <Marker
+            coordinate={destination.coordinates}
+            pinColor="red"
+            title="Destination"
+            testID="destination-marker"
+          />
         )}
       </MapView>
 
       {/* Show loading spinner if data is being fetched */}
-      {isLoading && <ActivityIndicator size="large" color="#912338" style={styles.spinner} testID="loading-spinner" />}
+      {isLoading && (
+        <ActivityIndicator
+          size="large"
+          color="#912338"
+          style={styles.spinner}
+          testID="loading-spinner"
+        />
+      )}
 
       {/* Modal for Building Info */}
       <BuildingInfoModal
@@ -329,7 +367,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         onNextClassPress={() => setIsNextClassModalVisible(true)}
         onMoreOptionsPress={() => Alert.alert("More Options pressed")}
         onInfoPress={() => setIsBuildingInfoModalVisible(true)}
-        onBackPress={() => setDestination(null)}
+        onBackPress={resetOriginAndDestinationToDefault}
         onDirectionsPress={onDirectionsPress}
         testID="nav-tab"
       />
