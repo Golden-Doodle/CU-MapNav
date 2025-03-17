@@ -98,10 +98,10 @@ describe("CampusMap", () => {
     expect(restaurantMarkers.length).toBeGreaterThan(0);
     jest.useRealTimers();
   });
-  
+
   it("should display building markers on the map and open modal when clicked", async () => {
     const { getByTestId, queryByTestId } = render(<CampusMap pressedOptimizeRoute={false} />);
-    const buildingMarker = getByTestId("building-marker-FB-marker");
+    const buildingMarker = getByTestId("building-marker-FB-marker"); // Use an actual building ID from your data
     expect(buildingMarker).toBeTruthy();
     fireEvent.press(buildingMarker);
     await waitFor(() => {
@@ -112,7 +112,7 @@ describe("CampusMap", () => {
     await waitFor(() => {
       expect(queryByTestId("building-info-modal-content")).toBeNull();
     });
-  });
+  });  
   
   it("should open and close the TransitModal when the directions button is pressed", async () => {
     const { getByTestId, queryByTestId } = render(<CampusMap pressedOptimizeRoute={false} />);

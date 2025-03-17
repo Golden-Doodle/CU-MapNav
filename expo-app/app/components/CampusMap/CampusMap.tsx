@@ -132,7 +132,6 @@ const darkMapStyle = [
   },
 ];
 
-// Build the customMapStyle based on dark mode state
 const getCustomMapStyle = (isDarkMode: boolean) =>
   isDarkMode ? [...darkMapStyle, ...baseMapStyle] : baseMapStyle;
 
@@ -376,7 +375,6 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
     setViewEatingOnCampus((prevState) => !prevState);
   };
 
-  // Build the custom style by combining base style with darkMapStyle if dark mode is enabled.
   const customMapStyle = getCustomMapStyle(isDarkMode);
 
   return (

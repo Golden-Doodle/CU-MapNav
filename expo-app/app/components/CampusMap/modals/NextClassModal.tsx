@@ -12,7 +12,7 @@ import {
   LocationType,
   RoomLocation,
 } from "@/app/utils/types";
-import { SGWBuildings, LoyolaBuildings } from "../data/buildingData";
+import { buildings } from "../data/buildingData";
 import { fetchTodaysEventsFromSelectedSchedule } from "@/app/services/GoogleCalendar/fetchingUserCalendarData"; // Importing the new method
 import { coordinatesFromRoomLocation } from "@/app/utils/directions";
 
@@ -58,13 +58,13 @@ const NextClassModal: React.FC<NextClassModalProps> = ({
 
         if (parsedLocation?.building && typeof parsedLocation.building === 'string') {
           const buildingName = parsedLocation.building;
-          const building = [...SGWBuildings, ...LoyolaBuildings].find(
+          const building = buildings.find(
             (b) => b.name === buildingName
           );
           if (building) {
             parsedLocation.building = building;  
           } else {
-            parsedLocation.building = SGWBuildings[0]; 
+            parsedLocation.building = buildings[0]; 
           }
         }
 
@@ -85,8 +85,7 @@ const NextClassModal: React.FC<NextClassModalProps> = ({
 
     const coordinates = coordinatesFromRoomLocation(
       location,
-      SGWBuildings,
-      LoyolaBuildings
+      buildings
     );
 
     if (!coordinates) return;
@@ -101,7 +100,7 @@ const NextClassModal: React.FC<NextClassModalProps> = ({
   };
 
   const isButtonDisabled =
-    !location || !coordinatesFromRoomLocation(location, SGWBuildings, LoyolaBuildings);
+    !location || !coordinatesFromRoomLocation(location, buildings);
 
   if (!visible) return null;
 
