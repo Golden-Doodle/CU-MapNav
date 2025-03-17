@@ -1,7 +1,7 @@
 {
-    "menu_title": "Menu",
-    "campus_map": "Campus Map",
-    "chatbot": "Chatbot",
-    "shuttle_schedule": "Shuttle Schedule",
-    "study_spots": "Study Spots"
+    "Menu": "Menu",
+    "Campus Map": "Campus Map",
+    "Chatbot": "Chatbot",
+    "Shuttle Schedule": "Shuttle Schedule",
+    "Study Spots": "Study Spots"
 }

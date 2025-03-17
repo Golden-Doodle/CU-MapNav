@@ -3,13 +3,11 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { FontAwesome5 } from "@expo/vector-icons";
 
-// 1) Import useTranslation and specify the "HomeMenuScreen" namespace
 import { useTranslation } from "react-i18next";
 
 export default function HomeMenuScreen() {
   const router = useRouter();
 
-  // 2) Hook into the "HomeMenuScreen" namespace
   const { t } = useTranslation("HomeMenuScreen");
 
   return (
@@ -24,7 +22,7 @@ export default function HomeMenuScreen() {
       </TouchableOpacity>
 
       {/* Menu Title */}
-      <Text style={styles.title} testID="menu-title">{t("menu_title")}</Text>
+      <Text style={styles.title} testID="menu-title">{t("Menu")}</Text>
 
       {/* Navigation Options */}
       <TouchableOpacity
@@ -34,7 +32,7 @@ export default function HomeMenuScreen() {
         testID="campus-map-button"
       >
         {/* We keep the emoji, but the text itself is translated */}
-        <Text style={styles.menuText}>📍 {t("campus_map")}</Text>
+        <Text style={styles.menuText}>📍 {t("Campus Map")}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -43,7 +41,7 @@ export default function HomeMenuScreen() {
         onPress={() => router.push("/screens/Chatbot/ChatBotScreen")}
         testID="chatbot-button"
       >
-        <Text style={styles.menuText}>💬 {t("chatbot")}</Text>
+        <Text style={styles.menuText}>💬 {t("Chatbot")}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity 
@@ -52,7 +50,7 @@ export default function HomeMenuScreen() {
         onPress={() => router.push("/screens/Shuttle/ShuttleScreen")}
         testID="shuttle-button"
       >
-        <Text style={styles.menuText}>🚌 {t("shuttle_schedule")}</Text>
+        <Text style={styles.menuText}>🚌 {t("Shuttle Schedule")}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -61,7 +59,7 @@ export default function HomeMenuScreen() {
         onPress={() => router.push("/screens/Home/StudySpotsScreen")}
         testID="study-spots-button"
       >
-        <Text style={styles.menuText}>📖 {t("study_spots")}</Text>
+        <Text style={styles.menuText}>📖 {t("Study Spots")}</Text>
       </TouchableOpacity>
     </View>
   );
