@@ -313,7 +313,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
                 key={building.id}
                 coordinates={building.coordinates}
                 fillColor={
-                  getFillColorWithOpacity(building, destination, currentBuilding)
+                  getFillColorWithOpacity(building, currentBuilding, destination?.selectedBuilding ? destination.building : null) 
                 }
                 strokeColor={
                   isDarkMode
