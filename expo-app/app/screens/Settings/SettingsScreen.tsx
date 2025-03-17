@@ -36,7 +36,7 @@ export default function SettingsScreen() {
           setDarkMode(false); // default to false if not set
         }
       } catch (error) {
-        console.error(t("Error loading settings:"), error);
+        console.error("Error loading settings:", error);
       }
     };
     loadSettings();

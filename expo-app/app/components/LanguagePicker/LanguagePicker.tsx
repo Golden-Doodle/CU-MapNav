@@ -8,7 +8,6 @@ import { FontAwesome5 } from "@expo/vector-icons";
 
 const LanguageSelector = () => {
   const { i18n } = useTranslation();
-  const { t } = useTranslation("SettingsScreen");
   const [selectedLanguage, setSelectedLanguage] = useState(i18n.language);
 
   useEffect(() => {

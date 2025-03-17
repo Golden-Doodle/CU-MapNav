@@ -28,6 +28,33 @@ jest.mock("expo-router", () => ({
   }),
 }));
 
+jest.mock("react-i18next", () => ({
+  __esModule: true,
+  useTranslation: () => ({
+    t: (key: string) => key, // Return key as translation
+    i18n: {
+      changeLanguage: jest.fn().mockResolvedValue(null),
+    },
+  }),
+  initReactI18next: {
+    type: "backend",
+    init: jest.fn(),
+  },
+}));
+
+
+jest.mock("i18next", () => ({
+  __esModule: true,
+  default: {
+    changeLanguage: jest.fn().mockResolvedValue(null), // Prevents `changeLanguage` error
+    t: jest.fn((key) => key), // Returns the key instead of translations
+    language: "en",
+    init: jest.fn(),
+  },
+}));
+
+
+
 describe("SettingsScreen", () => {
   beforeEach(() => {
     jest.clearAllMocks(); 
@@ -102,29 +129,35 @@ describe("SettingsScreen", () => {
   });
 
   it("loads saved notification and dark mode settings from AsyncStorage", async () => {
-    (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce("true"); 
-    (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce("false"); 
-  
+    (AsyncStorage.getItem as jest.Mock).mockImplementation((key) => {
+      if (key === "notifications") return Promise.resolve("true");
+      if (key === "darkMode") return Promise.resolve("false");
+      return Promise.resolve(null);
+    });
+
     const { getByTestId } = render(<SettingsScreen />);
-  
+
     await waitFor(() => {
       expect(getByTestId("notifications-switch").props.value).toBe(true);
       expect(getByTestId("dark-mode-switch").props.value).toBe(false);
     });
   });
-  
+
   it("handles error when loading settings from AsyncStorage", async () => {
+    const mockConsoleError = jest.spyOn(console, "error").mockImplementation(() => {}); // ✅ Mock console.error
+    
     (AsyncStorage.getItem as jest.Mock).mockRejectedValueOnce(new Error("AsyncStorage error"));
-  
-    const mockConsoleError = jest.spyOn(console, "error").mockImplementation(() => {});
-  
+
     render(<SettingsScreen />);
-  
-    await waitFor(() => 
-      expect(mockConsoleError).toHaveBeenCalledWith("Error loading settings:", expect.any(Error))
+
+    await waitFor(
+      () => {
+        expect(mockConsoleError).toHaveBeenCalledWith("Error loading settings:", expect.any(Error)); // ✅ Match correct error log
+      },
+      { timeout: 5000 } // ✅ Allow more time for useEffect to run
     );
-  
-    mockConsoleError.mockRestore(); 
+
+    mockConsoleError.mockRestore(); // ✅ Restore console.error to avoid pollution
   });
 
   it("logs 'Delete Account' when delete account button is pressed", () => {
