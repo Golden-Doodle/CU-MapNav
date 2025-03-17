@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import {
   Modal,
   View,
@@ -50,16 +50,30 @@ const SearchModal: React.FC<SearchModalProps> = ({
     returnDataOnEmptyQuery: false, // Return all data when input is empty
   });
 
+  // Ref for the TextInput
+  const searchInputRef = useRef<TextInput>(null);
+
+  // Focus on input when the modal becomes visible
+  useEffect(() => {
+    if (visible) {
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 300); // Small delay ensures modal animation doesn't interfere
+    }
+  }, [visible]);
+
   return (
     <Modal visible={visible} animationType="slide" transparent testID={testID}>
       <View style={styles.overlay} testID={`${testID}-overlay`}>
         <View style={styles.modalContainer} testID={`${testID}-modal-container`}>
           {/* Header */}
           <View style={styles.header} testID={`${testID}-header`}>
-            <Text style={styles.title} testID={`${testID}-modal-title`}>Select Destination</Text>
-            <TouchableOpacity 
-              onPress={onClose} 
-              style={styles.closeIcon} 
+            <Text style={styles.title} testID={`${testID}-modal-title`}>
+              Select Destination
+            </Text>
+            <TouchableOpacity
+              onPress={onClose}
+              style={styles.closeIcon}
               testID={`${testID}-close-icon`}
             >
               <MaterialIcons name="close" size={24} color="#333" />
@@ -70,12 +84,12 @@ const SearchModal: React.FC<SearchModalProps> = ({
           <View style={styles.inputContainer} testID={`${testID}-input-container`}>
             <MaterialIcons name="search" size={24} color="#888" />
             <TextInput
+              ref={searchInputRef}
               style={styles.input}
               placeholder="Search for destination..."
               placeholderTextColor="#888"
               value={searchQuery}
               onChangeText={setSearchQuery}
-              autoFocus
               testID={`${testID}-search-input`}
             />
           </View>
@@ -95,13 +109,19 @@ const SearchModal: React.FC<SearchModalProps> = ({
               >
                 <MaterialIcons name="location-on" size={24} color="#007AFF" />
                 <View style={styles.resultTextContainer}>
-                  <Text style={styles.resultText} testID={`${testID}-result-text-${item.id}`}>{item.name}</Text>
-                  <Text style={styles.resultSubtext} testID={`${testID}-result-subtext-${item.id}`}>{item.description}</Text>
+                  <Text style={styles.resultText} testID={`${testID}-result-text-${item.id}`}>
+                    {item.name}
+                  </Text>
+                  <Text style={styles.resultSubtext} testID={`${testID}-result-subtext-${item.id}`}>
+                    {item.description}
+                  </Text>
                 </View>
               </TouchableOpacity>
             )}
             ListEmptyComponent={
-              <Text style={styles.noResultsText} testID={`${testID}-no-results-text`}>No results found</Text>
+              <Text style={styles.noResultsText} testID={`${testID}-no-results-text`}>
+                No results found
+              </Text>
             }
             testID={`${testID}-result-list`}
           />

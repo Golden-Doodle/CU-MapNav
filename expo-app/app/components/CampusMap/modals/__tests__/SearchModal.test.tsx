@@ -103,4 +103,26 @@ describe('SearchModal', () => {
 
     expect(mockOnSelectLocation).toHaveBeenCalledWith(buildingData[0]);
   });
+
+   it("focuses search input when the modal is visible", async () => {
+     const { getByTestId } = render(
+       <SearchModal
+         visible={true}
+         onClose={mockOnClose}
+         buildingData={buildingData}
+         markerData={[]}
+         onSelectLocation={mockOnSelectLocation}
+         onPressSelectOnMap={mockOnPressSelectOnMap}
+         destination={null}
+         onGetDirections={mockOnGetDirections}
+         testID="search-modal"
+       />
+     );
+
+     await waitFor(() => {
+       const searchInput = getByTestId("search-modal-search-input");
+       expect(searchInput).toBeTruthy();
+       expect(searchInput.props.autoFocus).toBeTruthy(); // Ensures autofocus is enabled
+     });
+   });
 });
