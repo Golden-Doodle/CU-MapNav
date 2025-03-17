@@ -16,7 +16,7 @@ export default function ReprotScreen() {
       </ScrollView>
       
       <View style={styles.navContainer}>
-        <BottomNavigation />
+        <BottomNavigation testID="bottom-navigation"/>
       </View>
     </View>
   );

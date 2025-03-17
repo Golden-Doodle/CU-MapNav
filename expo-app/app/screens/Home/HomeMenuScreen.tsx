@@ -56,7 +56,7 @@ export default function HomeMenuScreen() {
       <TouchableOpacity
         style={styles.menuItem}
         activeOpacity={0.8}
-        onPress={() => router.push("/screens/Home/StudySpotsScreen")}
+        onPress={() => router.push("/screens/StudySpots/StudySpotScreen")}
         testID="study-spots-button"
       >
         <Text style={styles.menuText}>📖 {t("Study Spots")}</Text>
