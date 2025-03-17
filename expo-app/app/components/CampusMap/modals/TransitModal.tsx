@@ -125,9 +125,17 @@ const TransitModal = ({
 
   const onSwitchPress = () => {
     resetIsSearching();
-    setOrigin(destination);
-    setDestination(origin);
+
+    // Store previous values in temp variables
+    const prevOrigin = origin;
+    const prevDestination = destination;
+
+    // Swap values
+    setOrigin(prevDestination);
+    setDestination(prevOrigin);
   };
+
+
 
   const handleOnSelectLocation = (location: Building) => () => {
     if (isSearching === "origin") {
