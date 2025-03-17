@@ -55,6 +55,10 @@ export interface GoogleCalendarEvent {
 export type SelectedBuildingType = Building | null | "markerOnMap";
 
 export const concordiaBurgendyColor = "#8C2633";
+export const SGW_FILL_COLOR = "rgba(0, 0, 255, 1)";
+export const SGW_STROKE_COLOR = "rgba(0, 0, 0, 1)";
+export const LOY_FILL_COLOR = "rgba(255, 165, 0, 1)";
+export const LOY_STROKE_COLOR = "rgba(0, 0, 0, 1)";
 
 export type LocationType = {
   userLocation?: boolean;
