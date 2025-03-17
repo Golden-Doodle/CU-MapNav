@@ -2,12 +2,11 @@ import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
 import BuildingInfoModal from "../BuildingInfoModal";
 import { Building } from "../../../../utils/types";
+import { Campus } from "@/app/utils/types";
 
 const mockNavigate = jest.fn();
 const mockOnClose = jest.fn();
 const mockUseAsOrigin = jest.fn();
-
-export type Campus = "SGW" | "LOY";
 
 const building: Building = {
   id: "1",
@@ -18,8 +17,13 @@ const building: Building = {
   coordinates: [{ latitude: 10.0, longitude: 20.0 }],
   fillColor: "#ff0000",
   strokeColor: "#00ff00",
-  campus: "SGW",
+  campus: "SGW" as Campus,
 };
+
+jest.mock("expo-location", () => ({
+  requestForegroundPermissionsAsync: jest.fn(() => Promise.resolve({ status: "granted" })),
+  watchPositionAsync: jest.fn(),
+}));
 
 describe("BuildingInfoModal", () => {
   it("renders correctly with building information", () => {
@@ -100,5 +104,21 @@ describe("BuildingInfoModal", () => {
   
     expect(queryByTestIdUndefined("building-info-modal-close-button")).toBeNull();
     expect(queryByTestIdUndefined("building-info-modal-building-image")).toBeNull();
+  });
+
+  it("calls onUseAsOrigin when use as origin button is pressed", () => {
+    const { getByTestId } = render(
+      <BuildingInfoModal
+        visible={true}
+        onClose={mockOnClose}
+        selectedBuilding={building}
+        onNavigate={mockNavigate}
+        testID="building-info-modal"
+        onUseAsOrigin={mockUseAsOrigin}
+      />
+    );
+
+    fireEvent.press(getByTestId("building-info-modal-use-as-origin-button"));
+    expect(mockUseAsOrigin).toHaveBeenCalled();
   });
 });
