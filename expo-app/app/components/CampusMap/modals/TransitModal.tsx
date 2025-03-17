@@ -94,6 +94,7 @@ const TransitModal = ({
     }
   };
 
+  // This has to be wrong? -- Need to look into this, it works though
   const onSwitchPress = () => {
     resetIsSearching();
     setOrigin(destination);
