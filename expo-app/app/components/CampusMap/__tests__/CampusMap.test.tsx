@@ -78,23 +78,27 @@ describe("CampusMap", () => {
   });
 
   it("should display the loading spinner while fetching restaurants", async () => {
+    jest.useFakeTimers();
     const { getByTestId, queryByTestId, findAllByTestId } = render(<CampusMap pressedOptimizeRoute={false} />);
     const eatButton = getByTestId("nav-tab-nav-item-Eat");
     fireEvent.press(eatButton);
-  
+    
     await waitFor(() => {
       expect(getByTestId("loading-spinner")).toBeTruthy();
     });
   
-    const restaurantMarkers = await findAllByTestId(/restaurant-marker-.*/);
+    jest.advanceTimersByTime(1000);
   
+    const restaurantMarkers = await findAllByTestId(/restaurant-marker-.*/);
+    
     await waitFor(() => {
       expect(queryByTestId("loading-spinner")).toBeNull();
     });
-  
+    
     expect(restaurantMarkers.length).toBeGreaterThan(0);
+    jest.useRealTimers();
   });
-  
+
   it("should display building markers on the map and open modal when clicked", async () => {
     const { getByTestId, queryByTestId } = render(<CampusMap pressedOptimizeRoute={false} />);
     const buildingMarker = getByTestId("building-marker-1-marker");
