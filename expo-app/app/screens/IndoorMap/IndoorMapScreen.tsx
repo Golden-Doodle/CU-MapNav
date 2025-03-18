@@ -1,11 +1,11 @@
 import React from "react";
 import { SafeAreaView, Text } from "react-native";
-import { MiMapView } from "@mappedin/react-native-sdk";
+import { MiMapView, TGetVenueOptions } from "@mappedin/react-native-sdk";
 
 // See Trial API key Terms and Conditions
 // https://developer.mappedin.com/docs/demo-keys-and-maps
 
-const options = {
+const options: TGetVenueOptions = {
   //Details for demo map (just for testing)
   clientId: "5eab30aa91b055001a68e996",
   clientSecret: "RJyRXKcryCMy4erZqqCbuB1NbR66QTGNXVE0x3Pg6oCIlUR1",

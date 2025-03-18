@@ -22,7 +22,9 @@ export default function HomeMenuScreen() {
       </TouchableOpacity>
 
       {/* Menu Title */}
-      <Text style={styles.title} testID="menu-title">{t("Menu")}</Text>
+      <Text style={styles.title} testID="menu-title">
+        {t("Menu")}
+      </Text>
 
       {/* Navigation Options */}
       <TouchableOpacity
@@ -44,9 +46,9 @@ export default function HomeMenuScreen() {
         <Text style={styles.menuText}>💬 {t("Chatbot")}</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity 
-        style={styles.menuItem} 
-        activeOpacity={0.8} 
+      <TouchableOpacity
+        style={styles.menuItem}
+        activeOpacity={0.8}
         onPress={() => router.push("/screens/Shuttle/ShuttleScreen")}
         testID="shuttle-button"
       >
@@ -62,13 +64,13 @@ export default function HomeMenuScreen() {
         <Text style={styles.menuText}>📖 {t("Study Spots")}</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity 
-        style={styles.menuItem} 
-        activeOpacity={0.8} 
-        onPress={() => router.push("/screens/IndoorMap/IndoorMap")}
-        testID="indoor-nav-button"
+      <TouchableOpacity
+        style={styles.menuItem}
+        activeOpacity={0.8}
+        onPress={() => router.push("/screens/IndoorMap/IndoorMapScreen")}
+        testID="indoor-map-button"
       >
-        <Text style={styles.menuText}>🏢 Indoor Navigation</Text>
+        <Text style={styles.menuText}>🏢 {t("Indoor Map")}</Text>
       </TouchableOpacity>
     </View>
   );
