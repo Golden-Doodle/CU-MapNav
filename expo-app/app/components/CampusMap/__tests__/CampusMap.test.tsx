@@ -211,4 +211,17 @@ describe("CampusMap", () => {
       expect(queryByTestId("building-info-modal-use-as-origin-button")).toBeNull()
     );
   });
+
+  it("Should focus on the inputText when the search modal is opened", async () => {
+    const { getByTestId } = render(<CampusMap pressedOptimizeRoute={false} />);
+
+    // Step 1: Open the search modal
+    fireEvent.press(getByTestId("nav-tab-nav-item-Search"));
+
+    // Step 2: Wait for the search modal to appear
+    await waitFor(() => {
+      expect(getByTestId("search-modal-search-input")).toBeTruthy();
+    });
+
+  });
 });

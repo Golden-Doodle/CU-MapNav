@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Modal, View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from "react-native";
 import {
   Building,
@@ -45,8 +45,27 @@ const SearchModal: React.FC<SearchModalProps> = ({
     returnDataOnEmptyQuery: false, // Return all data when input is empty
   });
 
+  // Ref for the TextInput
+  const searchInputRef = useRef<TextInput>(null);
+
+  useEffect(() => {
+    if (visible) {
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 100);
+    }
+  }, [visible]);
+
   return (
-    <Modal visible={visible} animationType="slide" transparent testID={testID}>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent
+      testID={testID}
+      onShow={() => {
+        searchInputRef.current?.focus();
+      }}
+    >
       <View style={styles.overlay} testID={`${testID}-overlay`}>
         <View style={styles.modalContainer} testID={`${testID}-modal-container`}>
           {/* Header */}
@@ -67,13 +86,14 @@ const SearchModal: React.FC<SearchModalProps> = ({
           <View style={styles.inputContainer} testID={`${testID}-input-container`}>
             <MaterialIcons name="search" size={24} color="#888" />
             <TextInput
+              ref={searchInputRef}
               style={styles.input}
               placeholder={t("Search for destination...")}
               placeholderTextColor="#888"
               value={searchQuery}
               onChangeText={setSearchQuery}
-              autoFocus
               testID={`${testID}-search-input`}
+              autoFocus
             />
           </View>
 
