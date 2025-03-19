@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { MappedinDirections, MapViewStore } from '@mappedin/react-native-sdk';
-import { generateDirections } from '../../services/Mappped-In/IndoorMapService';
+import { generateDirections } from '../../services/Mapped-In/MappedInService';
 
 interface DirectionsModalProps {
   visible: boolean;

@@ -18,7 +18,7 @@ import {
   generateDirections,
   clearDirections,
   RoomItem,
-} from '../../services/Mappped-In/IndoorMapService';
+} from '../../services/Mapped-In/MappedInService';
 
 interface IndoorRoutePlannerProps {
   mapView: React.RefObject<MapViewStore>;
