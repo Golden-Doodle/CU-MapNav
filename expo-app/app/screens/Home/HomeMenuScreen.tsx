@@ -65,7 +65,7 @@ export default function HomeMenuScreen() {
       <TouchableOpacity 
         style={styles.menuItem} 
         activeOpacity={0.8} 
-        onPress={() => router.push("/screens/IndoorMap/IndoorMap")}
+        onPress={() => router.push("/screens/IndoorMap/IndoorMapScreen")}
         testID="indoor-nav-button"
       >
         <Text style={styles.menuText}>🏢 Indoor Navigation</Text>
