@@ -36,7 +36,6 @@ const BuildingFloorSettingsModal: React.FC<IBuildingFloorSettingsModalProps> = (
   const [openFloor, setOpenFloor] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Correctly typed handler for building changes with loading overlay.
   const handleBuildingChange: React.Dispatch<React.SetStateAction<string | null>> = (value) => {
     setIsLoading(true);
     let newValue: string | null;
@@ -46,7 +45,6 @@ const BuildingFloorSettingsModal: React.FC<IBuildingFloorSettingsModalProps> = (
       newValue = value;
     }
     onChangeBuilding(newValue);
-    // Simulate an async operation (replace with your actual async logic)
     setTimeout(() => {
       setIsLoading(false);
     }, 2000);

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Text,
   FlatList,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {
@@ -18,7 +19,7 @@ import {
 } from '@mappedin/react-native-sdk';
 
 import DirectionsModal from '@/app/components/IndoorNavigation/DirectionsModal';
-import BuildingFloorModal from '@/app/components/IndoorNavigation/BuildingFloorModal';
+import BuildingFloorModal from '@/app/components/IndoorNavigation/SetBuildingFloorModal';
 
 const buildings = [
   { label: 'Hall', value: '67c87db88e15de000bed1abb' },
@@ -73,6 +74,7 @@ const IndoorMap = () => {
     const currentMapId = mapView.current?.currentMap?.id;
     const availableMaps = mapView.current?.venueData?.maps || [];
     setSelectedFloor(currentMapId ?? null);
+
     const items = availableMaps.map((floor) => ({
       label: floor.name,
       value: floor.id,
@@ -110,6 +112,12 @@ const IndoorMap = () => {
     setActiveDirections(null);
   };
 
+  // Debug log for rendering
+  console.log(
+    '[RENDER] activeDirections?.instructions?.length:',
+    activeDirections?.instructions?.length
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.contentContainer}>
@@ -145,7 +153,8 @@ const IndoorMap = () => {
             <Icon name="directions-walk" size={35} color="#912338" />
           </TouchableOpacity>
 
-          {activeDirections && (
+          {/* Render directions buttons only if activeDirections has valid instructions */}
+          {activeDirections?.instructions?.length ? (
             <View style={styles.directionsOverlay} pointerEvents="box-none">
               {showDirections ? (
                 <View style={styles.directionsContainer}>
@@ -177,7 +186,7 @@ const IndoorMap = () => {
                 </View>
               )}
             </View>
-          )}
+          ) : null}
         </View>
       </View>
 
@@ -186,6 +195,19 @@ const IndoorMap = () => {
         onRequestClose={() => setDirectionsModalVisible(false)}
         mapView={mapView}
         onDirectionsSet={(directions) => {
+          console.log('[DEBUG] onDirectionsSet -> directions:', directions);
+          // If no directions, or distance is zero with a single instruction and no path, treat as invalid.
+          if (
+            !directions ||
+            !directions.instructions ||
+            directions.instructions.length === 0 ||
+            (directions.distance === 0 &&
+              directions.instructions.length === 1 &&
+              directions.path.length === 0)
+          ) {
+            Alert.alert('Directions Unavailable', 'No valid paths found.');
+            return;
+          }
           setActiveDirections(directions);
         }}
       />
@@ -240,10 +262,6 @@ const styles = StyleSheet.create({
     right: 20,
     padding: 8,
     zIndex: 20,
-  },
-  directionsButtonText: {
-    color: '#fff',
-    fontWeight: '600',
   },
   directionsOverlay: {
     position: 'absolute',
