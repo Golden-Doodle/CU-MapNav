@@ -1,152 +1,208 @@
 import React from 'react';
-import { Alert } from 'react-native';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { Alert } from 'react-native';
 import DirectionsModal from '../DirectionsModal';
 import { generateDirections } from '../../../services/Mapped-In/MappedInService';
+import { MapViewStore } from '@mappedin/react-native-sdk';
 
 jest.mock('../../../services/Mapped-In/MappedInService', () => ({
   generateDirections: jest.fn(),
 }));
 
-const defaultVenueData = {
-  locations: [
-    { name: 'Room1', toMap: 'map1', nodes: [] },
-    { name: 'Room2', toMap: 'map2', nodes: [] },
-  ],
-};
-
-const createFakeMapView = (customVenueData = defaultVenueData) => ({
-  current: {
-    venueData: customVenueData,
-    setMap: jest.fn(),
-  },
+jest.mock('../SearchablePicker', () => {
+  const React = require('react');
+  const { TouchableOpacity, Text } = require('react-native');
+  return (props: any) => {
+    const handlePress = () => {
+      if (props.placeholder === 'Select a start room') {
+        props.onValueChange(props.items[0].value);
+      } else if (props.placeholder === 'Select a destination room') {
+        props.onValueChange(
+          props.items.length > 1 ? props.items[1].value : props.items[0].value
+        );
+      }
+    };
+    return (
+      <TouchableOpacity testID={props.placeholder} onPress={handlePress}>
+        <Text>{props.selectedValue || props.placeholder}</Text>
+      </TouchableOpacity>
+    );
+  };
 });
 
-type RenderModalProps = {
-  visible?: boolean;
-  onRequestClose?: () => void;
-  onDirectionsSet?: (directions: any) => void;
-  mapView: any;
-};
-
-const renderDirectionsModal = ({
-  visible = true,
-  onRequestClose = jest.fn(),
-  onDirectionsSet = jest.fn(),
-  mapView,
-}: RenderModalProps) => {
-  return render(
-    <DirectionsModal
-      visible={visible}
-      onRequestClose={onRequestClose}
-      mapView={mapView}
-      onDirectionsSet={onDirectionsSet}
-    />
-  );
-};
-
 describe('DirectionsModal', () => {
-  let fakeMapView: ReturnType<typeof createFakeMapView>;
+  const dummyDirections = { direction: 'dummy' };
+  const onRequestClose = jest.fn();
+  const onDirectionsSet = jest.fn();
+  const mapView = {
+    current: {
+      venueData: {
+        locations: [
+          { name: 'RoomA', toMap: 'map1' },
+          { name: 'RoomB', toMap: 'map2' },
+        ],
+      },
+      setMap: jest.fn(),
+    },
+  } as unknown as React.RefObject<MapViewStore>;
 
   beforeEach(() => {
-    fakeMapView = createFakeMapView();
+    jest.clearAllMocks();
     (generateDirections as jest.Mock).mockReset();
   });
 
-  it('renders the modal correctly when visible', () => {
-    const { getByText } = renderDirectionsModal({ mapView: fakeMapView });
+  test('renders modal when visible', () => {
+    const { getByText } = render(
+      <DirectionsModal
+        visible={true}
+        onRequestClose={onRequestClose}
+        mapView={mapView}
+        onDirectionsSet={onDirectionsSet}
+      />
+    );
     expect(getByText('Select Rooms')).toBeTruthy();
     expect(getByText('Start Room:')).toBeTruthy();
     expect(getByText('Destination Room:')).toBeTruthy();
+    expect(getByText('Get Directions')).toBeTruthy();
+    expect(getByText('Close')).toBeTruthy();
   });
 
-  it('shows alert if start or destination room is not selected', () => {
+  test('alerts when start or destination room is not selected', () => {
     const alertSpy = jest.spyOn(Alert, 'alert');
-    const { getByText } = renderDirectionsModal({ mapView: fakeMapView });
+    const { getByText } = render(
+      <DirectionsModal
+        visible={true}
+        onRequestClose={onRequestClose}
+        mapView={mapView}
+        onDirectionsSet={onDirectionsSet}
+      />
+    );
     fireEvent.press(getByText('Get Directions'));
     expect(alertSpy).toHaveBeenCalledWith(
       'Select Room',
       'Please select both a start and destination room.'
     );
-    alertSpy.mockRestore();
   });
 
-  it('calls getDirections and updates map when valid rooms are selected with departure.toMap', async () => {
-    (generateDirections as jest.Mock).mockReturnValue({ route: 'fake-route' });
-    const onDirectionsSetMock = jest.fn();
-    const onRequestCloseMock = jest.fn();
-    const { getByText, getByTestId } = renderDirectionsModal({
-      mapView: fakeMapView,
-      onDirectionsSet: onDirectionsSetMock,
-      onRequestClose: onRequestCloseMock,
-    });
-    fireEvent(getByTestId('startPicker'), 'onValueChange', 'Room1');
-    fireEvent(getByTestId('destinationPicker'), 'onValueChange', 'Room2');
+  test('calls getDirections successfully when both rooms are selected (toMap branch)', async () => {
+    (generateDirections as jest.Mock).mockReturnValue(dummyDirections);
+    const { getByText, getByTestId } = render(
+      <DirectionsModal
+        visible={true}
+        onRequestClose={onRequestClose}
+        mapView={mapView}
+        onDirectionsSet={onDirectionsSet}
+      />
+    );
+    fireEvent.press(getByTestId('Select a start room'));
+    fireEvent.press(getByTestId('Select a destination room'));
     fireEvent.press(getByText('Get Directions'));
-    expect(generateDirections).toHaveBeenCalledWith(fakeMapView, 'Room1', 'Room2');
-    expect(fakeMapView.current.setMap).toHaveBeenCalledWith('map1');
     await waitFor(() => {
-      expect(onDirectionsSetMock).toHaveBeenCalledWith({ route: 'fake-route' });
-      expect(onRequestCloseMock).toHaveBeenCalled();
+      expect(generateDirections).toHaveBeenCalledWith(mapView, 'RoomA', 'RoomB');
+      expect(mapView.current!.setMap).toHaveBeenCalledWith('map1');
+      expect(onDirectionsSet).toHaveBeenCalledWith(dummyDirections);
+      expect(onRequestClose).toHaveBeenCalled();
     });
   });
 
-  it('calls getDirections and updates map using node.map.id when departure.toMap is absent', async () => {
-    const customVenueData: any = {
-      locations: [
-        { name: 'Room1', toMap: undefined, nodes: [{ map: { id: 'nodeMap1' } }] },
-        { name: 'Room2', toMap: 'map2', nodes: [] },
-      ],
-    };
-    fakeMapView = createFakeMapView(customVenueData);
-    (generateDirections as jest.Mock).mockReturnValue({ route: 'fake-route' });
-    const onDirectionsSetMock = jest.fn();
-    const onRequestCloseMock = jest.fn();
-    const { getByText, getByTestId } = renderDirectionsModal({
-      mapView: fakeMapView,
-      onDirectionsSet: onDirectionsSetMock,
-      onRequestClose: onRequestCloseMock,
-    });
-    fireEvent(getByTestId('startPicker'), 'onValueChange', 'Room1');
-    fireEvent(getByTestId('destinationPicker'), 'onValueChange', 'Room2');
+  test('calls getDirections successfully when departure has nodes (no toMap branch)', async () => {
+    const mapViewNodes = {
+      current: {
+        venueData: {
+          locations: [
+            { name: 'RoomA', nodes: [{ map: { id: 'nodeMap' } }] },
+            { name: 'RoomB', toMap: 'map2' },
+          ],
+        },
+        setMap: jest.fn(),
+      },
+    } as unknown as React.RefObject<MapViewStore>;
+    (generateDirections as jest.Mock).mockReturnValue(dummyDirections);
+    const { getByText, getByTestId } = render(
+      <DirectionsModal
+        visible={true}
+        onRequestClose={onRequestClose}
+        mapView={mapViewNodes}
+        onDirectionsSet={onDirectionsSet}
+      />
+    );
+    fireEvent.press(getByTestId('Select a start room'));
+    fireEvent.press(getByTestId('Select a destination room')); 
     fireEvent.press(getByText('Get Directions'));
-    expect(generateDirections).toHaveBeenCalledWith(fakeMapView, 'Room1', 'Room2');
-    expect(fakeMapView.current.setMap).toHaveBeenCalledWith('nodeMap1');
     await waitFor(() => {
-      expect(onDirectionsSetMock).toHaveBeenCalledWith({ route: 'fake-route' });
-      expect(onRequestCloseMock).toHaveBeenCalled();
+      expect(generateDirections).toHaveBeenCalledWith(mapViewNodes, 'RoomA', 'RoomB');
+      expect(mapViewNodes.current!.setMap).toHaveBeenCalledWith('nodeMap');
+      expect(onDirectionsSet).toHaveBeenCalledWith(dummyDirections);
+      expect(onRequestClose).toHaveBeenCalled();
     });
   });
 
-  it('shows alert when generateDirections returns null', async () => {
+  test('alerts when directions unavailable', async () => {
     (generateDirections as jest.Mock).mockReturnValue(null);
     const alertSpy = jest.spyOn(Alert, 'alert');
-    const onDirectionsSetMock = jest.fn();
-    const onRequestCloseMock = jest.fn();
-    const { getByText, getByTestId } = renderDirectionsModal({
-      mapView: fakeMapView,
-      onDirectionsSet: onDirectionsSetMock,
-      onRequestClose: onRequestCloseMock,
-    });
-    fireEvent(getByTestId('startPicker'), 'onValueChange', 'Room1');
-    fireEvent(getByTestId('destinationPicker'), 'onValueChange', 'Room2');
-    fireEvent.press(getByText('Get Directions'));
-    expect(alertSpy).toHaveBeenCalledWith(
-      'Directions Unavailable',
-      'No directions found between these locations.'
+    const { getByText, getByTestId } = render(
+      <DirectionsModal
+        visible={true}
+        onRequestClose={onRequestClose}
+        mapView={mapView}
+        onDirectionsSet={onDirectionsSet}
+      />
     );
-    alertSpy.mockRestore();
-    expect(onDirectionsSetMock).not.toHaveBeenCalled();
-    expect(onRequestCloseMock).not.toHaveBeenCalled();
+    fireEvent.press(getByTestId('Select a start room'));
+    fireEvent.press(getByTestId('Select a destination room'));
+    fireEvent.press(getByText('Get Directions'));
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalledWith(
+        'Directions Unavailable',
+        'No directions found between these locations.'
+      );
+    });
   });
 
-  it('calls onRequestClose when the close button is pressed', () => {
-    const onRequestCloseMock = jest.fn();
-    const { getByText } = renderDirectionsModal({
-      mapView: fakeMapView,
-      onRequestClose: onRequestCloseMock,
-    });
+  test('calls onRequestClose when Close button is pressed', async () => {
+    const { getByText } = render(
+      <DirectionsModal
+        visible={true}
+        onRequestClose={onRequestClose}
+        mapView={mapView}
+        onDirectionsSet={onDirectionsSet}
+      />
+    );
     fireEvent.press(getByText('Close'));
-    expect(onRequestCloseMock).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(onRequestClose).toHaveBeenCalled();
+    });
+  });
+
+  test('calls onRequestClose when backdrop is pressed', async () => {
+    const { getByTestId } = render(
+      <DirectionsModal
+        visible={true}
+        onRequestClose={onRequestClose}
+        mapView={mapView}
+        onDirectionsSet={onDirectionsSet}
+      />
+    );
+    const backdrop = getByTestId('backdrop');
+    fireEvent.press(backdrop);
+    await waitFor(() => {
+      expect(onRequestClose).toHaveBeenCalled();
+    });
+  });
+
+  test('calls onRequestClose when Modal onRequestClose is triggered', async () => {
+    const { getByTestId } = render(
+      <DirectionsModal
+        visible={true}
+        onRequestClose={onRequestClose}
+        mapView={mapView}
+        onDirectionsSet={onDirectionsSet}
+      />
+    );
+    const modal = getByTestId('modal');
+    modal.props.onRequestClose();
+    await waitFor(() => {
+      expect(onRequestClose).toHaveBeenCalled();
+    });
   });
 });

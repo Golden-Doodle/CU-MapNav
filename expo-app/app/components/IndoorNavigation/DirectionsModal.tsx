@@ -1,3 +1,4 @@
+// DirectionsModal.tsx
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -7,7 +8,7 @@ import {
   StyleSheet,
   Modal,
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import SearchablePicker from './SearchablePicker';
 import { MappedinDirections, MapViewStore } from '@mappedin/react-native-sdk';
 import { generateDirections } from '../../services/Mapped-In/MappedInService';
 
@@ -71,39 +72,36 @@ const DirectionsModal: React.FC<DirectionsModalProps> = ({
       transparent
       animationType="slide"
       onRequestClose={onRequestClose}
+      testID="modal"
     >
       <View style={styles.modalBackground}>
         <TouchableOpacity
           style={styles.backdrop}
           activeOpacity={1}
           onPress={onRequestClose}
+          testID="backdrop"
         />
         <View style={styles.modalCard}>
           <Text style={styles.headerText}>Select Rooms</Text>
+
           <Text style={styles.label}>Start Room:</Text>
-          <Picker
-            testID="startPicker"
+          <SearchablePicker
+            items={roomItems}
             selectedValue={startRoom}
-            onValueChange={(val) => setStartRoom(val)}
-            style={styles.picker}
-          >
-            <Picker.Item key="default-start" label="Select a room" value="" />
-            {roomItems.map((item) => (
-              <Picker.Item key={item.value} label={item.label} value={item.value} />
-            ))}
-          </Picker>
+            onValueChange={setStartRoom}
+            placeholder="Select a start room"
+            modalTitle="Select Start Room"
+          />
+
           <Text style={styles.label}>Destination Room:</Text>
-          <Picker
-            testID="destinationPicker"
+          <SearchablePicker
+            items={roomItems}
             selectedValue={destinationRoom}
-            onValueChange={(val) => setDestinationRoom(val)}
-            style={styles.picker}
-          >
-            <Picker.Item key="default-dest" label="Select a room" value="" />
-            {roomItems.map((item) => (
-              <Picker.Item key={item.value} label={item.label} value={item.value} />
-            ))}
-          </Picker>
+            onValueChange={setDestinationRoom}
+            placeholder="Select a destination room"
+            modalTitle="Select Destination Room"
+          />
+
           <View style={styles.buttonRow}>
             <TouchableOpacity style={styles.button} onPress={getDirections}>
               <Text style={styles.buttonText}>Get Directions</Text>
@@ -147,10 +145,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     marginTop: 10,
-  },
-  picker: {
-    height: 50,
-    width: '100%',
+    marginBottom: 5,
   },
   buttonRow: {
     flexDirection: 'row',
