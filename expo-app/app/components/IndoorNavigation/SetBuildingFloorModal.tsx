@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import {
   Modal,
   View,
@@ -12,7 +12,17 @@ import {
   FloorDropdown,
 } from '@/app/components/IndoorNavigation/DropDownPicker';
 
-interface IBuildingFloorSettingsModalProps {
+export interface IBuildingFloorSettingsModalHandles {
+  handleOpenBuilding: (open: boolean | ((prev: boolean) => boolean)) => void;
+  handleOpenFloor: (open: boolean | ((prev: boolean) => boolean)) => void;
+  handleBuildingChange: (
+    value: string | null | ((prev: string | null) => string | null)
+  ) => void;
+  getOpenBuilding: () => boolean;
+  getOpenFloor: () => boolean;
+}
+
+export interface IBuildingFloorSettingsModalProps {
   visible: boolean;
   onRequestClose: () => void;
 
@@ -27,7 +37,10 @@ interface IBuildingFloorSettingsModalProps {
   testID?: string;
 }
 
-const BuildingFloorSettingsModal: React.FC<IBuildingFloorSettingsModalProps> = ({
+const BuildingFloorSettingsModal = forwardRef<
+  IBuildingFloorSettingsModalHandles,
+  IBuildingFloorSettingsModalProps
+>(({
   visible,
   onRequestClose,
   selectedBuilding,
@@ -37,14 +50,12 @@ const BuildingFloorSettingsModal: React.FC<IBuildingFloorSettingsModalProps> = (
   onChangeFloor,
   floorItems,
   testID,
-}) => {
+}, ref) => {
   const [openBuilding, setOpenBuilding] = useState<boolean>(false);
   const [openFloor, setOpenFloor] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Updated handler to accept the full Dispatch<SetStateAction<boolean>> type.
   const handleOpenBuilding: React.Dispatch<React.SetStateAction<boolean>> = (openValueOrUpdater) => {
-    // Determine the new value
     const newValue =
       typeof openValueOrUpdater === 'function'
         ? openValueOrUpdater(openBuilding)
@@ -79,6 +90,14 @@ const BuildingFloorSettingsModal: React.FC<IBuildingFloorSettingsModalProps> = (
       setIsLoading(false);
     }, 2000);
   };
+
+  useImperativeHandle(ref, () => ({
+    handleOpenBuilding,
+    handleOpenFloor,
+    handleBuildingChange,
+    getOpenBuilding: () => openBuilding,
+    getOpenFloor: () => openFloor,
+  }));
 
   return (
     <Modal
@@ -118,7 +137,7 @@ const BuildingFloorSettingsModal: React.FC<IBuildingFloorSettingsModalProps> = (
           <Text style={styles.label} testID="bfsFloorLabel">
             Select Floor:
           </Text>
-          {/* Floor container with lower zIndex */}
+          {/* Floor container */}
           <View style={styles.floorContainer}>
             <FloorDropdown
               testID="floorDropdown"
@@ -149,7 +168,7 @@ const BuildingFloorSettingsModal: React.FC<IBuildingFloorSettingsModalProps> = (
       </View>
     </Modal>
   );
-};
+});
 
 export default BuildingFloorSettingsModal;
 

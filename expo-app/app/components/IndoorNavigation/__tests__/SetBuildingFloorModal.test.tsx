@@ -1,6 +1,9 @@
 import React from 'react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
-import BuildingFloorSettingsModal from '../SetBuildingFloorModal';
+import BuildingFloorSettingsModal, {
+  IBuildingFloorSettingsModalProps,
+  IBuildingFloorSettingsModalHandles,
+} from '../SetBuildingFloorModal';
 
 jest.useFakeTimers();
 
@@ -23,12 +26,17 @@ jest.mock('@/app/components/IndoorNavigation/DropDownPicker', () => {
       label?: string;
       items?: any[];
       open?: boolean;
-      setOpen?: (open: boolean) => void;
+      setOpen?: (open: boolean | ((prev: boolean) => boolean)) => void;
     }) => {
       return (
         <TouchableOpacity
           testID={testID}
-          onPress={() => setValue('new-building')}
+          onPress={() => {
+            if (setOpen) {
+              setOpen(true);
+            }
+            setValue('new-building');
+          }}
         >
           <Text>{value || 'Select Building'}</Text>
         </TouchableOpacity>
@@ -50,13 +58,20 @@ jest.mock('@/app/components/IndoorNavigation/DropDownPicker', () => {
       label?: string;
       items?: any[];
       open?: boolean;
-      setOpen?: (open: boolean) => void;
+      setOpen?: (open: boolean | ((prev: boolean) => boolean)) => void;
       disabled?: boolean;
     }) => {
       return (
         <TouchableOpacity
           testID={testID}
-          onPress={() => setValue('new-floor')}
+          onPress={() => {
+            if (!disabled) {
+              if (setOpen) {
+                setOpen((prev: boolean) => !prev);
+              }
+              setValue('new-floor');
+            }
+          }}
           disabled={disabled}
         >
           <Text>{value || 'Select Floor'}</Text>
@@ -87,7 +102,7 @@ describe('BuildingFloorSettingsModal', () => {
   const mockOnChangeBuilding = jest.fn();
   const mockOnChangeFloor = jest.fn();
 
-  const defaultProps = {
+  const defaultProps: IBuildingFloorSettingsModalProps = {
     visible: true,
     onRequestClose: mockOnRequestClose,
     selectedBuilding: 'building-a',
@@ -161,5 +176,87 @@ describe('BuildingFloorSettingsModal', () => {
       fireEvent.press(getByTestId('floorDropdown'));
     });
     expect(mockOnChangeFloor).toHaveBeenCalledWith('new-floor');
+  });
+
+  it('displays default text when selected building and floor are null', () => {
+    const newProps = {
+      ...defaultProps,
+      selectedBuilding: null,
+      selectedFloor: null,
+    };
+    const { getByText } = render(
+      <BuildingFloorSettingsModal {...newProps} />
+    );
+    expect(getByText('Select Building')).toBeTruthy();
+    expect(getByText('Select Floor')).toBeTruthy();
+  });
+
+  it('does not trigger floor change when floor dropdown is disabled', () => {
+    const newProps = {
+      ...defaultProps,
+      floorItems: [],
+    };
+    const { getByTestId } = render(
+      <BuildingFloorSettingsModal {...newProps} />
+    );
+    act(() => {
+      fireEvent.press(getByTestId('floorDropdown'));
+    });
+    expect(mockOnChangeFloor).not.toHaveBeenCalled();
+  });
+
+  it('handleOpenBuilding boolean branch works', () => {
+    const ref = React.createRef<IBuildingFloorSettingsModalHandles>();
+    render(<BuildingFloorSettingsModal ref={ref} {...defaultProps} />);
+    act(() => {
+      ref.current?.handleOpenBuilding(false);
+    });
+    expect(ref.current?.getOpenBuilding()).toBe(false);
+  });
+
+  it('handleOpenBuilding function branch works', () => {
+    const ref = React.createRef<IBuildingFloorSettingsModalHandles>();
+    render(<BuildingFloorSettingsModal ref={ref} {...defaultProps} />);
+    act(() => {
+      ref.current?.handleOpenBuilding((prev) => !prev);
+    });
+
+    expect(ref.current?.getOpenBuilding()).toBe(true);
+    expect(ref.current?.getOpenFloor()).toBe(false);
+  });
+
+  it('handleOpenFloor boolean branch works', () => {
+    const ref = React.createRef<IBuildingFloorSettingsModalHandles>();
+    render(<BuildingFloorSettingsModal ref={ref} {...defaultProps} />);
+    act(() => {
+      ref.current?.handleOpenFloor(false);
+    });
+    expect(ref.current?.getOpenFloor()).toBe(false);
+  });
+
+  it('handleOpenFloor function branch works', () => {
+    const ref = React.createRef<IBuildingFloorSettingsModalHandles>();
+    render(<BuildingFloorSettingsModal ref={ref} {...defaultProps} />);
+
+    act(() => {
+      ref.current?.handleOpenBuilding(true);
+    });
+    expect(ref.current?.getOpenBuilding()).toBe(true);
+
+    act(() => {
+      ref.current?.handleOpenFloor((prev) => true);
+    });
+
+    expect(ref.current?.getOpenFloor()).toBe(true);
+    expect(ref.current?.getOpenBuilding()).toBe(false);
+  });
+
+  it('handleBuildingChange function branch works', () => {
+    const ref = React.createRef<IBuildingFloorSettingsModalHandles>();
+    render(<BuildingFloorSettingsModal ref={ref} {...defaultProps} />);
+    act(() => {
+      ref.current?.handleBuildingChange((prev) => 'updated-building');
+    });
+    expect(mockOnChangeBuilding).toHaveBeenCalledWith('updated-building');
   });
 });

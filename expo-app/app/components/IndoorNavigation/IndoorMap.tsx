@@ -20,14 +20,15 @@ import {
 
 import DirectionsModal from '@/app/components/IndoorNavigation/DirectionsModal';
 import BuildingFloorModal from '@/app/components/IndoorNavigation/SetBuildingFloorModal';
+import Constants from 'expo-constants';
 
 const buildings = [
   { label: 'Hall', value: '67c87db88e15de000bed1abb' },
   { label: 'JMSB', value: '67d974ddf63286000bb80fc3' },
 ];
 
-const key = 'mik_LUeYSdqlvDJYpSHXT56b207a8';
-const secret = 'mis_toNhLLj9mmlK5rJzJHebi3km4rjI9V3x3VUzgpPCYbq9a2410c7';
+const key = Constants.expoConfig?.extra?.mappedInApiKey; 
+const secret = Constants.expoConfig?.extra?.mappedInSecret; 
 
 const DirectionsList = ({ directions }: { directions: MappedinDirections | null }) => {
   if (!directions) return null;
