@@ -112,12 +112,6 @@ const IndoorMap = () => {
     setActiveDirections(null);
   };
 
-  // Debug log for rendering
-  console.log(
-    '[RENDER] activeDirections?.instructions?.length:',
-    activeDirections?.instructions?.length
-  );
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.contentContainer}>
@@ -137,7 +131,6 @@ const IndoorMap = () => {
             </View>
           )}
 
-          {/* Settings Button */}
           <TouchableOpacity
             style={styles.settingsButton}
             onPress={() => setSettingsModalVisible(true)}
@@ -145,7 +138,6 @@ const IndoorMap = () => {
             <Icon name="settings" size={32} color="#912338" />
           </TouchableOpacity>
 
-          {/* Directions Button with Icon */}
           <TouchableOpacity
             style={styles.directionsButton}
             onPress={() => setDirectionsModalVisible(true)}
@@ -153,7 +145,6 @@ const IndoorMap = () => {
             <Icon name="directions-walk" size={35} color="#912338" />
           </TouchableOpacity>
 
-          {/* Render directions buttons only if activeDirections has valid instructions */}
           {activeDirections?.instructions?.length ? (
             <View style={styles.directionsOverlay} pointerEvents="box-none">
               {showDirections ? (
@@ -195,8 +186,6 @@ const IndoorMap = () => {
         onRequestClose={() => setDirectionsModalVisible(false)}
         mapView={mapView}
         onDirectionsSet={(directions) => {
-          console.log('[DEBUG] onDirectionsSet -> directions:', directions);
-          // If no directions, or distance is zero with a single instruction and no path, treat as invalid.
           if (
             !directions ||
             !directions.instructions ||

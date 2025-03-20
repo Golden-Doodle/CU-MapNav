@@ -46,6 +46,19 @@ const DirectionsModal: React.FC<DirectionsModalProps> = ({
     }
     const directions = generateDirections(mapView, startRoom, destinationRoom);
     if (directions) {
+
+      const allLocations = mapView.current?.venueData?.locations || [];
+      const departure = allLocations.find((loc: any) => loc.name === startRoom);
+      if (departure) {
+        if (departure.toMap) {
+          mapView.current?.setMap(departure.toMap);
+        } else if (departure.nodes && departure.nodes.length > 0) {
+          const node = departure.nodes[0];
+          if (node.map && node.map.id) {
+            mapView.current?.setMap(node.map.id);
+          }
+        }
+      }
       onDirectionsSet(directions);
       onRequestClose();
     } else {
@@ -61,17 +74,13 @@ const DirectionsModal: React.FC<DirectionsModalProps> = ({
       onRequestClose={onRequestClose}
     >
       <View style={styles.modalBackground}>
-        {/* A background that closes the modal if tapped */}
         <TouchableOpacity
           style={styles.backdrop}
           activeOpacity={1}
           onPress={onRequestClose}
         />
-
-        {/* The actual card for picking rooms */}
         <View style={styles.modalCard}>
           <Text style={styles.headerText}>Select Rooms</Text>
-
           <Text style={styles.label}>Start Room:</Text>
           <Picker
             selectedValue={startRoom}
@@ -83,7 +92,6 @@ const DirectionsModal: React.FC<DirectionsModalProps> = ({
               <Picker.Item key={item.value} label={item.label} value={item.value} />
             ))}
           </Picker>
-
           <Text style={styles.label}>Destination Room:</Text>
           <Picker
             selectedValue={destinationRoom}
@@ -95,7 +103,6 @@ const DirectionsModal: React.FC<DirectionsModalProps> = ({
               <Picker.Item key={item.value} label={item.label} value={item.value} />
             ))}
           </Picker>
-
           <View style={styles.buttonRow}>
             <TouchableOpacity style={styles.button} onPress={getDirections}>
               <Text style={styles.buttonText}>Get Directions</Text>
