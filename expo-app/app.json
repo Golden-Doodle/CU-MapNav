@@ -58,6 +58,8 @@
     },
     "extra": {
       "googleMapsApiKey": "AIzaSyBYvb6Sg2jIbSgu_ckcLfsUekS2-pS5mc8",
+      "mappedInApiKey": "mik_LUeYSdqlvDJYpSHXT56b207a8",
+      "mappedInSecret" : "mis_toNhLLj9mmlK5rJzJHebi3km4rjI9V3x3VUzgpPCYbq9a2410c7",
       "router": {
         "origin": false
       },
