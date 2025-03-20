@@ -13,7 +13,7 @@ type DropdownProps = {
   disabled?: boolean;
   zIndex?: number;
   zIndexInverse?: number;
-  testID?: string; // Optional testID for the root container
+  testID?: string; 
 };
 
 export const BuildingDropdown = ({

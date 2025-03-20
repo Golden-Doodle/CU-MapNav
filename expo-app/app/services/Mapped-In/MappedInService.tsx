@@ -1,4 +1,3 @@
-// IndoorMapService.ts
 import { MapViewStore, MappedinDirections } from '@mappedin/react-native-sdk';
 import React from 'react';
 
