@@ -145,9 +145,10 @@ const styles = StyleSheet.create({
   },
   closeModalButton: {
     marginTop: 10,
-    padding: 10,
-    backgroundColor: '#912338',
-    borderRadius: 5,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: '#666',
+    borderRadius: 25,
     alignSelf: 'center',
   },
   closeModalButtonText: {
