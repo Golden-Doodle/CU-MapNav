@@ -46,7 +46,6 @@ const DirectionsModal: React.FC<DirectionsModalProps> = ({
     }
     const directions = generateDirections(mapView, startRoom, destinationRoom);
     if (directions) {
-
       const allLocations = mapView.current?.venueData?.locations || [];
       const departure = allLocations.find((loc: any) => loc.name === startRoom);
       if (departure) {
@@ -83,6 +82,7 @@ const DirectionsModal: React.FC<DirectionsModalProps> = ({
           <Text style={styles.headerText}>Select Rooms</Text>
           <Text style={styles.label}>Start Room:</Text>
           <Picker
+            testID="startPicker"
             selectedValue={startRoom}
             onValueChange={(val) => setStartRoom(val)}
             style={styles.picker}
@@ -94,6 +94,7 @@ const DirectionsModal: React.FC<DirectionsModalProps> = ({
           </Picker>
           <Text style={styles.label}>Destination Room:</Text>
           <Picker
+            testID="destinationPicker"
             selectedValue={destinationRoom}
             onValueChange={(val) => setDestinationRoom(val)}
             style={styles.picker}

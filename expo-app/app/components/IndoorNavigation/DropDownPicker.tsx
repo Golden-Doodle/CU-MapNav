@@ -13,6 +13,7 @@ type DropdownProps = {
   disabled?: boolean;
   zIndex?: number;
   zIndexInverse?: number;
+  testID?: string; // Optional testID for the root container
 };
 
 export const BuildingDropdown = ({
@@ -25,11 +26,13 @@ export const BuildingDropdown = ({
   placeholder = 'Select Building',
   zIndex = 3000,
   zIndexInverse = 1000,
+  testID,
 }: DropdownProps) => {
   return (
-    <View style={styles.dropdownContainer}>
-      <Text style={styles.cardTitle}>{label}</Text>
+    <View style={styles.dropdownContainer} testID={testID || 'buildingDropdownContainer'}>
+      <Text style={styles.cardTitle} testID="buildingDropdownLabel">{label}</Text>
       <DropDownPicker
+        testID="buildingDropdownPicker"
         open={open}
         value={value}
         items={items}
@@ -57,11 +60,13 @@ export const FloorDropdown = ({
   disabled = false,
   zIndex = 2000,
   zIndexInverse = 2000,
+  testID,
 }: DropdownProps) => {
   return (
-    <View style={styles.dropdownContainer}>
-      <Text style={styles.cardTitle}>{label}</Text>
+    <View style={styles.dropdownContainer} testID={testID || 'floorDropdownContainer'}>
+      <Text style={styles.cardTitle} testID="floorDropdownLabel">{label}</Text>
       <DropDownPicker
+        testID="floorDropdownPicker"
         open={open}
         value={value}
         items={items}

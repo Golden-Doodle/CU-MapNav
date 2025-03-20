@@ -33,11 +33,14 @@ const DirectionsFlatList = ({
   if (!directions) return null;
 
   const renderItem = ({ item }: { item: TMappedinDirective }) => (
-    <Text style={styles.directionText}>{item.instruction}</Text>
+    <Text style={styles.directionText} testID="directionText">
+      {item.instruction}
+    </Text>
   );
 
   return (
     <FlatList
+      testID="directionsFlatList"
       data={directions.instructions}
       renderItem={renderItem}
       keyExtractor={(_, index) => index.toString()}
@@ -90,11 +93,16 @@ const IndoorRoutePlanner: React.FC<IndoorRoutePlannerProps> = ({
   };
 
   return (
-    <View style={styles.modalContent}>
-      <Text style={styles.headerText}>Get Directions</Text>
+    <View style={styles.modalContent} testID="routePlannerModalContent">
+      <Text style={styles.headerText} testID="headerText">
+        Get Directions
+      </Text>
 
-      <Text style={styles.label}>Select Starting Position:</Text>
+      <Text style={styles.label} testID="startRoomLabel">
+        Select Starting Position:
+      </Text>
       <Picker
+        testID="startRoomPicker"
         selectedValue={startRoom}
         onValueChange={(itemValue) => setStartRoom(itemValue)}
         style={styles.picker}
@@ -104,8 +112,11 @@ const IndoorRoutePlanner: React.FC<IndoorRoutePlannerProps> = ({
         ))}
       </Picker>
 
-      <Text style={styles.label}>Select Destination:</Text>
+      <Text style={styles.label} testID="destinationRoomLabel">
+        Select Destination:
+      </Text>
       <Picker
+        testID="destinationRoomPicker"
         selectedValue={destinationRoom}
         onValueChange={(itemValue) => setDestinationRoom(itemValue)}
         style={styles.picker}
@@ -115,9 +126,13 @@ const IndoorRoutePlanner: React.FC<IndoorRoutePlannerProps> = ({
         ))}
       </Picker>
 
-      <View style={styles.buttonRow}>
+      <View style={styles.buttonRow} testID="buttonRow">
         <TouchableOpacity
-          style={[styles.button, activeDirections ? styles.cancelButton : null]}
+          testID="toggleDirectionsButton"
+          style={[
+            styles.button,
+            activeDirections ? styles.cancelButton : null,
+          ]}
           onPress={toggleDirections}
         >
           <Text style={styles.buttonText}>
@@ -126,6 +141,7 @@ const IndoorRoutePlanner: React.FC<IndoorRoutePlannerProps> = ({
         </TouchableOpacity>
 
         <TouchableOpacity
+          testID="closeButton"
           style={[styles.button, styles.closeButton]}
           onPress={onRequestClose}
         >
@@ -134,7 +150,10 @@ const IndoorRoutePlanner: React.FC<IndoorRoutePlannerProps> = ({
       </View>
 
       {activeDirections && (
-        <View style={styles.directionsContainer}>
+        <View
+          style={styles.directionsContainer}
+          testID="directionsContainer"
+        >
           <DirectionsFlatList directions={activeDirections} />
         </View>
       )}

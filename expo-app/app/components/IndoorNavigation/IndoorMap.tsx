@@ -33,7 +33,7 @@ const DirectionsList = ({ directions }: { directions: MappedinDirections | null 
   if (!directions) return null;
 
   const renderItem = ({ item }: { item: TMappedinDirective }) => (
-    <Text style={styles.instruction}>{item.instruction}</Text>
+    <Text style={styles.instruction} testID="directionInstruction">{item.instruction}</Text>
   );
 
   return (
@@ -42,6 +42,7 @@ const DirectionsList = ({ directions }: { directions: MappedinDirections | null 
       renderItem={renderItem}
       keyExtractor={(_, index) => index.toString()}
       style={styles.directionsList}
+      testID="directionsList"
     />
   );
 };
@@ -113,9 +114,10 @@ const IndoorMap = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.contentContainer}>
-        <View style={styles.mapContainer}>
+    <SafeAreaView style={styles.container} testID="indoorMapContainer">
+      <View style={styles.contentContainer} testID="indoorMapContent">
+        <View style={styles.mapContainer} testID="mapContainer">
+          {/* MiMapView from the Mappedin SDK */}
           <MiMapView
             style={styles.map}
             key={selectedBuilding ?? 'default'}
@@ -126,7 +128,7 @@ const IndoorMap = () => {
           />
 
           {isMapLoading && (
-            <View style={styles.loaderContainer}>
+            <View style={styles.loaderContainer} testID="loaderContainer">
               <ActivityIndicator size="large" color="#912338" />
             </View>
           )}
@@ -134,6 +136,7 @@ const IndoorMap = () => {
           <TouchableOpacity
             style={styles.settingsButton}
             onPress={() => setSettingsModalVisible(true)}
+            testID="settingsButton"
           >
             <Icon name="settings" size={32} color="#912338" />
           </TouchableOpacity>
@@ -141,19 +144,21 @@ const IndoorMap = () => {
           <TouchableOpacity
             style={styles.directionsButton}
             onPress={() => setDirectionsModalVisible(true)}
+            testID="directionsButton"
           >
             <Icon name="directions-walk" size={35} color="#912338" />
           </TouchableOpacity>
 
           {activeDirections?.instructions?.length ? (
-            <View style={styles.directionsOverlay} pointerEvents="box-none">
+            <View style={styles.directionsOverlay} testID="directionsOverlay" pointerEvents="box-none">
               {showDirections ? (
-                <View style={styles.directionsContainer}>
-                  <View style={styles.directionsHeaderRow}>
-                    <Text style={styles.directionsTitle}>Directions</Text>
+                <View style={styles.directionsContainer} testID="directionsContainer">
+                  <View style={styles.directionsHeaderRow} testID="directionsHeaderRow">
+                    <Text style={styles.directionsTitle} testID="directionsTitle">Directions</Text>
                     <TouchableOpacity
                       onPress={() => setShowDirections(false)}
                       style={styles.iconButton}
+                      testID="minimizeButton"
                     >
                       <Icon name="minimize" size={24} color="#000" />
                     </TouchableOpacity>
@@ -161,16 +166,18 @@ const IndoorMap = () => {
                   <DirectionsList directions={activeDirections} />
                 </View>
               ) : (
-                <View style={styles.directionsButtonColumn}>
+                <View style={styles.directionsButtonColumn} testID="directionsButtonColumn">
                   <TouchableOpacity
                     style={[styles.button, styles.cancelButton]}
                     onPress={cancelDirections}
+                    testID="cancelDirectionsButton"
                   >
                     <Text style={styles.buttonText}>Cancel Directions</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.button, styles.showButton]}
                     onPress={() => setShowDirections(true)}
+                    testID="showDirectionsButton"
                   >
                     <Text style={styles.buttonText}>Show Directions</Text>
                   </TouchableOpacity>

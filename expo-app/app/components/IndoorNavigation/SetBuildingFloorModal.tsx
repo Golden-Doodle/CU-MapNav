@@ -7,7 +7,10 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
-import { BuildingDropdown, FloorDropdown } from '@/app/components/IndoorNavigation/DropDownPicker';
+import {
+  BuildingDropdown,
+  FloorDropdown,
+} from '@/app/components/IndoorNavigation/DropDownPicker';
 
 interface IBuildingFloorSettingsModalProps {
   visible: boolean;
@@ -20,6 +23,8 @@ interface IBuildingFloorSettingsModalProps {
   selectedFloor: string | null;
   onChangeFloor: React.Dispatch<React.SetStateAction<string | null>>;
   floorItems: { label: string; value: string }[];
+
+  testID?: string;
 }
 
 const BuildingFloorSettingsModal: React.FC<IBuildingFloorSettingsModalProps> = ({
@@ -31,10 +36,35 @@ const BuildingFloorSettingsModal: React.FC<IBuildingFloorSettingsModalProps> = (
   selectedFloor,
   onChangeFloor,
   floorItems,
+  testID,
 }) => {
-  const [openBuilding, setOpenBuilding] = useState(false);
-  const [openFloor, setOpenFloor] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [openBuilding, setOpenBuilding] = useState<boolean>(false);
+  const [openFloor, setOpenFloor] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  // Updated handler to accept the full Dispatch<SetStateAction<boolean>> type.
+  const handleOpenBuilding: React.Dispatch<React.SetStateAction<boolean>> = (openValueOrUpdater) => {
+    // Determine the new value
+    const newValue =
+      typeof openValueOrUpdater === 'function'
+        ? openValueOrUpdater(openBuilding)
+        : openValueOrUpdater;
+    setOpenBuilding(newValue);
+    if (newValue) {
+      setOpenFloor(false);
+    }
+  };
+
+  const handleOpenFloor: React.Dispatch<React.SetStateAction<boolean>> = (openValueOrUpdater) => {
+    const newValue =
+      typeof openValueOrUpdater === 'function'
+        ? openValueOrUpdater(openFloor)
+        : openValueOrUpdater;
+    setOpenFloor(newValue);
+    if (newValue) {
+      setOpenBuilding(false);
+    }
+  };
 
   const handleBuildingChange: React.Dispatch<React.SetStateAction<string | null>> = (value) => {
     setIsLoading(true);
@@ -56,35 +86,62 @@ const BuildingFloorSettingsModal: React.FC<IBuildingFloorSettingsModalProps> = (
       transparent
       animationType="slide"
       onRequestClose={onRequestClose}
+      testID={testID || 'buildingFloorSettingsModal'}
     >
-      <View style={styles.backdrop}>
-        <TouchableOpacity style={styles.backdropTouchable} onPress={onRequestClose} />
-        <View style={styles.modalCard}>
-          <Text style={styles.modalTitle}>Settings</Text>
-          <Text style={styles.label}>Select Building:</Text>
-          <BuildingDropdown
-            label="Building"
-            open={openBuilding}
-            setOpen={setOpenBuilding}
-            value={selectedBuilding}
-            setValue={handleBuildingChange}
-            items={buildingItems}
-          />
-          <Text style={styles.label}>Select Floor:</Text>
-          <FloorDropdown
-            label="Floor"
-            open={openFloor}
-            setOpen={setOpenFloor}
-            value={selectedFloor}
-            setValue={onChangeFloor}
-            items={floorItems}
-            disabled={floorItems.length === 0}
-          />
-          <TouchableOpacity style={styles.closeButton} onPress={onRequestClose}>
+      <View style={styles.backdrop} testID="bfsBackdrop">
+        <TouchableOpacity
+          style={styles.backdropTouchable}
+          onPress={onRequestClose}
+          testID="bfsBackdropTouchable"
+        />
+        <View style={styles.modalCard} testID="bfsModalCard">
+          <Text style={styles.modalTitle} testID="bfsModalTitle">
+            Settings
+          </Text>
+          <Text style={styles.label} testID="bfsBuildingLabel">
+            Select Building:
+          </Text>
+          {/* Building container with higher zIndex */}
+          <View style={styles.buildingContainer}>
+            <BuildingDropdown
+              testID="buildingDropdown"
+              label="Building"
+              open={openBuilding}
+              setOpen={handleOpenBuilding}
+              value={selectedBuilding}
+              setValue={handleBuildingChange}
+              items={buildingItems}
+              zIndex={3000}
+              zIndexInverse={1000}
+            />
+          </View>
+          <Text style={styles.label} testID="bfsFloorLabel">
+            Select Floor:
+          </Text>
+          {/* Floor container with lower zIndex */}
+          <View style={styles.floorContainer}>
+            <FloorDropdown
+              testID="floorDropdown"
+              label="Floor"
+              open={openFloor}
+              setOpen={handleOpenFloor}
+              value={selectedFloor}
+              setValue={onChangeFloor}
+              items={floorItems}
+              disabled={floorItems.length === 0}
+              zIndex={2000}
+              zIndexInverse={2000}
+            />
+          </View>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={onRequestClose}
+            testID="bfsCloseButton"
+          >
             <Text style={styles.closeButtonText}>Close</Text>
           </TouchableOpacity>
           {isLoading && (
-            <View style={styles.loadingOverlay}>
+            <View style={styles.loadingOverlay} testID="bfsLoadingOverlay">
               <ActivityIndicator size="large" color="#912338" />
             </View>
           )}
@@ -142,5 +199,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 10,
+  },
+  buildingContainer: {
+    zIndex: 3000,
+    marginBottom: 10,
+  },
+  floorContainer: {
+    zIndex: 2000,
+    marginBottom: 10,
   },
 });

@@ -15,18 +15,26 @@ const IndoorNavigationHeader: React.FC<IndoorNavigationHeaderProps> = ({ testID 
   return (
     <View style={styles.background} testID={testID}>
       {/* Back Button */}
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-        <FontAwesome5 name="arrow-left" size={30} color="#fff" />
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => router.back()}
+        testID="backButton"
+      >
+        <FontAwesome5 name="arrow-left" size={30} color="#fff" testID="backIcon" />
       </TouchableOpacity>
 
-      <View style={styles.container}>
+      <View style={styles.container} testID="headerContainer">
         {/* Header Title */}
-        <Text style={styles.headerTitle}>{t("Indoor Navigation")}</Text>
+        <Text style={styles.headerTitle} testID="headerTitle">
+          {t("Indoor Navigation")}
+        </Text>
 
         {/* Navigation Info */}
-        <View style={styles.infoContainer}>
-          <FontAwesome5 name="map-marker-alt" size={18} color="#fff" />
-          <Text style={styles.infoText}>{t("Find your way inside")}</Text>
+        <View style={styles.infoContainer} testID="infoContainer">
+          <FontAwesome5 name="map-marker-alt" size={18} color="#fff" testID="infoIcon" />
+          <Text style={styles.infoText} testID="infoText">
+            {t("Find your way inside")}
+          </Text>
         </View>
       </View>
     </View>
