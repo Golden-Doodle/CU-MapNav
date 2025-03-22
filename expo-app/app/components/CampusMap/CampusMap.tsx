@@ -8,7 +8,6 @@ import { initialRegion, SGWMarkers, LoyolaMarkers } from "./data/customMarkerDat
 import NavTab from "./CampusMapNavTab";
 import * as Location from "expo-location";
 import BuildingInfoModal from "./modals/BuildingInfoModal";
-import { getCustomMapStyle } from "./styles/MapStyles";
 import NextClassModal from "./modals/NextClassModal";
 import HamburgerWidget from "./HamburgerWidget";
 import TransitModal from "./modals/TransitModal";
@@ -17,6 +16,7 @@ import { fetchNearbyRestaurants } from "@/app/services/GoogleMap/googlePlacesSer
 import { Campus, Coordinates, LocationType, CustomMarkerType, Building, GooglePlace } from "@/app/utils/types";
 import { useTranslation } from "react-i18next";
 import RadiusAdjuster from "./RadiusAdjuster";
+import { getCustomMapStyle } from "./styles/MapStyles";
 
 import { calculateDistance, isPointInPolygon } from "@/app/utils/MapUtils";
 import { getFillColorWithOpacity } from "@/app/utils/helperFunctions";
@@ -49,8 +49,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   const markers = campus === "SGW" ? SGWMarkers : LoyolaMarkers;
   const buildings = campus === "SGW" ? SGWBuildings : LoyolaBuildings;
 
-
-  const {t} = useTranslation("CampusMap");
+  const { t } = useTranslation("CampusMap");
 
   useEffect(() => {
     let subscription: Location.LocationSubscription;
@@ -230,11 +229,9 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   const customMapStyle = getCustomMapStyle(isDarkMode);
 
   const handleOnUseAsOrigin = () => {
-    // Store previous values in temp variables
     const prevOrigin = origin;
     const prevDestination = destination;
 
-    // Swap values
     setOrigin(prevDestination);
     setDestination(prevOrigin);
 
@@ -243,6 +240,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   };
 
   const handleNavTabBackPress = () => {
+    setRouteCoordinates([]);
     if (userLocation) {
       setOrigin({
         userLocation: true,
