@@ -1,5 +1,13 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Alert, StyleSheet, ActivityIndicator, Text, TouchableOpacity } from "react-native";
+import {
+  View,
+  Alert,
+  StyleSheet,
+  ActivityIndicator,
+  Text,
+  TouchableOpacity,
+  Modal,
+} from "react-native";
 import MapView, { Marker, Polygon, Polyline, Circle } from "react-native-maps";
 import CustomMarker from "./CustomMarker";
 import { SGWBuildings, LoyolaBuildings } from "./data/buildingData";
@@ -13,13 +21,22 @@ import HamburgerWidget from "./HamburgerWidget";
 import TransitModal from "./modals/TransitModal";
 import SearchModal from "./modals/SearchModal";
 import { fetchNearbyRestaurants } from "@/app/services/GoogleMap/googlePlacesService";
-import { Campus, Coordinates, LocationType, CustomMarkerType, Building, GooglePlace } from "@/app/utils/types";
+import {
+  Campus,
+  Coordinates,
+  LocationType,
+  CustomMarkerType,
+  Building,
+  GooglePlace,
+} from "@/app/utils/types";
 import { useTranslation } from "react-i18next";
 import RadiusAdjuster from "./RadiusAdjuster";
 import { getCustomMapStyle } from "./styles/MapStyles";
 
 import { calculateDistance, isPointInPolygon } from "@/app/utils/MapUtils";
 import { getFillColorWithOpacity } from "@/app/utils/helperFunctions";
+
+import IndoorMap from "@/app/components/IndoorNavigation/IndoorMap";
 
 interface CampusMapProps {
   pressedOptimizeRoute: boolean;
@@ -45,6 +62,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   const [selectedDistance, setSelectedDistance] = useState<number>(100);
   const [isRadiusAdjusterVisible, setIsRadiusAdjusterVisible] = useState<boolean>(false);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+  const [isIndoorMapVisible, setIsIndoorMapVisible] = useState<boolean>(false);
 
   const markers = campus === "SGW" ? SGWMarkers : LoyolaMarkers;
   const buildings = campus === "SGW" ? SGWBuildings : LoyolaBuildings;
@@ -253,6 +271,14 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
     setDestination(null);
   };
 
+  const handleGoIndoor = () => {
+    if (destination && destination.room) {
+      setIsIndoorMapVisible(true);
+    } else {
+      Alert.alert("No Room Exists", "There is no room number available for this class.");
+    }
+  };
+
   return (
     <View style={styles.container}>
       <HamburgerWidget
@@ -334,12 +360,14 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
           />
         )}
 
+        {/* Updated Destination Marker using CustomMarker with red dot */}
         {destination && !destination.selectedBuilding && (
-          <Marker
-            coordinate={destination.coordinates}
-            pinColor="red"
-            title="Destination"
+          <CustomMarker
             testID="destination-marker"
+            coordinate={destination.coordinates}
+            title="Destination"
+            description="Destination"
+            isFoodLocation={false}
           />
         )}
       </MapView>
@@ -412,11 +440,19 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         testID="next-class-modal"
       />
 
-      {currentBuilding && (
-        <View style={styles.buildingTextContainer}>
-          <Text style={styles.buildingText}>I'm inside {currentBuilding.name}</Text>
-        </View>
-      )}
+      {routeCoordinates.length > 0 &&
+        destination &&
+        destination.building &&
+        currentBuilding &&
+        currentBuilding.id === destination.building.id && (
+          <TouchableOpacity
+            style={styles.indoorButton}
+            onPress={handleGoIndoor}
+            testID="indoor-button"
+          >
+            <Text style={styles.indoorButtonText}>Go Indoor Directions</Text>
+          </TouchableOpacity>
+        )}
 
       <NavTab
         campus={campus}
@@ -439,6 +475,24 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         onReset={() => setSelectedDistance(100)}
         onClose={() => setIsRadiusAdjusterVisible(false)}
       />
+
+      {/* Modal to render the IndoorMap when the user presses "Go Indoor Directions" */}
+      <Modal
+        visible={isIndoorMapVisible}
+        animationType="slide"
+        onRequestClose={() => setIsIndoorMapVisible(false)}
+      >
+        <View style={{ flex: 1 }}>
+          {/* Pass the destination room if it exists */}
+          <IndoorMap destinationRoom={destination?.room} />
+          <TouchableOpacity
+            onPress={() => setIsIndoorMapVisible(false)}
+            style={styles.closeIndoorMapButton}
+          >
+            <Text style={styles.closeButtonText}>Close Indoor Map</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -452,21 +506,6 @@ const styles = StyleSheet.create({
     left: "50%",
     marginLeft: -25,
     marginTop: -25,
-  },
-  buildingTextContainer: {
-    position: "absolute",
-    bottom: 100,
-    left: 0,
-    width: "100%",
-    backgroundColor: "rgba(128,128,128,0.7)",
-    padding: 10,
-    alignItems: "center",
-    zIndex: 1500,
-  },
-  buildingText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#fff",
   },
   radiusButton: {
     position: "absolute",
@@ -484,6 +523,35 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",
+  },
+  indoorButton: {
+    position: "absolute",
+    bottom: 120,
+    left: 10,
+    right: 10,
+    backgroundColor: "#912338",
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    zIndex: 2200,
+    elevation: 5,
+  },
+  indoorButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  closeIndoorMapButton: {
+    backgroundColor: "#912338",
+    padding: 12,
+    margin: 20,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  closeButtonText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 16,
   },
 });
 

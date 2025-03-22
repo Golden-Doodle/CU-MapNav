@@ -1,124 +1,138 @@
 import React from "react";
-import { render, fireEvent } from "@testing-library/react-native";
+import { render, fireEvent, waitFor } from "@testing-library/react-native";
+import { Alert } from "react-native";
 import BuildingInfoModal from "../BuildingInfoModal";
-import { Building } from "../../../../utils/types";
-import { Campus } from "@/app/utils/types";
+import { Building } from "@/app/utils/types";
 
-const mockNavigate = jest.fn();
-const mockOnClose = jest.fn();
-const mockUseAsOrigin = jest.fn();
-
-const building: Building = {
-  id: "1",
-  name: "Building Name",
-  description: "This is a description of the building.",
-  photoUrl: "https://example.com/photo.jpg",
-  rating: 4.5,
-  coordinates: [{ latitude: 10.0, longitude: 20.0 }],
-  fillColor: "#ff0000",
-  strokeColor: "#00ff00",
-  campus: "SGW" as Campus,
-};
-
-jest.mock("expo-location", () => ({
-  requestForegroundPermissionsAsync: jest.fn(() => Promise.resolve({ status: "granted" })),
-  watchPositionAsync: jest.fn(),
+jest.mock("react-i18next", () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
+  }),
 }));
 
-describe("BuildingInfoModal", () => {
-  it("renders correctly with building information", () => {
-    const { getByText } = render(
-      <BuildingInfoModal
-        visible={true}
-        onClose={mockOnClose}
-        selectedBuilding={building}
-        onNavigate={mockNavigate}
-        testID="building-info-modal"
-        onUseAsOrigin={mockUseAsOrigin}
-      />
-    );
+jest.mock("@/app/components/IndoorNavigation/IndoorMap", () => {
+  const React = require("react");
+  const { Text } = require("react-native");
+  return () => React.createElement(Text, { testID: "indoor-map" }, "IndoorMap");
+});
 
-    expect(getByText("Building Name")).toBeTruthy();
-    expect(getByText("This is a description of the building.")).toBeTruthy();
-    expect(getByText("Rating: 4.5 ★")).toBeTruthy();
+const dummyBuilding: Building = {
+  id: "H",
+  name: "Test Building",
+  description: "A test building",
+  photoUrl: "http://example.com/photo.jpg",
+  coordinates: [{ latitude: 10, longitude: 20 }],
+  rating: 4.5,
+  fillColor: "#000000",
+  strokeColor: "#FFFFFF",
+  campus: "SGW",
+};
+
+describe("BuildingInfoModal", () => {
+  const defaultProps = {
+    visible: true,
+    onClose: jest.fn(),
+    onNavigate: jest.fn(),
+    testID: "test",
+    onUseAsOrigin: jest.fn(),
+  };
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  it("calls onNavigate when navigate button is pressed", () => {
-    const { getByText } = render(
-      <BuildingInfoModal
-        visible={true}
-        onClose={mockOnClose}
-        selectedBuilding={building}
-        onNavigate={mockNavigate}
-        testID="building-info-modal"
-        onUseAsOrigin={mockUseAsOrigin}
-      />
+  it("renders null if selectedBuilding is null", () => {
+    const { queryByTestId } = render(
+      <BuildingInfoModal {...defaultProps} selectedBuilding={null} />
     );
+    expect(queryByTestId("test-overlay")).toBeNull();
+  });
 
-    fireEvent.press(getByText("Navigate to this Building"));
-
-    expect(mockNavigate).toHaveBeenCalledWith(10.0, 20.0);
+  it("renders building info modal when visible", () => {
+    const { getByTestId, getByText } = render(
+      <BuildingInfoModal {...defaultProps} selectedBuilding={dummyBuilding} />
+    );
+    expect(getByTestId("test-title").props.children).toBe(dummyBuilding.name);
+    expect(getByTestId("test-description").props.children).toBe(dummyBuilding.description);
+    expect(getByText(`Rating: ${dummyBuilding.rating} ★`)).toBeTruthy();
+    expect(getByTestId("test-building-image")).toBeTruthy();
   });
 
   it("calls onClose when close button is pressed", () => {
+    const onCloseMock = jest.fn();
     const { getByTestId } = render(
-      <BuildingInfoModal
-        visible={true}
-        onClose={mockOnClose}
-        selectedBuilding={building}
-        onNavigate={mockNavigate}
-        testID="building-info-modal"
-        onUseAsOrigin={mockUseAsOrigin}
-      />
+      <BuildingInfoModal {...defaultProps} selectedBuilding={dummyBuilding} onClose={onCloseMock} />
     );
-
-    fireEvent.press(getByTestId("building-info-modal-close-button"));
-    expect(mockOnClose).toHaveBeenCalled();
+    fireEvent.press(getByTestId("test-close-button"));
+    expect(onCloseMock).toHaveBeenCalled();
   });
 
-  it("does not render modal when selectedBuilding is null or undefined", () => {
-    const { queryByTestId } = render(
-      <BuildingInfoModal
-        visible={true}
-        onClose={mockOnClose}
-        selectedBuilding={null}
-        onNavigate={mockNavigate}
-        testID="building-info-modal"
-        onUseAsOrigin={mockUseAsOrigin}
-      />
+  it("calls onNavigate and onClose when navigate button is pressed", () => {
+    const onNavigateMock = jest.fn();
+    const onCloseMock = jest.fn();
+    const { getByTestId } = render(
+      <BuildingInfoModal {...defaultProps} selectedBuilding={dummyBuilding} onClose={onCloseMock} onNavigate={onNavigateMock} />
     );
-  
-    expect(queryByTestId("building-info-modal-close-button")).toBeNull();
-    expect(queryByTestId("building-info-modal-building-image")).toBeNull();
-  
-    const { queryByTestId: queryByTestIdUndefined } = render(
-      <BuildingInfoModal
-        visible={true}
-        onClose={mockOnClose}
-        selectedBuilding={undefined}
-        onNavigate={mockNavigate}
-        testID="building-info-modal"
-        onUseAsOrigin={mockUseAsOrigin}
-      />
+    fireEvent.press(getByTestId("test-navigate-button"));
+    expect(onNavigateMock).toHaveBeenCalledWith(
+      dummyBuilding.coordinates[0].latitude,
+      dummyBuilding.coordinates[0].longitude
     );
-  
-    expect(queryByTestIdUndefined("building-info-modal-close-button")).toBeNull();
-    expect(queryByTestIdUndefined("building-info-modal-building-image")).toBeNull();
+    expect(onCloseMock).toHaveBeenCalled();
   });
 
-  it("calls onUseAsOrigin when use as origin button is pressed", () => {
+  it("calls onUseAsOrigin when the 'Use as origin' button is pressed", () => {
+    const onUseAsOriginMock = jest.fn();
     const { getByTestId } = render(
-      <BuildingInfoModal
-        visible={true}
-        onClose={mockOnClose}
-        selectedBuilding={building}
-        onNavigate={mockNavigate}
-        testID="building-info-modal"
-        onUseAsOrigin={mockUseAsOrigin}
-      />
+      <BuildingInfoModal {...defaultProps} selectedBuilding={dummyBuilding} onUseAsOrigin={onUseAsOriginMock} />
     );
+    fireEvent.press(getByTestId("test-use-as-origin-button"));
+    expect(onUseAsOriginMock).toHaveBeenCalled();
+  });
 
-    fireEvent.press(getByTestId("building-info-modal-use-as-origin-button"));
-    expect(mockUseAsOrigin).toHaveBeenCalled();
+  it("shows an alert when indoor map is not available", () => {
+    const buildingNoIndoor: Building = { ...dummyBuilding, id: "XYZ" };
+    const alertSpy = jest.spyOn(Alert, "alert");
+    const { getByTestId } = render(
+      <BuildingInfoModal {...defaultProps} selectedBuilding={buildingNoIndoor} />
+    );
+    fireEvent.press(getByTestId("test-show-indoors-button"));
+    expect(alertSpy).toHaveBeenCalledWith(
+      "Indoor Map Not Available",
+      "Indoor map is not available for this building."
+    );
+  });
+
+  it("opens indoor map modal when building supports indoor map", () => {
+    const { getByTestId, getByText, queryByText } = render(
+      <BuildingInfoModal {...defaultProps} selectedBuilding={dummyBuilding} />
+    );
+    expect(queryByText("Close Indoor Map")).toBeNull();
+    fireEvent.press(getByTestId("test-show-indoors-button"));
+    expect(getByText("Close Indoor Map")).toBeTruthy();
+    expect(getByTestId("indoor-map")).toBeTruthy();
+  });
+
+  it("closes indoor map modal when the close indoor map button is pressed", () => {
+    const { getByTestId, getByText, queryByText } = render(
+      <BuildingInfoModal {...defaultProps} selectedBuilding={dummyBuilding} />
+    );
+    fireEvent.press(getByTestId("test-show-indoors-button"));
+    const closeIndoorMapButton = getByText("Close Indoor Map");
+    fireEvent.press(closeIndoorMapButton);
+    expect(queryByText("Close Indoor Map")).toBeNull();
+  });
+
+  it("displays spinner while image is loading and hides after load end", async () => {
+    const { getByTestId, queryByTestId } = render(
+      <BuildingInfoModal {...defaultProps} selectedBuilding={dummyBuilding} />
+    );
+    const image = getByTestId("test-building-image");
+    fireEvent(image, "loadStart");
+    expect(getByTestId("test-spinner")).toBeTruthy();
+    fireEvent(image, "loadEnd");
+    await waitFor(() => {
+      expect(queryByTestId("test-spinner")).toBeNull();
+    });
   });
 });

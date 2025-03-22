@@ -8,62 +8,69 @@ import {
   Text,
   FlatList,
   Alert,
+  Modal,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {
   MiMapView,
   MappedinMap,
   MappedinDirections,
-  TMappedinDirective,
   MapViewStore,
 } from '@mappedin/react-native-sdk';
 
 import DirectionsModal from '@/app/components/IndoorNavigation/DirectionsModal';
 import BuildingFloorModal from '@/app/components/IndoorNavigation/SetBuildingFloorModal';
 import Constants from 'expo-constants';
+import { RoomLocation } from '@/app/utils/types';
+import { generateDirections as generateIndoorDirections } from '@/app/services/Mapped-In/MappedInService';
 
 const buildings = [
   { label: 'Hall', value: '67c87db88e15de000bed1abb' },
   { label: 'JMSB', value: '67d974ddf63286000bb80fc3' },
 ];
 
-const key = Constants.expoConfig?.extra?.mappedInApiKey; 
-const secret = Constants.expoConfig?.extra?.mappedInSecret; 
+const key = Constants.expoConfig?.extra?.mappedInApiKey;
+const secret = Constants.expoConfig?.extra?.mappedInSecret;
 
-const DirectionsList = ({ directions }: { directions: MappedinDirections | null }) => {
-  if (!directions) return null;
+export interface IndoorMapProps {
+  destinationRoom?: RoomLocation;
+  pressedOptimizeRoute?: boolean;
+  indoorBuildingId?: string;
+}
 
-  const renderItem = ({ item }: { item: TMappedinDirective }) => (
-    <Text style={styles.instruction} testID="directionInstruction">{item.instruction}</Text>
-  );
-
-  return (
-    <FlatList
-      data={directions.instructions}
-      renderItem={renderItem}
-      keyExtractor={(_, index) => index.toString()}
-      style={styles.directionsList}
-      testID="directionsList"
-    />
-  );
-};
-
-const IndoorMap = () => {
+const IndoorMap = ({
+  destinationRoom,
+  pressedOptimizeRoute,
+  indoorBuildingId,
+}: IndoorMapProps) => {
+  console.log('pressedOptimizeRoute:', pressedOptimizeRoute);
+  
   const mapView = useRef<MapViewStore>(null);
-
   const [levels, setLevels] = useState<MappedinMap[]>();
   const [selectedFloor, setSelectedFloor] = useState<string | null>(null);
   const [isMapLoading, setIsMapLoading] = useState(true);
-
-  const [selectedBuilding, setSelectedBuilding] = useState<string | null>(buildings[0].value);
+  const [selectedBuilding, setSelectedBuilding] = useState<string | null>(
+    indoorBuildingId ?? buildings[0].value
+  );
   const [buildingItems] = useState<{ label: string; value: string }[]>(buildings);
   const [floorItems, setFloorItems] = useState<{ label: string; value: string }[]>([]);
-
   const [directionsModalVisible, setDirectionsModalVisible] = useState(false);
   const [settingsModalVisible, setSettingsModalVisible] = useState(false);
-
   const [activeDirections, setActiveDirections] = useState<MappedinDirections | null>(null);
   const [showDirections, setShowDirections] = useState(false);
+
+  useEffect(() => {
+    if (indoorBuildingId) {
+      let mappedId = indoorBuildingId;
+
+      if (indoorBuildingId === "MB") {
+        mappedId = "67d974ddf63286000bb80fc3";
+      } else if (indoorBuildingId === "H") {
+        mappedId = "67c87db88e15de000bed1abb";
+      }
+      setSelectedBuilding(mappedId);
+    }
+  }, [indoorBuildingId]);
 
   const options = {
     key,
@@ -71,7 +78,7 @@ const IndoorMap = () => {
     mapId: selectedBuilding ?? '',
   };
 
-  const handleFirstMapLoaded = () => {
+  const handleFirstMapLoaded = async () => {
     setIsMapLoading(false);
     const currentMapId = mapView.current?.currentMap?.id;
     const availableMaps = mapView.current?.venueData?.maps || [];
@@ -83,6 +90,22 @@ const IndoorMap = () => {
     }));
     setFloorItems(items);
     setLevels(availableMaps);
+
+    if (destinationRoom) {
+      console.log('IndoorMap loaded. Searching for room:', destinationRoom.room);
+
+      const directions = generateIndoorDirections(mapView, 'Entrance #1', destinationRoom.room);
+      if (directions) {
+        setActiveDirections(directions);
+        if (directions.path && directions.path.length > 0 && directions.path[0].map) {
+          const startingMapId = directions.path[0].map.id;
+          await mapView.current?.setMap(startingMapId);
+          setSelectedFloor(startingMapId);
+        }
+      } else {
+        Alert.alert('No Directions Found', `No indoor directions found for room ${destinationRoom.room}`);
+      }
+    }
   };
 
   useEffect(() => {
@@ -118,7 +141,6 @@ const IndoorMap = () => {
     <SafeAreaView style={styles.container} testID="indoorMapContainer">
       <View style={styles.contentContainer} testID="indoorMapContent">
         <View style={styles.mapContainer} testID="mapContainer">
-          {/* MiMapView from the Mappedin SDK */}
           <MiMapView
             style={styles.map}
             key={selectedBuilding ?? 'default'}
@@ -127,13 +149,11 @@ const IndoorMap = () => {
             onFirstMapLoaded={handleFirstMapLoaded}
             onMapChanged={({ map }) => setSelectedFloor(map.id)}
           />
-
           {isMapLoading && (
             <View style={styles.loaderContainer} testID="loaderContainer">
               <ActivityIndicator size="large" color="#912338" />
             </View>
           )}
-
           <TouchableOpacity
             style={styles.settingsButton}
             onPress={() => setSettingsModalVisible(true)}
@@ -141,7 +161,6 @@ const IndoorMap = () => {
           >
             <Icon name="settings" size={32} color="#912338" />
           </TouchableOpacity>
-
           <TouchableOpacity
             style={styles.directionsButton}
             onPress={() => setDirectionsModalVisible(true)}
@@ -149,13 +168,14 @@ const IndoorMap = () => {
           >
             <Icon name="directions-walk" size={35} color="#912338" />
           </TouchableOpacity>
-
           {activeDirections?.instructions?.length ? (
             <View style={styles.directionsOverlay} testID="directionsOverlay" pointerEvents="box-none">
               {showDirections ? (
                 <View style={styles.directionsContainer} testID="directionsContainer">
                   <View style={styles.directionsHeaderRow} testID="directionsHeaderRow">
-                    <Text style={styles.directionsTitle} testID="directionsTitle">Directions</Text>
+                    <Text style={styles.directionsTitle} testID="directionsTitle">
+                      Directions
+                    </Text>
                     <TouchableOpacity
                       onPress={() => setShowDirections(false)}
                       style={styles.iconButton}
@@ -164,7 +184,15 @@ const IndoorMap = () => {
                       <Icon name="minimize" size={24} color="#000" />
                     </TouchableOpacity>
                   </View>
-                  <DirectionsList directions={activeDirections} />
+                  <FlatList
+                    data={activeDirections.instructions}
+                    renderItem={({ item }) => (
+                      <Text style={styles.instruction}>{item.instruction}</Text>
+                    )}
+                    keyExtractor={(_, index) => index.toString()}
+                    style={styles.directionsList}
+                    testID="directionsList"
+                  />
                 </View>
               ) : (
                 <View style={styles.directionsButtonColumn} testID="directionsButtonColumn">
@@ -206,6 +234,7 @@ const IndoorMap = () => {
             return;
           }
           setActiveDirections(directions);
+          setDirectionsModalVisible(false);
         }}
       />
 
@@ -226,19 +255,10 @@ const IndoorMap = () => {
 export default IndoorMap;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f7f7f7',
-  },
-  contentContainer: {
-    flex: 1,
-  },
-  mapContainer: {
-    flex: 1,
-  },
-  map: {
-    flex: 1,
-  },
+  container: { flex: 1, backgroundColor: '#f7f7f7' },
+  contentContainer: { flex: 1 },
+  mapContainer: { flex: 1 },
+  map: { flex: 1 },
   loaderContainer: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(255,255,255,0.7)',
@@ -285,9 +305,7 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 5,
   },
-  directionsList: {
-    marginVertical: 5,
-  },
+  directionsList: { marginVertical: 5 },
   instruction: {
     fontSize: 14,
     color: '#333',
@@ -298,9 +316,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 10,
   },
-  iconButton: {
-    padding: 5,
-  },
+  iconButton: { padding: 5 },
   button: {
     backgroundColor: '#912338',
     borderRadius: 25,
@@ -308,14 +324,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginTop: 10,
   },
-  cancelButton: {
-    backgroundColor: '#FF3B30',
-  },
-  showButton: {
-    backgroundColor: '#912338',
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
+  cancelButton: { backgroundColor: '#FF3B30' },
+  showButton: { backgroundColor: '#912338' },
+  buttonText: { color: '#fff', fontWeight: '600' },
 });

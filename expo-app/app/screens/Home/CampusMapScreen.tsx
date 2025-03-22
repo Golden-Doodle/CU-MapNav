@@ -1,5 +1,5 @@
 import React from "react";
-import { View, TouchableOpacity, StyleSheet, SafeAreaView, Text } from "react-native";
+import { View, TouchableOpacity, StyleSheet, SafeAreaView } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useLocalSearchParams } from "expo-router";
@@ -15,14 +15,12 @@ export default function CampusMapScreen() {
         {/* Back Button */}
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <FontAwesome5 name="arrow-left" size={30} color="#fff" />
-          {/* Added label for translation */}
         </TouchableOpacity>
-
-        {/* Placeholder View for symmetry */}
+        {/* Placeholder for symmetry */}
         <View style={{ width: 40 }} />
       </SafeAreaView>
 
-      {/* Map Content */}
+      {/* Outdoor Campus Map Content */}
       <View style={styles.mapContainer}>
         <CampusMap pressedOptimizeRoute={pressedOptimizeRoute === "true"} />
       </View>
@@ -48,20 +46,6 @@ const styles = StyleSheet.create({
   backButton: {
     flexDirection: "row",
     alignItems: "center",
-  },
-  backButtonText: {
-    color: "#fff",
-    fontSize: 18,
-    marginLeft: 8,
-  },
-  titleContainer: {
-    flex: 1,
-    alignItems: "center",
-  },
-  titleText: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "bold",
   },
   mapContainer: {
     flex: 1,

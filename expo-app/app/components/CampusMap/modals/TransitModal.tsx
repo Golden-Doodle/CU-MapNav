@@ -509,7 +509,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#912338",
     paddingVertical: 8,
     paddingHorizontal: 16,
-    borderRadius: 4,
+    borderRadius: 25,
     alignSelf: "flex-end",
     margin: 8,
   },
