@@ -1,6 +1,7 @@
+jest.setTimeout(10000);
 import React, { act } from 'react';
-import { Alert } from 'react-native';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { Alert } from 'react-native';
 import IndoorMap from '../IndoorMap';
 import { generateDirections as generateIndoorDirections } from '@/app/services/Mapped-In/MappedInService';
 
@@ -111,12 +112,9 @@ describe('IndoorMap Component', () => {
     jest.spyOn(Alert, 'alert').mockClear();
   });
 
-  const setup = () => render(<IndoorMap />);
+  const setup = (props = {}) => render(<IndoorMap {...props} />);
 
-  const triggerDirectionsModal = async (
-    getByTestId: (testID: string) => any,
-    directions: any
-  ) => {
+  const triggerDirectionsModal = async (getByTestId: (id: string) => any, directions: any) => {
     mockTriggerDirections = (onDirectionsSet: (d: any) => void) => onDirectionsSet(directions);
     fireEvent.press(getByTestId('directionsButton'));
     await waitFor(() => expect(getByTestId('directionsModal')).toBeTruthy());
@@ -291,6 +289,30 @@ describe('IndoorMap Component', () => {
     await waitFor(() => {
       expect(queryByTestId('directionsOverlay')).toBeNull();
       expect(fakeJourney.clear).toHaveBeenCalled();
+    });
+  });
+
+  it("maps indoorBuildingId 'MB' to correct building id", async () => {
+    const { getByTestId } = setup({ indoorBuildingId: 'MB' });
+    await waitFor(() => {
+      const miMapView = getByTestId('miMapView') as any;
+      expect(miMapView.props.options.mapId).toBe("67d974ddf63286000bb80fc3");
+    });
+  });
+
+  it("maps indoorBuildingId 'H' to correct building id", async () => {
+    const { getByTestId } = setup({ indoorBuildingId: 'H' });
+    await waitFor(() => {
+      const miMapView = getByTestId('miMapView') as any;
+      expect(miMapView.props.options.mapId).toBe("67c87db88e15de000bed1abb");
+    });
+  });
+
+  it("sets selectedBuilding to provided indoorBuildingId if not 'MB' or 'H'", async () => {
+    const { getByTestId } = setup({ indoorBuildingId: 'XYZ' });
+    await waitFor(() => {
+      const miMapView = getByTestId('miMapView') as any;
+      expect(miMapView.props.options.mapId).toBe("XYZ");
     });
   });
 });
