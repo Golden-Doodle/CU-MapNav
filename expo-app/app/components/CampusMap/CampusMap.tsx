@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   Modal,
 } from "react-native";
-import MapView, { Marker, Polygon, Polyline, Circle } from "react-native-maps";
+import MapView, { Polygon, Polyline, Circle } from "react-native-maps";
 import CustomMarker from "./CustomMarker";
 import { SGWBuildings, LoyolaBuildings } from "./data/buildingData";
 import { getDirections } from "@/app/utils/directions";
@@ -32,10 +32,8 @@ import {
 import { useTranslation } from "react-i18next";
 import RadiusAdjuster from "./RadiusAdjuster";
 import { getCustomMapStyle } from "./styles/MapStyles";
-
 import { calculateDistance, isPointInPolygon } from "@/app/utils/MapUtils";
 import { getFillColorWithOpacity } from "@/app/utils/helperFunctions";
-
 import IndoorMap from "@/app/components/IndoorNavigation/IndoorMap";
 
 interface CampusMapProps {
@@ -104,7 +102,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         subscription.remove();
       }
     };
-  }, [buildings, campus]);
+  }, [buildings, campus, t]);
 
   useEffect(() => {
     if (!userLocation) {
@@ -144,7 +142,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
           setIsLoading(false);
         });
     }
-  }, [userLocation, viewEatingOnCampus]);
+  }, [userLocation, viewEatingOnCampus, campus]);
 
   useEffect(() => {
     if (userLocation && allRestaurantMarkers.length > 0) {
@@ -222,7 +220,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
     if (route) {
       setRouteCoordinates(route);
     }
-  }, [origin, destination]);
+  }, [origin, destination, t]);
 
   const onDirectionsPress = useCallback(() => {
     setIsTransitModalVisible(true);
@@ -282,7 +280,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   return (
     <View style={styles.container}>
       <HamburgerWidget
-        testID="toggle-campus-button"
+        testID="toggle-campus-button-hamburger-button"
         toggleCampus={toggleCampus}
         viewCampusMap={viewCampusMap}
         setViewCampusMap={setViewCampusMap}
@@ -299,7 +297,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         loadingEnabled={true}
         scrollEnabled={true}
         zoomEnabled={true}
-        onLongPress={(event: any) => handleMapPress(event)}
+        onLongPress={handleMapPress}
         testID="campus-map"
       >
         {viewCampusMap && (
@@ -360,10 +358,9 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
           />
         )}
 
-        {/* Updated Destination Marker using CustomMarker with red dot */}
         {destination && !destination.selectedBuilding && (
           <CustomMarker
-            testID="destination-marker"
+            testID="destination-marker-marker"
             coordinate={destination.coordinates}
             title="Destination"
             description="Destination"
@@ -390,13 +387,14 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         />
       )}
 
+      {/* Pass only a single testID for the modal container if the component already assigns internal testIDs */}
       <BuildingInfoModal
         visible={isBuildingInfoModalVisible}
         onClose={() => setIsBuildingInfoModalVisible(false)}
         selectedBuilding={destination?.building}
         onNavigate={onDirectionsPress}
         onUseAsOrigin={handleOnUseAsOrigin}
-        testID="building-info-modal"
+        testID="building-info-modal-content"
       />
 
       <SearchModal
@@ -429,7 +427,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         buildingData={buildings}
         markerData={markers}
         userLocation={userLocation}
-        testID="transit-modal"
+        testID="transit-modal-modal"
       />
 
       <NextClassModal
@@ -437,7 +435,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         onClose={() => setIsNextClassModalVisible(false)}
         destination={destination}
         setDestination={setDestination}
-        testID="next-class-modal"
+        testID="next-class-modal-overlay"
       />
 
       {routeCoordinates.length > 0 &&
@@ -476,18 +474,17 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         onClose={() => setIsRadiusAdjusterVisible(false)}
       />
 
-      {/* Modal to render the IndoorMap when the user presses "Go Indoor Directions" */}
       <Modal
         visible={isIndoorMapVisible}
         animationType="slide"
         onRequestClose={() => setIsIndoorMapVisible(false)}
       >
         <View style={{ flex: 1 }}>
-          {/* Pass the destination room if it exists */}
           <IndoorMap destinationRoom={destination?.room} />
           <TouchableOpacity
             onPress={() => setIsIndoorMapVisible(false)}
             style={styles.closeIndoorMapButton}
+            testID="indoor-map-close-button"
           >
             <Text style={styles.closeButtonText}>Close Indoor Map</Text>
           </TouchableOpacity>

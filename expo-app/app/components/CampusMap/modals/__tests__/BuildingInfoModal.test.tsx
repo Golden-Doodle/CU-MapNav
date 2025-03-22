@@ -1,5 +1,5 @@
 import React from "react";
-import { render, fireEvent, waitFor } from "@testing-library/react-native";
+import { render, fireEvent, waitFor, act } from "@testing-library/react-native";
 import { Alert } from "react-native";
 import BuildingInfoModal from "../BuildingInfoModal";
 import { Building } from "@/app/utils/types";
@@ -13,7 +13,10 @@ jest.mock("react-i18next", () => ({
 jest.mock("@/app/components/IndoorNavigation/IndoorMap", () => {
   const React = require("react");
   const { Text } = require("react-native");
-  return () => React.createElement(Text, { testID: "indoor-map" }, "IndoorMap");
+  return (props: any) =>
+    props.indoorBuildingId ? (
+      React.createElement(Text, { testID: "indoor-map" }, "IndoorMap")
+    ) : null;
 });
 
 const dummyBuilding: Building = {
@@ -58,6 +61,23 @@ describe("BuildingInfoModal", () => {
     expect(getByTestId("test-building-image")).toBeTruthy();
   });
 
+  it("renders 'No description available' when description is missing", () => {
+    const buildingNoDescription = { ...dummyBuilding, description: "" };
+    const { getByTestId } = render(
+      <BuildingInfoModal {...defaultProps} selectedBuilding={buildingNoDescription} />
+    );
+    expect(getByTestId("test-description").props.children).toBe("No description available");
+  });
+
+  it("does not render image or spinner when photoUrl is empty", () => {
+    const buildingNoPhoto = { ...dummyBuilding, photoUrl: "" };
+    const { queryByTestId } = render(
+      <BuildingInfoModal {...defaultProps} selectedBuilding={buildingNoPhoto} />
+    );
+    expect(queryByTestId("test-building-image")).toBeNull();
+    expect(queryByTestId("test-spinner")).toBeNull();
+  });
+
   it("calls onClose when close button is pressed", () => {
     const onCloseMock = jest.fn();
     const { getByTestId } = render(
@@ -71,7 +91,12 @@ describe("BuildingInfoModal", () => {
     const onNavigateMock = jest.fn();
     const onCloseMock = jest.fn();
     const { getByTestId } = render(
-      <BuildingInfoModal {...defaultProps} selectedBuilding={dummyBuilding} onClose={onCloseMock} onNavigate={onNavigateMock} />
+      <BuildingInfoModal
+        {...defaultProps}
+        selectedBuilding={dummyBuilding}
+        onClose={onCloseMock}
+        onNavigate={onNavigateMock}
+      />
     );
     fireEvent.press(getByTestId("test-navigate-button"));
     expect(onNavigateMock).toHaveBeenCalledWith(
@@ -81,10 +106,29 @@ describe("BuildingInfoModal", () => {
     expect(onCloseMock).toHaveBeenCalled();
   });
 
+  it("does not call onNavigate when selectedBuilding has no coordinates", () => {
+    const buildingNoCoordinates = { ...dummyBuilding, coordinates: [] };
+    const onNavigateMock = jest.fn();
+    const onCloseMock = jest.fn();
+    const { queryByTestId } = render(
+      <BuildingInfoModal
+        {...defaultProps}
+        selectedBuilding={buildingNoCoordinates}
+        onClose={onCloseMock}
+        onNavigate={onNavigateMock}
+      />
+    );
+    expect(queryByTestId("test-navigate-button")).toBeNull();
+  });
+  
   it("calls onUseAsOrigin when the 'Use as origin' button is pressed", () => {
     const onUseAsOriginMock = jest.fn();
     const { getByTestId } = render(
-      <BuildingInfoModal {...defaultProps} selectedBuilding={dummyBuilding} onUseAsOrigin={onUseAsOriginMock} />
+      <BuildingInfoModal
+        {...defaultProps}
+        selectedBuilding={dummyBuilding}
+        onUseAsOrigin={onUseAsOriginMock}
+      />
     );
     fireEvent.press(getByTestId("test-use-as-origin-button"));
     expect(onUseAsOriginMock).toHaveBeenCalled();
@@ -104,6 +148,7 @@ describe("BuildingInfoModal", () => {
   });
 
   it("opens indoor map modal when building supports indoor map", () => {
+    // Using a building id that supports indoor map: H, MB, or JMSB.
     const { getByTestId, getByText, queryByText } = render(
       <BuildingInfoModal {...defaultProps} selectedBuilding={dummyBuilding} />
     );
