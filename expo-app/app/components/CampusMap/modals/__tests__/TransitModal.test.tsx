@@ -121,10 +121,10 @@ describe('TransitModal', () => {
 
   it('sets route coordinates and closes modal when selecting a route', async () => {
     renderModal();
-    await waitFor(() => expect(screen.getByTestId('transit-modal-route-option-1')).toBeTruthy());
+    await waitFor(() => expect(screen.getByTestId('transit-modal-go-button-1')).toBeTruthy());
     await act(async () => {
-      fireEvent.press(screen.getByTestId('transit-modal-route-option-1'));
-    });
+          fireEvent.press(screen.getByTestId('transit-modal-go-button-1'));
+    });    
     expect(mockSetRouteCoordinates).toHaveBeenCalledWith(routeOptions[0].routeCoordinates);
     expect(mockOnClose).toHaveBeenCalled();
   });

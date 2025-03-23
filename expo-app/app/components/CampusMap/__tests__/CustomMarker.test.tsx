@@ -3,86 +3,33 @@ import { render, fireEvent } from "@testing-library/react-native";
 import CustomMarker from "../CustomMarker";
 
 describe("CustomMarker", () => {
-  const coordinate = { latitude: 10.0, longitude: 20.0 };
-  const mockOnPress = jest.fn();
+  const coordinate = { latitude: 12.34, longitude: 56.78 };
+  const testID = "test-marker";
 
   it("renders default marker when isFoodLocation is false", () => {
-    const { getByTestId } = render(
-      <CustomMarker
-        coordinate={coordinate}
-        title="Sample Location"
-        description="Sample Description"
-        isFoodLocation={false}
-        onPress={mockOnPress}
-        testID="custom-marker" 
-      />
+    const { getByTestId, queryByTestId } = render(
+      <CustomMarker coordinate={coordinate} testID={testID} />
     );
-
-    const marker = getByTestId("custom-marker-default-marker"); 
-    expect(marker).toBeTruthy();
+    expect(getByTestId(`${testID}-marker`)).toBeTruthy();
+    expect(getByTestId(`${testID}-default-marker`)).toBeTruthy();
+    expect(queryByTestId(`${testID}-food-marker`)).toBeNull();
   });
 
   it("renders food marker when isFoodLocation is true", () => {
-    const { getByTestId } = render(
-      <CustomMarker
-        coordinate={coordinate}
-        title="Food Location"
-        description="Delicious food here"
-        isFoodLocation={true}
-        onPress={mockOnPress}
-        testID="custom-marker"
-      />
+    const { getByTestId, queryByTestId } = render(
+      <CustomMarker coordinate={coordinate} testID={testID} isFoodLocation={true} />
     );
-
-    const marker = getByTestId("custom-marker-food-marker"); 
-    expect(marker).toBeTruthy();
+    expect(getByTestId(`${testID}-marker`)).toBeTruthy();
+    expect(getByTestId(`${testID}-food-marker`)).toBeTruthy();
+    expect(queryByTestId(`${testID}-default-marker`)).toBeNull();
   });
 
   it("calls onPress when marker is pressed", () => {
+    const onPressMock = jest.fn();
     const { getByTestId } = render(
-      <CustomMarker
-        coordinate={coordinate}
-        title="Sample Location"
-        description="Sample Description"
-        isFoodLocation={false}
-        onPress={mockOnPress}
-        testID="custom-marker" 
-      />
+      <CustomMarker coordinate={coordinate} testID={testID} onPress={onPressMock} />
     );
-
-    fireEvent.press(getByTestId("custom-marker-default-marker")); 
-    expect(mockOnPress).toHaveBeenCalled();
-  });
-
-  it("renders default marker with correct image source", () => {
-    const { getByTestId } = render(
-      <CustomMarker
-        coordinate={coordinate}
-        title="Sample Location"
-        description="Sample Description"
-        isFoodLocation={false}
-        onPress={mockOnPress}
-        testID="custom-marker"
-      />
-    );
-
-    const image = getByTestId("custom-marker-default-marker").props.source.uri; 
-    expect(image).toBe("https://maps.google.com/mapfiles/ms/icons/red-dot.png");
-  });
-
-  it("renders food marker with correct image source", () => {
-    const { getByTestId } = render(
-      <CustomMarker
-        coordinate={coordinate}
-        title="Food Location"
-        description="Delicious food here"
-        isFoodLocation={true}
-        onPress={mockOnPress}
-        testID="custom-marker" 
-      />
-    );
-
-    const image = getByTestId("custom-marker-food-marker").props.source.uri; 
-    expect(image).toBe("https://maps.google.com/mapfiles/ms/icons/restaurant.png");
+    fireEvent.press(getByTestId(`${testID}-marker`));
+    expect(onPressMock).toHaveBeenCalled();
   });
 });

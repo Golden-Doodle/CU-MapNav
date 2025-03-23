@@ -1,6 +1,14 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Alert, StyleSheet, ActivityIndicator, Text, TouchableOpacity } from "react-native";
-import MapView, { Marker, Polygon, Polyline, Circle } from "react-native-maps";
+import {
+  View,
+  Alert,
+  StyleSheet,
+  ActivityIndicator,
+  Text,
+  TouchableOpacity,
+  Modal,
+} from "react-native";
+import MapView, { Polygon, Polyline, Circle } from "react-native-maps";
 import CustomMarker from "./CustomMarker";
 import { SGWBuildings, LoyolaBuildings } from "./data/buildingData";
 import { getDirections } from "@/app/utils/directions";
@@ -8,18 +16,25 @@ import { initialRegion, SGWMarkers, LoyolaMarkers } from "./data/customMarkerDat
 import NavTab from "./CampusMapNavTab";
 import * as Location from "expo-location";
 import BuildingInfoModal from "./modals/BuildingInfoModal";
-import { getCustomMapStyle } from "./styles/MapStyles";
 import NextClassModal from "./modals/NextClassModal";
 import HamburgerWidget from "./HamburgerWidget";
 import TransitModal from "./modals/TransitModal";
 import SearchModal from "./modals/SearchModal";
 import { fetchNearbyRestaurants } from "@/app/services/GoogleMap/googlePlacesService";
-import { Campus, Coordinates, LocationType, CustomMarkerType, Building, GooglePlace } from "@/app/utils/types";
+import {
+  Campus,
+  Coordinates,
+  LocationType,
+  CustomMarkerType,
+  Building,
+  GooglePlace,
+} from "@/app/utils/types";
 import { useTranslation } from "react-i18next";
 import RadiusAdjuster from "./RadiusAdjuster";
-
+import { getCustomMapStyle } from "./styles/MapStyles";
 import { calculateDistance, isPointInPolygon } from "@/app/utils/MapUtils";
 import { getFillColorWithOpacity } from "@/app/utils/helperFunctions";
+import IndoorMap from "@/app/components/IndoorNavigation/IndoorMap";
 
 interface CampusMapProps {
   pressedOptimizeRoute: boolean;
@@ -45,12 +60,12 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   const [selectedDistance, setSelectedDistance] = useState<number>(100);
   const [isRadiusAdjusterVisible, setIsRadiusAdjusterVisible] = useState<boolean>(false);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+  const [isIndoorMapVisible, setIsIndoorMapVisible] = useState<boolean>(false);
 
   const markers = campus === "SGW" ? SGWMarkers : LoyolaMarkers;
   const buildings = campus === "SGW" ? SGWBuildings : LoyolaBuildings;
 
-
-  const {t} = useTranslation("CampusMap");
+  const { t } = useTranslation("CampusMap");
 
   useEffect(() => {
     let subscription: Location.LocationSubscription;
@@ -87,7 +102,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         subscription.remove();
       }
     };
-  }, [buildings, campus]);
+  }, [buildings, campus, t]);
 
   useEffect(() => {
     if (!userLocation) {
@@ -127,7 +142,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
           setIsLoading(false);
         });
     }
-  }, [userLocation, viewEatingOnCampus]);
+  }, [userLocation, viewEatingOnCampus, campus]);
 
   useEffect(() => {
     if (userLocation && allRestaurantMarkers.length > 0) {
@@ -205,7 +220,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
     if (route) {
       setRouteCoordinates(route);
     }
-  }, [origin, destination]);
+  }, [origin, destination, t]);
 
   const onDirectionsPress = useCallback(() => {
     setIsTransitModalVisible(true);
@@ -230,11 +245,9 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   const customMapStyle = getCustomMapStyle(isDarkMode);
 
   const handleOnUseAsOrigin = () => {
-    // Store previous values in temp variables
     const prevOrigin = origin;
     const prevDestination = destination;
 
-    // Swap values
     setOrigin(prevDestination);
     setDestination(prevOrigin);
 
@@ -243,6 +256,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   };
 
   const handleNavTabBackPress = () => {
+    setRouteCoordinates([]);
     if (userLocation) {
       setOrigin({
         userLocation: true,
@@ -255,10 +269,18 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
     setDestination(null);
   };
 
+  const handleGoIndoor = () => {
+    if (destination && destination.room) {
+      setIsIndoorMapVisible(true);
+    } else {
+      Alert.alert("No Room Exists", "There is no room number available for this class.");
+    }
+  };
+
   return (
     <View style={styles.container}>
       <HamburgerWidget
-        testID="toggle-campus-button"
+        testID="toggle-campus-button-hamburger-button"
         toggleCampus={toggleCampus}
         viewCampusMap={viewCampusMap}
         setViewCampusMap={setViewCampusMap}
@@ -275,7 +297,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         loadingEnabled={true}
         scrollEnabled={true}
         zoomEnabled={true}
-        onLongPress={(event: any) => handleMapPress(event)}
+        onLongPress={handleMapPress}
         testID="campus-map"
       >
         {viewCampusMap && (
@@ -337,11 +359,12 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         )}
 
         {destination && !destination.selectedBuilding && (
-          <Marker
+          <CustomMarker
+            testID="destination-marker-marker"
             coordinate={destination.coordinates}
-            pinColor="red"
             title="Destination"
-            testID="destination-marker"
+            description="Destination"
+            isFoodLocation={false}
           />
         )}
       </MapView>
@@ -364,13 +387,14 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         />
       )}
 
+      {/* Pass only a single testID for the modal container if the component already assigns internal testIDs */}
       <BuildingInfoModal
         visible={isBuildingInfoModalVisible}
         onClose={() => setIsBuildingInfoModalVisible(false)}
         selectedBuilding={destination?.building}
         onNavigate={onDirectionsPress}
         onUseAsOrigin={handleOnUseAsOrigin}
-        testID="building-info-modal"
+        testID="building-info-modal-content"
       />
 
       <SearchModal
@@ -403,7 +427,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         buildingData={buildings}
         markerData={markers}
         userLocation={userLocation}
-        testID="transit-modal"
+        testID="transit-modal-modal"
       />
 
       <NextClassModal
@@ -411,14 +435,22 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         onClose={() => setIsNextClassModalVisible(false)}
         destination={destination}
         setDestination={setDestination}
-        testID="next-class-modal"
+        testID="next-class-modal-overlay"
       />
 
-      {currentBuilding && (
-        <View style={styles.buildingTextContainer}>
-          <Text style={styles.buildingText}>I'm inside {currentBuilding.name}</Text>
-        </View>
-      )}
+      {routeCoordinates.length > 0 &&
+        destination &&
+        destination.building &&
+        currentBuilding &&
+        currentBuilding.id === destination.building.id && (
+          <TouchableOpacity
+            style={styles.indoorButton}
+            onPress={handleGoIndoor}
+            testID="indoor-button"
+          >
+            <Text style={styles.indoorButtonText}>Go Indoor Directions</Text>
+          </TouchableOpacity>
+        )}
 
       <NavTab
         campus={campus}
@@ -441,6 +473,23 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         onReset={() => setSelectedDistance(100)}
         onClose={() => setIsRadiusAdjusterVisible(false)}
       />
+
+      <Modal
+        visible={isIndoorMapVisible}
+        animationType="slide"
+        onRequestClose={() => setIsIndoorMapVisible(false)}
+      >
+        <View style={{ flex: 1 }}>
+          <IndoorMap destinationRoom={destination?.room} />
+          <TouchableOpacity
+            onPress={() => setIsIndoorMapVisible(false)}
+            style={styles.closeIndoorMapButton}
+            testID="indoor-map-close-button"
+          >
+            <Text style={styles.closeButtonText}>Close Indoor Map</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -454,21 +503,6 @@ const styles = StyleSheet.create({
     left: "50%",
     marginLeft: -25,
     marginTop: -25,
-  },
-  buildingTextContainer: {
-    position: "absolute",
-    bottom: 100,
-    left: 0,
-    width: "100%",
-    backgroundColor: "rgba(128,128,128,0.7)",
-    padding: 10,
-    alignItems: "center",
-    zIndex: 1500,
-  },
-  buildingText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#fff",
   },
   radiusButton: {
     position: "absolute",
@@ -486,6 +520,35 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",
+  },
+  indoorButton: {
+    position: "absolute",
+    bottom: 120,
+    left: 10,
+    right: 10,
+    backgroundColor: "#912338",
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    zIndex: 2200,
+    elevation: 5,
+  },
+  indoorButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  closeIndoorMapButton: {
+    backgroundColor: "#912338",
+    padding: 12,
+    margin: 20,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  closeButtonText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 16,
   },
 });
 

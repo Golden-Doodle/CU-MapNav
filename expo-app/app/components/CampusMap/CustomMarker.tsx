@@ -20,20 +20,20 @@ const CustomMarker: React.FC<CustomMarkerProps> = ({
   description = "No description available",
   isFoodLocation = false,
   onPress,
-  testID, // Destructure testID prop
+  testID,
 }) => {
   return (
     <Marker coordinate={coordinate} onPress={onPress} tappable={true} testID={`${testID}-marker`}>
       {isFoodLocation ? (
         <Image
-          source={{ uri: "https://maps.google.com/mapfiles/ms/icons/restaurant.png" }}
-          style={styles.foodMarker}
-          testID={`${testID}-food-marker`} 
+          source={require("@/assets/images/restaurant-marker.png")}
+          style={[styles.foodMarker, { tintColor: "#912338" }]}
+          testID={`${testID}-food-marker`}
         />
       ) : (
         <Image
-          source={{ uri: "https://maps.google.com/mapfiles/ms/icons/red-dot.png" }}
-          style={styles.defaultMarker}
+          source={require("@/assets/images/map-marker.png")}
+          style={[styles.defaultMarker, { tintColor: "#912338" }]}
           testID={`${testID}-default-marker`}
         />
       )}
