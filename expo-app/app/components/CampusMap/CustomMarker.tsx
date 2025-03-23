@@ -26,13 +26,13 @@ const CustomMarker: React.FC<CustomMarkerProps> = ({
     <Marker coordinate={coordinate} onPress={onPress} tappable={true} testID={`${testID}-marker`}>
       {isFoodLocation ? (
         <Image
-          source={{ uri: "https://cdn-icons-png.flaticon.com/512/5193/5193674.png" }}
+          source={require("@/assets/images/restaurant-marker.png")}
           style={[styles.foodMarker, { tintColor: "#912338" }]}
           testID={`${testID}-food-marker`}
         />
       ) : (
         <Image
-          source={{ uri: "https://cdn-icons-png.flaticon.com/512/684/684908.png" }}
+          source={require("@/assets/images/map-marker.png")}
           style={[styles.defaultMarker, { tintColor: "#912338" }]}
           testID={`${testID}-default-marker`}
         />
