@@ -4,13 +4,10 @@ import {
   render,
   fireEvent,
   waitFor,
-  act,
   RenderAPI,
 } from "@testing-library/react-native";
 import { Alert } from "react-native";
-import { fetchNearbyPlaces } from "@/app/services/GoogleMap/googlePlacesService";
 
-// Updated mock: use fetchNearbyPlaces instead of fetchNearbyRestaurants
 jest.mock("@/app/services/GoogleMap/googlePlacesService", () => ({
   fetchNearbyPlaces: jest.fn().mockResolvedValue([
     {
@@ -259,16 +256,11 @@ jest.mock("../CustomMarker", () => {
 
 import CampusMap from "../CampusMap";
 
-// Helper to render CampusMap with default props
+// ---------------------
+// Helper: Render & Actions
+// ---------------------
 const renderCampusMap = () => render(<CampusMap pressedOptimizeRoute={false} />);
 
-// =====================
-// Helper Functions
-// =====================
-
-/**
- * Simulate a long press on the map with a given coordinate.
- */
 const simulateLongPressOnMap = (
   getByTestId: RenderAPI["getByTestId"],
   coordinate: { latitude: number; longitude: number } = {
@@ -280,9 +272,6 @@ const simulateLongPressOnMap = (
   fireEvent(map, "onLongPress", { nativeEvent: { coordinate } });
 };
 
-/**
- * Generic helper to open a modal and then close it.
- */
 const openCloseModal = async (
   renderAPI: RenderAPI,
   {
@@ -297,9 +286,6 @@ const openCloseModal = async (
   await waitFor(() => expect(renderAPI.queryByTestId(modalId)).toBeNull());
 };
 
-/**
- * Helper to simulate toggling between campuses.
- */
 const toggleCampusTest = async (
   getByTestId: RenderAPI["getByTestId"],
   getByText: RenderAPI["getByText"]
@@ -313,9 +299,6 @@ const toggleCampusTest = async (
   await waitFor(() => expect(getByText("View SGW Campus")).toBeTruthy());
 };
 
-/**
- * Helper to open the search modal and trigger a route fetch.
- */
 const openSearchModalAndFetchRoute = async (
   getByTestId: RenderAPI["getByTestId"]
 ): Promise<void> => {
@@ -325,16 +308,33 @@ const openSearchModalAndFetchRoute = async (
   await waitFor(() => getByTestId("route-polyline"));
 };
 
-/**
- * Helper to open Eat mode.
- */
 const openEatMode = (getByTestId: RenderAPI["getByTestId"]): void =>
   fireEvent.press(getByTestId("nav-tab-nav-item-Eat"));
 
-// =====================
-// Test Suites
-// =====================
+// Additional helper for Filter and Radius modals
+const openFilterModal = async (
+  getByTestId: RenderAPI["getByTestId"],
+  getByText: RenderAPI["getByText"]
+): Promise<void> => {
+  openEatMode(getByTestId);
+  const filterButton = await waitFor(() => getByText("Filter Places"));
+  fireEvent.press(filterButton);
+  await waitFor(() => getByTestId("filter-modal"));
+};
 
+const openRadiusAdjusterModal = async (
+  getByTestId: RenderAPI["getByTestId"],
+  getByText: RenderAPI["getByText"]
+): Promise<void> => {
+  openEatMode(getByTestId);
+  const adjustButton = await waitFor(() => getByText("Adjust Search Radius"));
+  fireEvent.press(adjustButton);
+  await waitFor(() => getByTestId("radius-adjuster-modal"));
+};
+
+// ---------------------
+// Test Suites
+// ---------------------
 describe("CampusMap", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -405,13 +405,12 @@ describe("CampusMap", () => {
   });
 
   it("should open and close the Search Modal when the search button is pressed", async () => {
-    const { getByTestId, queryByTestId } = renderCampusMap();
-    fireEvent.press(getByTestId("nav-tab-nav-item-Search"));
-    await waitFor(() => expect(getByTestId("search-modal")).toBeTruthy());
-    fireEvent.press(getByTestId("search-modal-close-icon"));
-    await waitFor(() =>
-      expect(queryByTestId("search-modal")).toBeNull()
-    );
+    const renderAPI = renderCampusMap();
+    await openCloseModal(renderAPI, {
+      openButtonId: "nav-tab-nav-item-Search",
+      modalId: "search-modal",
+      closeButtonId: "search-modal-close-icon",
+    });
   });
 
   it("swaps origin and destination when handleOnUseAsOrigin is called", async () => {
@@ -509,10 +508,7 @@ describe("CampusMap", () => {
 describe("Additional Modals and Components", () => {
   it("should update search radius when RadiusAdjuster callbacks are triggered", async () => {
     const { getByTestId, getByText, queryByTestId } = renderCampusMap();
-    openEatMode(getByTestId);
-    const adjustButton = await waitFor(() => getByText("Adjust Search Radius"));
-    expect(adjustButton).toBeTruthy();
-    fireEvent.press(adjustButton);
+    await openRadiusAdjusterModal(getByTestId, getByText);
     const slider = getByTestId("radius-adjuster-radius-slider");
     fireEvent(slider, "valueChange", 200);
     fireEvent.press(getByTestId("radius-adjuster-apply-button"));
@@ -523,11 +519,7 @@ describe("Additional Modals and Components", () => {
 
   it("should open the FilterModal and close it after applying filters", async () => {
     const { getByTestId, getByText, queryByTestId } = renderCampusMap();
-    openEatMode(getByTestId);
-    const filterButton = await waitFor(() => getByText("Filter Places"));
-    expect(filterButton).toBeTruthy();
-    fireEvent.press(filterButton);
-    await waitFor(() => getByTestId("filter-modal"));
+    await openFilterModal(getByTestId, getByText);
     const restaurantSwitch = getByTestId("filter-modal-switch-restaurant");
     fireEvent(restaurantSwitch, "valueChange", false);
     fireEvent.press(getByTestId("filter-modal-apply-button"));
@@ -538,11 +530,7 @@ describe("Additional Modals and Components", () => {
 
   it("should close the FilterModal when the cancel button is pressed", async () => {
     const { getByTestId, getByText, queryByTestId } = renderCampusMap();
-    openEatMode(getByTestId);
-    const filterButton = await waitFor(() => getByText("Filter Places"));
-    expect(filterButton).toBeTruthy();
-    fireEvent.press(filterButton);
-    await waitFor(() => getByTestId("filter-modal"));
+    await openFilterModal(getByTestId, getByText);
     fireEvent.press(getByTestId("filter-modal-cancel-button"));
     await waitFor(() =>
       expect(queryByTestId("filter-modal")).toBeNull()
