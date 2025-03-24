@@ -12,6 +12,9 @@ import { useRouter } from "expo-router";
 import Svg, { Circle } from "react-native-svg";
 import { AuthContext } from "./contexts/AuthContext";
 import { useTranslation } from "react-i18next";
+import { initialize } from '@microsoft/react-native-clarity';
+
+initialize("qtckqvmd75");
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
