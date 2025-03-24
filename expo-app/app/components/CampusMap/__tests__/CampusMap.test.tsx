@@ -2,7 +2,20 @@ jest.setTimeout(10000);
 import React from "react";
 import { render, fireEvent, waitFor, act } from "@testing-library/react-native";
 import { Alert } from "react-native";
-import { fetchNearbyRestaurants } from "@/app/services/GoogleMap/googlePlacesService";
+import { fetchNearbyPlaces } from "@/app/services/GoogleMap/googlePlacesService";
+
+// Updated mock: use fetchNearbyPlaces instead of fetchNearbyRestaurants
+jest.mock("@/app/services/GoogleMap/googlePlacesService", () => ({
+  fetchNearbyPlaces: jest.fn().mockResolvedValue([
+    {
+      place_id: "1",
+      name: "Restaurant 1",
+      geometry: { location: { lat: 45.5017, lng: -73.5673 } },
+      vicinity: "Near campus",
+      rating: 4.5,
+    },
+  ]),
+}));
 
 jest.mock("../HamburgerWidget", () => {
   const React = require("react");
@@ -45,18 +58,6 @@ jest.mock("expo-location", () => ({
     callback({ coords: { latitude: 45.5017, longitude: -73.5673 } });
     return { remove: jest.fn() };
   }),
-}));
-
-jest.mock("@/app/services/GoogleMap/googlePlacesService", () => ({
-  fetchNearbyRestaurants: jest.fn().mockResolvedValue([
-    {
-      place_id: "1",
-      name: "Restaurant 1",
-      geometry: { location: { lat: 45.5017, lng: -73.5673 } },
-      vicinity: "Near campus",
-      rating: 4.5,
-    },
-  ]),
 }));
 
 jest.mock("@/app/utils/directions", () => ({
@@ -380,9 +381,7 @@ describe("CampusMap", () => {
     act(() => {
       fireEvent.press(getByTestId("nav-tab-nav-item-Search"));
     });
-    await waitFor(() =>
-      expect(getByTestId("search-modal")).toBeTruthy()
-    );
+    await waitFor(() => expect(getByTestId("search-modal")).toBeTruthy());
     act(() => {
       fireEvent.press(getByTestId("search-modal-get-directions-button"));
     });
@@ -481,5 +480,68 @@ describe("CampusMap", () => {
     act(() => {
       fireEvent.press(getByText("Adjust Search Radius"));
     });
+  });
+});
+
+// Modal and Additional Components
+describe("Additional Modals and Components", () => {
+  it("should update search radius when RadiusAdjuster callbacks are triggered", async () => {
+    const { getByTestId, getByText, queryByTestId } = renderCampusMap();
+
+    fireEvent.press(getByTestId("nav-tab-nav-item-Eat"));
+
+    const adjustButton = await waitFor(() => getByText("Adjust Search Radius"));
+    expect(adjustButton).toBeTruthy();
+    fireEvent.press(adjustButton);
+
+    const radiusModal = getByTestId("radius-adjuster-modal");
+    expect(radiusModal).toBeTruthy();
+
+    const slider = getByTestId("radius-adjuster-radius-slider");
+    fireEvent(slider, "valueChange", 200);
+
+    const applyButton = getByTestId("radius-adjuster-apply-button");
+    fireEvent.press(applyButton);
+
+    await waitFor(() => expect(queryByTestId("radius-adjuster-modal")).toBeNull());
+  });
+
+  it("should open the FilterModal and close it after applying filters", async () => {
+    const { getByTestId, getByText, queryByTestId } = renderCampusMap();
+
+    fireEvent.press(getByTestId("nav-tab-nav-item-Eat"));
+
+    const filterButton = await waitFor(() => getByText("Filter Places"));
+    expect(filterButton).toBeTruthy();
+    fireEvent.press(filterButton);
+
+    const filterModal = await waitFor(() => getByTestId("filter-modal"));
+    expect(filterModal).toBeTruthy();
+
+    const restaurantSwitch = getByTestId("filter-modal-switch-restaurant");
+    fireEvent(restaurantSwitch, "valueChange", false);
+
+    const applyFilterButton = getByTestId("filter-modal-apply-button");
+    fireEvent.press(applyFilterButton);
+
+    await waitFor(() => expect(queryByTestId("filter-modal")).toBeNull());
+  });
+
+  it("should close the FilterModal when the cancel button is pressed", async () => {
+    const { getByTestId, getByText, queryByTestId } = renderCampusMap();
+
+    fireEvent.press(getByTestId("nav-tab-nav-item-Eat"));
+
+    const filterButton = await waitFor(() => getByText("Filter Places"));
+    expect(filterButton).toBeTruthy();
+    fireEvent.press(filterButton);
+
+    const filterModal = await waitFor(() => getByTestId("filter-modal"));
+    expect(filterModal).toBeTruthy();
+
+    const cancelButton = getByTestId("filter-modal-cancel-button");
+    fireEvent.press(cancelButton);
+
+    await waitFor(() => expect(queryByTestId("filter-modal")).toBeNull());
   });
 });

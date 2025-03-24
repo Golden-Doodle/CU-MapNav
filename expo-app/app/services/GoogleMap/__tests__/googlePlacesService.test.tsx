@@ -1,9 +1,9 @@
-import { getImageUrl, fetchNearbyRestaurants } from "../googlePlacesService";
+import { getImageUrl, fetchNearbyPlaces } from "../googlePlacesService";
 
 jest.mock("expo-constants", () => ({
   expoConfig: {
     extra: {
-      googleMapsApiKey: "fake-google-api-key", 
+      googleMapsApiKey: "fake-google-api-key",
     },
   },
 }));
@@ -20,13 +20,12 @@ describe("getImageUrl", () => {
   });
 });
 
-describe("fetchNearbyRestaurants", () => {
+describe("fetchNearbyPlaces", () => {
   beforeEach(() => {
     (fetch as jest.Mock).mockClear();
   });
 
   it("should fetch nearby restaurants and return an array of places", async () => {
-
     const mockResponse = {
       results: [
         {
@@ -56,7 +55,7 @@ describe("fetchNearbyRestaurants", () => {
     });
 
     const userLocation = { latitude: 10.0, longitude: 20.0 };
-    const result = await fetchNearbyRestaurants(userLocation);
+    const result = await fetchNearbyPlaces(userLocation, "restaurant");
 
     expect(result).toHaveLength(1);
     expect(result[0].place_id).toBe("123");
@@ -65,8 +64,8 @@ describe("fetchNearbyRestaurants", () => {
     expect(result[0].geometry.location.lng).toBe(20.0);
     expect(result[0].rating).toBe(4.5);
     expect(result[0].photos?.[0]?.imageUrl).toBe(
-        "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=photoReference1&key=fake-google-api-key"
-      );      
+      "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=photoReference1&key=fake-google-api-key"
+    );
   });
 
   it("should return an empty array when no results are found", async () => {
@@ -76,7 +75,7 @@ describe("fetchNearbyRestaurants", () => {
     });
 
     const userLocation = { latitude: 10.0, longitude: 20.0 };
-    const result = await fetchNearbyRestaurants(userLocation);
+    const result = await fetchNearbyPlaces(userLocation, "restaurant");
 
     expect(result).toHaveLength(0);
   });
@@ -85,7 +84,7 @@ describe("fetchNearbyRestaurants", () => {
     (fetch as jest.Mock).mockRejectedValueOnce(new Error("Network Error"));
 
     const userLocation = { latitude: 10.0, longitude: 20.0 };
-    const result = await fetchNearbyRestaurants(userLocation);
+    const result = await fetchNearbyPlaces(userLocation, "restaurant");
 
     expect(result).toEqual([]);
   });
