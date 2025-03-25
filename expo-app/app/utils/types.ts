@@ -16,6 +16,7 @@ export type Building = {
   photoUrl?: string;
   rating?: number; 
 };
+
 export type CustomMarkerType = {
   id: string;
   title: string;
@@ -23,9 +24,9 @@ export type CustomMarkerType = {
   coordinate: Coordinates;
   campus?: Campus;
   photoUrl?: string; 
-  rating?: number; 
+  rating?: number;
+  markerType?: "restaurant" | "cafe" | "washroom" | "default";
 };
-
 
 export type RoomLocation = {
   room: string;
@@ -117,4 +118,5 @@ export type GooglePlace = {
     photo_reference: string;
     imageUrl: string; 
   }[];
+  types?: string[];
 };

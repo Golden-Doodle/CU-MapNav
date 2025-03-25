@@ -8,6 +8,7 @@ interface RadiusAdjusterProps {
   onApply: (value: number) => void;
   onReset: () => void;
   onClose: () => void;
+  testID?: string;
 }
 
 const RadiusAdjuster: React.FC<RadiusAdjusterProps> = ({
@@ -16,22 +17,28 @@ const RadiusAdjuster: React.FC<RadiusAdjusterProps> = ({
   onApply,
   onReset,
   onClose,
+  testID,
 }) => {
   const [radius, setRadius] = useState<number>(initialValue);
+  const baseTestID = testID || "radius-adjuster";
 
   useEffect(() => {
     setRadius(initialValue);
   }, [initialValue]);
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
-      <View style={styles.modalOverlay} testID="modal-overlay">
-        <View style={styles.modalContainer} testID="modal-container">
-          <Text style={styles.title} testID="title-text">Set Search Radius</Text>
-          <Text style={styles.radiusText} testID="radius-text">{radius} meters</Text>
+    <Modal visible={visible} animationType="slide" transparent testID={`${baseTestID}-modal`}>
+      <View style={styles.modalOverlay} testID={`${baseTestID}-modal-overlay`}>
+        <View style={styles.modalContainer} testID={`${baseTestID}-modal-container`}>
+          <Text style={styles.title} testID={`${baseTestID}-title-text`}>
+            Set Search Radius
+          </Text>
+          <Text style={styles.radiusText} testID={`${baseTestID}-radius-text`}>
+            {radius} meters
+          </Text>
           <Slider
             style={styles.slider}
-            testID="radius-slider"
+            testID={`${baseTestID}-radius-slider`}
             minimumValue={100}
             maximumValue={2000}
             value={radius}
@@ -41,14 +48,14 @@ const RadiusAdjuster: React.FC<RadiusAdjusterProps> = ({
             maximumTrackTintColor="#d3d3d3"
             thumbTintColor="rgba(145,35,56,1)"
           />
-          <View style={styles.buttonContainer} testID="button-container">
+          <View style={styles.buttonContainer} testID={`${baseTestID}-button-container`}>
             <TouchableOpacity
               style={[styles.button, styles.resetButton]}
               onPress={() => {
                 setRadius(100);
                 onReset();
               }}
-              testID="reset-button"
+              testID={`${baseTestID}-reset-button`}
             >
               <Text style={styles.buttonText}>Reset</Text>
             </TouchableOpacity>
@@ -58,12 +65,12 @@ const RadiusAdjuster: React.FC<RadiusAdjusterProps> = ({
                 onApply(radius);
                 onClose();
               }}
-              testID="apply-button"
+              testID={`${baseTestID}-apply-button`}
             >
               <Text style={styles.buttonText}>Apply</Text>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.closeButton} onPress={onClose} testID="close-button">
+          <TouchableOpacity style={styles.closeButton} onPress={onClose} testID={`${baseTestID}-close-button`}>
             <Text style={styles.closeText}>Close</Text>
           </TouchableOpacity>
         </View>
