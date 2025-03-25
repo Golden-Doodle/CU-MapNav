@@ -6,18 +6,20 @@ interface Coordinates {
   longitude: number;
 }
 
-export const getImageUrl = (photoReference: string): string => {
+export const getGooglePlaceImageUrl = (photoReference: string): string => {
   const baseUrl = "https://maps.googleapis.com/maps/api/place/photo";
-  const maxWidth = 400; 
-  const apiKey = Constants.expoConfig?.extra?.googleMapsApiKey; 
+  const maxWidth = 400;
+  const apiKey = Constants.expoConfig?.extra?.googleMapsApiKey;
   return `${baseUrl}?maxwidth=${maxWidth}&photo_reference=${photoReference}&key=${apiKey}`;
 };
 
-export const fetchNearbyRestaurants = async (userLocation: Coordinates): Promise<GooglePlace[]> => {
+export const fetchNearbyPlaces = async (
+  userLocation: Coordinates,
+  placeType: "restaurant" | "cafe" | "washroom"
+): Promise<GooglePlace[]> => {
   try {
-    const { latitude, longitude } = userLocation; 
-
-    const placesUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=1500&type=restaurant|store&key=${Constants.expoConfig?.extra?.googleMapsApiKey}`;
+    const { latitude, longitude } = userLocation;
+    const placesUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=1500&type=${placeType}&key=${Constants.expoConfig?.extra?.googleMapsApiKey}`;
 
     const response = await fetch(placesUrl);
     const data = await response.json();
@@ -38,13 +40,13 @@ export const fetchNearbyRestaurants = async (userLocation: Coordinates): Promise
           height: photo.height,
           width: photo.width,
           photo_reference: photo.photo_reference,
-          imageUrl: getImageUrl(photo.photo_reference), 
+          imageUrl: getGooglePlaceImageUrl(photo.photo_reference),
         })),
       }));
     }
     return [];
   } catch (error) {
-    console.error("Error fetching nearby restaurants: ", error);
+    console.error("Error fetching nearby places: ", error);
     return [];
   }
 };

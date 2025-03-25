@@ -20,7 +20,8 @@ import NextClassModal from "./modals/NextClassModal";
 import HamburgerWidget from "./HamburgerWidget";
 import TransitModal from "./modals/TransitModal";
 import SearchModal from "./modals/SearchModal";
-import { fetchNearbyRestaurants } from "@/app/services/GoogleMap/googlePlacesService";
+import FilterModal, { defaultFilters } from "./modals/FilterModal";
+import { fetchNearbyPlaces } from "@/app/services/GoogleMap/googlePlacesService";
 import {
   Campus,
   Coordinates,
@@ -52,8 +53,8 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   const [viewEatingOnCampus, setViewEatingOnCampus] = useState<boolean>(false);
   const [isSearchModalVisible, setIsSearchModalVisible] = useState<boolean>(false);
   const [isTransitModalVisible, setIsTransitModalVisible] = useState<boolean>(false);
-  const [restaurantMarkers, setRestaurantMarkers] = useState<CustomMarkerType[]>([]);
-  const [allRestaurantMarkers, setAllRestaurantMarkers] = useState<CustomMarkerType[]>([]);
+  const [fetchedPlaceResults, setFetchedPlaceResults] = useState<CustomMarkerType[]>([]);
+  const [visiblePlaceMarkers, setVisiblePlaceMarkers] = useState<CustomMarkerType[]>([]);
   const [mapRegion, setMapRegion] = useState(initialRegion[campus]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [currentBuilding, setCurrentBuilding] = useState<Building | null>(null);
@@ -61,6 +62,9 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   const [isRadiusAdjusterVisible, setIsRadiusAdjusterVisible] = useState<boolean>(false);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const [isIndoorMapVisible, setIsIndoorMapVisible] = useState<boolean>(false);
+  
+  const [activeFilters, setActiveFilters] = useState<string[]>(defaultFilters);
+  const [isFilterModalVisible, setIsFilterModalVisible] = useState<boolean>(false);
 
   const markers = campus === "SGW" ? SGWMarkers : LoyolaMarkers;
   const buildings = campus === "SGW" ? SGWBuildings : LoyolaBuildings;
@@ -117,36 +121,43 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   }, [userLocation, mapRegion, buildings]);
 
   useEffect(() => {
-    if (userLocation && viewEatingOnCampus) {
+    if (userLocation && viewEatingOnCampus && activeFilters.length > 0) {
       setIsLoading(true);
-      fetchNearbyRestaurants(userLocation)
-        .then((restaurants) => {
-          const markers = restaurants.map((place: GooglePlace) => ({
-            id: place.place_id,
-            coordinate: {
-              latitude: place.geometry.location.lat,
-              longitude: place.geometry.location.lng,
-            },
-            title: place.name,
-            description: place.vicinity,
-            photoUrl: place.photos?.[0]?.imageUrl,
-            rating: place.rating,
-            campus,
-          }));
-          setAllRestaurantMarkers(markers);
+      Promise.all(
+        activeFilters.map((filter) =>
+          fetchNearbyPlaces(userLocation, filter as "restaurant" | "cafe" | "washroom")
+        )
+      )
+        .then((results) => {
+            const markers = results.flatMap((places, index) =>
+              places.map((place: GooglePlace) => ({
+                id: place.place_id + "_" + activeFilters[index],
+                coordinate: {
+                  latitude: place.geometry.location.lat,
+                  longitude: place.geometry.location.lng,
+                },
+                title: place.name,
+                description: place.vicinity,
+                photoUrl: place.photos?.[0]?.imageUrl,
+                rating: place.rating,
+                campus,
+                markerType: activeFilters[index] as "restaurant" | "cafe" | "washroom",
+              }))
+            );
+            setFetchedPlaceResults(markers);
         })
         .catch((error) => {
-          console.error("Error fetching nearby restaurants: ", error);
+          console.error("Error fetching nearby places: ", error);
         })
         .finally(() => {
           setIsLoading(false);
         });
     }
-  }, [userLocation, viewEatingOnCampus, campus]);
+  }, [userLocation, viewEatingOnCampus, campus, activeFilters]);
 
   useEffect(() => {
-    if (userLocation && allRestaurantMarkers.length > 0) {
-      const filteredMarkers = allRestaurantMarkers.filter((marker) => {
+    if (userLocation && fetchedPlaceResults.length > 0) {
+      const filteredMarkers = fetchedPlaceResults.filter((marker) => {
         const distance = calculateDistance(
           userLocation.latitude,
           userLocation.longitude,
@@ -155,9 +166,9 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         );
         return distance <= selectedDistance;
       });
-      setRestaurantMarkers(filteredMarkers);
+      setVisiblePlaceMarkers(filteredMarkers);
     }
-  }, [selectedDistance, userLocation, allRestaurantMarkers]);
+  }, [selectedDistance, userLocation, fetchedPlaceResults]);
 
   const handleMarkerPress = useCallback((marker: CustomMarkerType) => {
     const markerToBuilding: Building = {
@@ -311,14 +322,14 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
                   fillColor="rgba(145,35,56,0.2)"
                   zIndex={1000}
                 />
-                {restaurantMarkers.map((marker) => (
+                {visiblePlaceMarkers.map((marker) => (
                   <CustomMarker
                     key={marker.id}
-                    testID={`restaurant-marker-${marker.id}`}
+                    testID={`place-marker-${marker.id}`}
                     coordinate={marker.coordinate}
                     title={marker.title}
                     description={marker.description}
-                    isFoodLocation={true}
+                    markerType={marker.markerType || "default"}
                     onPress={() => handleMarkerPress(marker)}
                   />
                 ))}
@@ -364,18 +375,26 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
             coordinate={destination.coordinates}
             title="Destination"
             description="Destination"
-            isFoodLocation={false}
+            markerType="default"
           />
         )}
       </MapView>
 
       {viewEatingOnCampus && (
-        <TouchableOpacity
-          style={styles.radiusButton}
-          onPress={() => setIsRadiusAdjusterVisible(true)}
-        >
-          <Text style={styles.radiusButtonText}>Adjust Search Radius</Text>
-        </TouchableOpacity>
+        <View style={styles.bottomButtonContainer}>
+          <TouchableOpacity
+            style={styles.bottomButton}
+            onPress={() => setIsRadiusAdjusterVisible(true)}
+          >
+            <Text style={styles.bottomButtonText}>Adjust Search Radius</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.bottomButton}
+            onPress={() => setIsFilterModalVisible(true)}
+          >
+            <Text style={styles.bottomButtonText}>Filter Places</Text>
+          </TouchableOpacity>
+        </View>
       )}
 
       {isLoading && (
@@ -387,7 +406,6 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         />
       )}
 
-      {/* Pass only a single testID for the modal container if the component already assigns internal testIDs */}
       <BuildingInfoModal
         visible={isBuildingInfoModalVisible}
         onClose={() => setIsBuildingInfoModalVisible(false)}
@@ -472,6 +490,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         onApply={(value) => setSelectedDistance(value)}
         onReset={() => setSelectedDistance(100)}
         onClose={() => setIsRadiusAdjusterVisible(false)}
+        testID="radius-adjuster"
       />
 
       <Modal
@@ -490,6 +509,16 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
           </TouchableOpacity>
         </View>
       </Modal>
+
+      <FilterModal
+        visible={isFilterModalVisible}
+        onApply={(filters) => {
+          setActiveFilters(filters);
+          setIsFilterModalVisible(false);
+        }}
+        onClose={() => setIsFilterModalVisible(false)}
+        testID="filter-modal"
+      />
     </View>
   );
 };
@@ -504,19 +533,26 @@ const styles = StyleSheet.create({
     marginLeft: -25,
     marginTop: -25,
   },
-  radiusButton: {
+  bottomButtonContainer: {
     position: "absolute",
-    bottom: 160,
+    bottom: 120,
     left: 10,
     right: 10,
-    backgroundColor: "rgba(145,35,56,1)",
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-evenly",
     zIndex: 2100,
     elevation: 5,
   },
-  radiusButtonText: {
+  bottomButton: {
+    backgroundColor: "rgba(145,35,56,1)",
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    flex: 1,
+    marginHorizontal: 5,
+    alignItems: "center",
+  },
+  bottomButtonText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",
