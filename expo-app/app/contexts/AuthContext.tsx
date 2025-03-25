@@ -103,7 +103,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             [
               {
                 text: "OK",
-                onPress: () => signOut(),
+                onPress: () => {
+                  void signOut();
+                },
               },
             ]
           );
