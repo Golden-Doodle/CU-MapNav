@@ -1,9 +1,14 @@
+// contexts/AuthContext.tsx
 import React, { createContext, useState, useEffect } from "react";
+import { Alert } from "react-native"; // <-- Import Alert
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { useRouter } from "expo-router";
-import { fetchAllCalendars, fetchGoogleCalendarEvents } from "@/app/services/GoogleCalendar/fetchingUserCalendarData";
+import {
+  fetchAllCalendars,
+  fetchGoogleCalendarEvents,
+} from "@/app/services/GoogleCalendar/fetchingUserCalendarData";
 import { GoogleCalendarEvent } from "../utils/types";
 
 export interface AuthContextType {
@@ -69,7 +74,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         if (!storedCalendarId) {
           const allCalendars = await fetchAllCalendars();
-          const defaultCalendar = allCalendars.find((cal:any) => cal.summary === "Concordia_Class_Schedule");
+          const defaultCalendar = allCalendars.find(
+            (cal: any) => cal.summary === "Concordia_Class_Schedule"
+          );
 
           if (defaultCalendar) {
             storedCalendarId = defaultCalendar.id;
@@ -82,11 +89,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         if (storedCalendarId) {
           setSelectedCalendarId(storedCalendarId);
+
+          // Fetch events and catch UNAUTHORIZED error
           const events = await fetchGoogleCalendarEvents(storedCalendarId, 7);
           setGoogleCalendarEvents(events);
         }
       } catch (error) {
-        console.error("Error fetching calendar events:", error);
+        // If we detect the "UNAUTHORIZED" error, log out user and show an alert
+        if ((error as Error).message === "UNAUTHORIZED") {
+          Alert.alert(
+            "Session Expired",
+            "Your Google session has expired. Please sign in again.",
+            [
+              {
+                text: "OK",
+                onPress: () => signOut(),
+              },
+            ]
+          );
+        } else {
+          console.error("Error fetching calendar events:", error);
+        }
       }
     };
 
@@ -126,6 +149,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       await AsyncStorage.removeItem("user");
       await AsyncStorage.removeItem("selectedScheduleID");
       await AsyncStorage.removeItem("selectedScheduleName");
+      await AsyncStorage.removeItem("googleAccessToken");
       setUser(null);
       setSelectedCalendarId(null);
       setGoogleCalendarEvents([]);
