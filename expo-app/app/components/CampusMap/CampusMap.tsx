@@ -53,8 +53,8 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   const [viewEatingOnCampus, setViewEatingOnCampus] = useState<boolean>(false);
   const [isSearchModalVisible, setIsSearchModalVisible] = useState<boolean>(false);
   const [isTransitModalVisible, setIsTransitModalVisible] = useState<boolean>(false);
-  const [allPlaceMarkers, setAllPlaceMarkers] = useState<CustomMarkerType[]>([]);
-  const [placeMarkers, setPlaceMarkers] = useState<CustomMarkerType[]>([]);
+  const [fetchedPlaceResults, setFetchedPlaceResults] = useState<CustomMarkerType[]>([]);
+  const [visiblePlaceMarkers, setVisiblePlaceMarkers] = useState<CustomMarkerType[]>([]);
   const [mapRegion, setMapRegion] = useState(initialRegion[campus]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [currentBuilding, setCurrentBuilding] = useState<Building | null>(null);
@@ -63,7 +63,6 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const [isIndoorMapVisible, setIsIndoorMapVisible] = useState<boolean>(false);
   
-  // New state: active filters (multiple types)
   const [activeFilters, setActiveFilters] = useState<string[]>(defaultFilters);
   const [isFilterModalVisible, setIsFilterModalVisible] = useState<boolean>(false);
 
@@ -121,7 +120,6 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
     }
   }, [userLocation, mapRegion, buildings]);
 
-  // Fetch nearby places for each active filter and combine the results.
   useEffect(() => {
     if (userLocation && viewEatingOnCampus && activeFilters.length > 0) {
       setIsLoading(true);
@@ -131,11 +129,8 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         )
       )
         .then((results) => {
-          // results is an array of arrays (one per filter). Flatten them while tagging each marker with its filter type.
-// Example from combining results in Promise.all
             const markers = results.flatMap((places, index) =>
               places.map((place: GooglePlace) => ({
-                // Make the key unique by appending the filter name
                 id: place.place_id + "_" + activeFilters[index],
                 coordinate: {
                   latitude: place.geometry.location.lat,
@@ -149,7 +144,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
                 markerType: activeFilters[index] as "restaurant" | "cafe" | "washroom",
               }))
             );
-          setAllPlaceMarkers(markers);
+            setFetchedPlaceResults(markers);
         })
         .catch((error) => {
           console.error("Error fetching nearby places: ", error);
@@ -161,8 +156,8 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   }, [userLocation, viewEatingOnCampus, campus, activeFilters]);
 
   useEffect(() => {
-    if (userLocation && allPlaceMarkers.length > 0) {
-      const filteredMarkers = allPlaceMarkers.filter((marker) => {
+    if (userLocation && fetchedPlaceResults.length > 0) {
+      const filteredMarkers = fetchedPlaceResults.filter((marker) => {
         const distance = calculateDistance(
           userLocation.latitude,
           userLocation.longitude,
@@ -171,9 +166,9 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         );
         return distance <= selectedDistance;
       });
-      setPlaceMarkers(filteredMarkers);
+      setVisiblePlaceMarkers(filteredMarkers);
     }
-  }, [selectedDistance, userLocation, allPlaceMarkers]);
+  }, [selectedDistance, userLocation, fetchedPlaceResults]);
 
   const handleMarkerPress = useCallback((marker: CustomMarkerType) => {
     const markerToBuilding: Building = {
@@ -327,7 +322,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
                   fillColor="rgba(145,35,56,0.2)"
                   zIndex={1000}
                 />
-                {placeMarkers.map((marker) => (
+                {visiblePlaceMarkers.map((marker) => (
                   <CustomMarker
                     key={marker.id}
                     testID={`place-marker-${marker.id}`}
@@ -385,7 +380,6 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         )}
       </MapView>
 
-      {/* Bottom buttons: Adjust Search Radius & Filter Places */}
       {viewEatingOnCampus && (
         <View style={styles.bottomButtonContainer}>
           <TouchableOpacity
@@ -516,7 +510,6 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         </View>
       </Modal>
 
-      {/* Filter Modal */}
       <FilterModal
         visible={isFilterModalVisible}
         onApply={(filters) => {
