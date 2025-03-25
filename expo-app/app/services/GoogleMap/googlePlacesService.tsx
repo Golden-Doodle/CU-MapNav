@@ -6,7 +6,7 @@ interface Coordinates {
   longitude: number;
 }
 
-export const getImageUrl = (photoReference: string): string => {
+export const getGooglePlaceImageUrl = (photoReference: string): string => {
   const baseUrl = "https://maps.googleapis.com/maps/api/place/photo";
   const maxWidth = 400;
   const apiKey = Constants.expoConfig?.extra?.googleMapsApiKey;
@@ -40,7 +40,7 @@ export const fetchNearbyPlaces = async (
           height: photo.height,
           width: photo.width,
           photo_reference: photo.photo_reference,
-          imageUrl: getImageUrl(photo.photo_reference),
+          imageUrl: getGooglePlaceImageUrl(photo.photo_reference),
         })),
       }));
     }
