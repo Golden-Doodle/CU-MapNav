@@ -79,13 +79,8 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         Alert.alert(t("Permission Denied"), t("Allow location access to navigate."));
         return;
       }
-      subscription = await Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.High,
-          timeInterval: 5000,
-          distanceInterval: 10,
-        },
-        (location) => {
+
+      const watchLocationFn = (location: Location.LocationObject) => {
           setUserLocation(location.coords);
           setOrigin({
             userLocation: true,
@@ -98,7 +93,14 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
             isPointInPolygon(location.coords, building.coordinates)
           );
           setCurrentBuilding(foundBuilding || null);
-        }
+      };
+      subscription = await Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.High,
+          timeInterval: 5000,
+          distanceInterval: 10,
+        },
+        watchLocationFn
       );
     })();
     return () => {
