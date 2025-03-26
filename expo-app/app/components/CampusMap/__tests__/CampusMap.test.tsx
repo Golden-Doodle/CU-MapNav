@@ -536,4 +536,14 @@ describe("Additional Modals and Components", () => {
       expect(queryByTestId("filter-modal")).toBeNull()
     );
   });
+
+  it("should trigger optimize route behavior when pressedOptimizeRoute is true", async () => {
+    const { getByTestId } = render(<CampusMap pressedOptimizeRoute={true} />);
+
+    await waitFor(() => {
+      // Check if search modal is automatically opened
+      expect(getByTestId("next-class-modal-overlay")).toBeTruthy();
+      // Or check if any other optimize route behavior is triggered
+    });
+  });
 });
