@@ -62,7 +62,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   const [isRadiusAdjusterVisible, setIsRadiusAdjusterVisible] = useState<boolean>(false);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const [isIndoorMapVisible, setIsIndoorMapVisible] = useState<boolean>(false);
-  
+
   const [activeFilters, setActiveFilters] = useState<string[]>(defaultFilters);
   const [isFilterModalVisible, setIsFilterModalVisible] = useState<boolean>(false);
 
@@ -81,18 +81,18 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
       }
 
       const watchLocationFn = (location: Location.LocationObject) => {
-          setUserLocation(location.coords);
-          setOrigin({
-            userLocation: true,
-            coordinates: {
-              latitude: location.coords.latitude,
-              longitude: location.coords.longitude,
-            },
-          });
-          const foundBuilding = buildings.find((building) =>
-            isPointInPolygon(location.coords, building.coordinates)
-          );
-          setCurrentBuilding(foundBuilding || null);
+        setUserLocation(location.coords);
+        setOrigin({
+          userLocation: true,
+          coordinates: {
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
+          },
+        });
+        const foundBuilding = buildings.find((building) =>
+          isPointInPolygon(location.coords, building.coordinates)
+        );
+        setCurrentBuilding(foundBuilding || null);
       };
       subscription = await Location.watchPositionAsync(
         {
@@ -122,39 +122,38 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
     }
   }, [userLocation, mapRegion, buildings]);
 
-  useEffect(() => {
+  async function loadNearbyPlaces() {
     if (userLocation && viewEatingOnCampus && activeFilters.length > 0) {
       setIsLoading(true);
-      Promise.all(
-        activeFilters.map((filter) =>
-          fetchNearbyPlaces(userLocation, filter as "restaurant" | "cafe" | "washroom")
-        )
-      )
-        .then((results) => {
-            const markers = results.flatMap((places, index) =>
-              places.map((place: GooglePlace) => ({
-                id: place.place_id + "_" + activeFilters[index],
-                coordinate: {
-                  latitude: place.geometry.location.lat,
-                  longitude: place.geometry.location.lng,
-                },
-                title: place.name,
-                description: place.vicinity,
-                photoUrl: place.photos?.[0]?.imageUrl,
-                rating: place.rating,
-                campus,
-                markerType: activeFilters[index] as "restaurant" | "cafe" | "washroom",
-              }))
-            );
-            setFetchedPlaceResults(markers);
-        })
-        .catch((error) => {
-          console.error("Error fetching nearby places: ", error);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
+      try {
+        const results = await Promise.all(activeFilters.map((filter) => fetchNearbyPlaces(userLocation, filter as "restaurant" | "cafe" | "washroom")));
+        const markers = results.flatMap((places, index) =>
+          places.map((place: GooglePlace) => ({
+            id: place.place_id + "_" + activeFilters[index],
+            coordinate: {
+              latitude: place.geometry.location.lat,
+              longitude: place.geometry.location.lng,
+            },
+            title: place.name,
+            description: place.vicinity,
+            photoUrl: place.photos?.[0]?.imageUrl,
+            rating: place.rating,
+            campus,
+            markerType: activeFilters[index] as "restaurant" | "cafe" | "washroom",
+          }))
+        );
+        setFetchedPlaceResults(markers);
+      } catch (error) {
+        console.error("Error fetching nearby places: ", error);
+      }
+      finally {
+        setIsLoading(false);
+      }
     }
+  }
+
+  useEffect(() => {
+    loadNearbyPlaces();
   }, [userLocation, viewEatingOnCampus, campus, activeFilters]);
 
   useEffect(() => {
@@ -350,8 +349,8 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
                   isDarkMode
                     ? "#fff"
                     : currentBuilding && currentBuilding.id === building.id
-                    ? "rgb(0, 0, 0)"
-                    : building.strokeColor
+                      ? "rgb(0, 0, 0)"
+                      : building.strokeColor
                 }
                 strokeWidth={2}
                 tappable={true}
