@@ -1,9 +1,10 @@
 import { GoogleCalendarEvent } from "@/app/utils/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getAccessToken } from "../GoogleSignin/accessToken";
 
 const fetchAllCalendars = async () => {
   try {
-    const accessToken = await AsyncStorage.getItem("googleAccessToken");
+    const accessToken = await getAccessToken();
 
     if (!accessToken) {
       throw new Error("No Google access token found. Please sign in again.");
@@ -42,7 +43,7 @@ export const fetchGoogleCalendarEvents = async (
       throw new Error("No calendar ID provided.");
     }
 
-    const accessToken = await AsyncStorage.getItem("googleAccessToken");
+    const accessToken = await getAccessToken();
 
     if (!accessToken) {
       throw new Error("No access token found. Please sign in again.");
@@ -54,8 +55,6 @@ export const fetchGoogleCalendarEvents = async (
 
     const timeMin = now.toISOString();
     const timeMax = futureDate.toISOString();
-
-    console.log("calendarid: ", calendarId)
     
     const response = await fetch(
       `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?timeMin=${timeMin}&timeMax=${timeMax}&maxResults=10&orderBy=startTime&singleEvents=true`,
@@ -117,7 +116,7 @@ export const fetchCalendarEvents = async () => {
 // Function to fetch today's events at the current time and later, but not tomorrow, based on selected schedule
 export const fetchTodaysEventsFromSelectedSchedule = async (): Promise<GoogleCalendarEvent[]> => {
   try {
-    const accessToken = await AsyncStorage.getItem("googleAccessToken");
+    const accessToken = await getAccessToken();
 
     if (!accessToken) {
       throw new Error("No access token found. Please sign in again.");

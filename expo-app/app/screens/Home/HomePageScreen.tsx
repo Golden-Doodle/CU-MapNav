@@ -42,7 +42,7 @@ export default function HomePageScreen() {
   }, []);
 
   const refreshCalendarEvents = useCallback(async () => {
-    if (!user) return;
+    if (!user || user === null) return;
     setIsLoading(true);
 
     try {
@@ -65,14 +65,6 @@ export default function HomePageScreen() {
       setIsLoading(false);
     }
   }, [user]);
-
-  useEffect(() => {
-    refreshCalendarEvents();
-    // const interval = setInterval(refreshCalendarEvents, 30000);
-    
-    // return () => clearInterval(interval);
-    return () => {};
-  }, [refreshCalendarEvents]); 
   
   // Must make sure this was the intended function (Megered Conflict)
   const toggleCampus = async () => {

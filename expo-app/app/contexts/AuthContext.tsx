@@ -106,7 +106,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const userCredential = await auth().signInWithCredential(googleCredential);
 
       await AsyncStorage.setItem("user", JSON.stringify(userCredential.user));
-      await AsyncStorage.setItem("googleAccessToken", accessToken);
 
       router.replace("/screens/Home/HomePageScreen");
     } catch (error) {
