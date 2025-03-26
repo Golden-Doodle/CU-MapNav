@@ -1,9 +1,24 @@
+import { getAccessToken } from "../../GoogleSignin/accessToken";
 import { fetchAllCalendars, fetchGoogleCalendarEvents, fetchCalendarEvents } from "../fetchingUserCalendarData";  // Adjust path accordingly
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 jest.mock("@react-native-async-storage/async-storage", () => ({
   getItem: jest.fn(),
   setItem: jest.fn(),
+}));
+
+jest.mock("../../GoogleSignin/accessToken", () => ({
+  getAccessToken: jest.fn(),
+}));
+
+
+jest.mock("@react-native-google-signin/google-signin", () => ({
+  GoogleSignin: {
+    configure: jest.fn(),
+    getTokens: jest.fn().mockResolvedValue({ accessToken: "mockAccessToken" }),
+    signIn: jest.fn(),
+    signInSilently: jest.fn(),
+  },
 }));
 
 global.fetch = jest.fn() as jest.Mock;
@@ -14,7 +29,7 @@ describe("Google Calendar Utils", () => {
   });
 
   it("should fetch all calendars successfully", async () => {
-    (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce("mockAccessToken");
+    (getAccessToken as jest.Mock).mockResolvedValueOnce("mockAccessToken");
 
     const mockCalendars = {
       items: [
@@ -41,7 +56,7 @@ describe("Google Calendar Utils", () => {
   });
 
   it("should fetch events based on calendar ID and days ahead", async () => {
-    (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce("mockAccessToken");
+    (getAccessToken as jest.Mock).mockResolvedValueOnce("mockAccessToken");
 
     const mockEvents = {
       items: [

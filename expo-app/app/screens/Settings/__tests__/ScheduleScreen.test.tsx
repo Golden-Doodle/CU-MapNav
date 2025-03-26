@@ -7,6 +7,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { act } from 'react-test-renderer'; // Import act
 
 // Mock AsyncStorage and GoogleCalendar functions
+jest.mock("@react-native-google-signin/google-signin", () => ({
+  GoogleSignin: {
+    configure: jest.fn(),
+    getTokens: jest.fn().mockResolvedValue({ accessToken: "mockAccessToken" }),
+    signIn: jest.fn(),
+    signInSilently: jest.fn(),
+  },
+}));
+
 jest.mock('@react-native-async-storage/async-storage');
 jest.mock('../../../services/GoogleCalendar/fetchingUserCalendarData', () => ({
   ...jest.requireActual('../../../services/GoogleCalendar/fetchingUserCalendarData'),
