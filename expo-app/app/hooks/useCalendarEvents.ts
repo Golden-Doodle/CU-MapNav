@@ -1,4 +1,3 @@
-// hooks/useCalendarEvents.ts
 import { useState, useEffect, useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { fetchGoogleCalendarEvents } from "@/app/services/GoogleCalendar/fetchingUserCalendarData";
@@ -14,12 +13,15 @@ export function useCalendarEvents(userId: string | null) {
 
     try {
       const calendarId = await AsyncStorage.getItem("selectedScheduleID");
-      if (!calendarId) return;
-
+      if (!calendarId) {
+        setEvents([]);
+        return;
+      }
       const data = await fetchGoogleCalendarEvents(calendarId, 7);
       setEvents(data);
-    } catch (err) {
-      console.error("Calendar refresh failed", err);
+    } catch (error) {
+      console.error("useCalendarEvents error:", error);
+      setEvents([]);
     } finally {
       setLoading(false);
     }
