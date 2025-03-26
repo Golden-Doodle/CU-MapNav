@@ -282,7 +282,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   };
 
   const handleGoIndoor = () => {
-    if (destination && destination.room) {
+    if (destination?.room) {
       setIsIndoorMapVisible(true);
     } else {
       Alert.alert("No Room Exists", "There is no room number available for this class.");
@@ -330,7 +330,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
                     coordinate={marker.coordinate}
                     title={marker.title}
                     description={marker.description}
-                    markerType={marker.markerType || "default"}
+                    markerType={marker.markerType ?? "default"}
                     onPress={() => handleMarkerPress(marker)}
                   />
                 ))}
@@ -348,7 +348,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
                 strokeColor={
                   isDarkMode
                     ? "#fff"
-                    : currentBuilding && currentBuilding.id === building.id
+                    : currentBuilding?.id === building.id
                       ? "rgb(0, 0, 0)"
                       : building.strokeColor
                 }
