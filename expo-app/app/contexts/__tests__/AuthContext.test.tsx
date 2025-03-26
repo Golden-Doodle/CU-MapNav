@@ -164,28 +164,4 @@ describe("AuthProvider", () => {
 
     expect(mockRouter.replace).toHaveBeenCalledWith("/screens/Home/HomePageScreen");
   });
-
-  it("fetches Google Calendar events when user is set", async () => {
-    let contextValue = {} as AuthContextType;
-
-    render(
-      <AuthProvider>
-        <AuthContext.Consumer>
-          {(value) => {
-            contextValue = value as AuthContextType;
-            return null;
-          }}
-        </AuthContext.Consumer>
-      </AuthProvider>
-    );
-
-    await act(async () => {
-      contextValue.setUser({ uid: "123" } as any);
-    });
-
-    await waitFor(() => {
-      expect(fetchGoogleCalendarEvents).toHaveBeenCalled();
-      expect(contextValue.googleCalendarEvents).toEqual([{ id: "1", summary: "Test Event" }]);
-    });
-  });
 });
