@@ -5,8 +5,8 @@ import { Alert } from 'react-native';
 import IndoorMap from '../IndoorMap';
 import { generateDirections as generateIndoorDirections } from '@/app/services/Mapped-In/MappedInService';
 
-export let mockTriggerDirections: ((onDirectionsSet: (directions: any) => void) => void) | undefined = undefined;
-export let mockTriggerBuildingChange: ((onChangeBuilding: (v: any) => void) => void) | undefined = undefined;
+let mockTriggerDirections: ((onDirectionsSet: (directions: any) => void) => void) | undefined = undefined;
+let mockTriggerBuildingChange: ((onChangeBuilding: (v: any) => void) => void) | undefined = undefined;
 
 let globalMiMapViewRef: { current: any } = { current: null };
 
