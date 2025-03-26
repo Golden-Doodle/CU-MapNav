@@ -1,5 +1,5 @@
 import { getAccessToken } from '../accessToken';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 jest.mock('@react-native-google-signin/google-signin', () => ({
   GoogleSignin: {
