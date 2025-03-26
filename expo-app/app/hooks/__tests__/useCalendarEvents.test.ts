@@ -92,17 +92,27 @@ describe("useCalendarEvents", () => {
     expect(result.current.events).toEqual([]);
   });
 
-  it("should not fetch events if calendarId is null", async () => {
+  it("should set loading to true first when calendarId is null", async () => {
     (AsyncStorage.getItem as jest.Mock).mockResolvedValue(null);
 
     const { result } = renderHook(() => useCalendarEvents("userId"));
-    act(() => result.current.refresh());
 
-    expect(result.current.loading).toBe(true);
-
-    await waitFor(() => {
-      expect(result.current.events).toEqual([]);
-      expect(result.current.loading).toBe(false);
+    // Start refresh but don't await yet
+    let refreshPromise: Promise<void>;
+    act(() => {
+      refreshPromise = result.current.refresh();
     });
+
+    // Assert loading is true DURING the operation (before await)
+    expect(result.current.loading).toBe(true); // ✅ Loading starts true
+
+    // Now wait for completion
+    await act(async () => {
+      await refreshPromise;
+    });
+
+    // Verify final state
+    expect(result.current.events).toEqual([]);
+    expect(result.current.loading).toBe(false); // ✅ Loading ends false
   });
 });
