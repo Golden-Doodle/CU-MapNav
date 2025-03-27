@@ -33,7 +33,7 @@ const NextClassModal: React.FC<NextClassModalProps> = ({
   testID,
 }) => {
 
-  const {t} = useTranslation("NextClassModal");
+  const {t} = useTranslation("CampusMap");
 
   const [nextClass, setNextClass] = useState<GoogleCalendarEvent | null>(null);
   const [location, setLocation] = useState<RoomLocation | null>(null);
