@@ -10,15 +10,6 @@ export let mockTriggerBuildingChange: ((onChangeBuilding: (v: any) => void) => v
 
 let globalMiMapViewRef: { current: any } = { current: null };
 
-type MiMapViewProps = {
-  testID?: string;
-  ref?: any;
-  options?: any;
-  onFirstMapLoaded?: () => void;
-  onMapChanged?: (event: { map: { id: string } }) => void;
-  [key: string]: any;
-};
-
 type DirectionsModalProps = {
   visible: boolean;
   onDirectionsSet: (directions: any) => void;
@@ -42,18 +33,22 @@ jest.mock('@mappedin/react-native-sdk', () => {
   const React = require('react');
   const { View } = require('react-native');
 
-  const MiMapView = React.forwardRef((props: MiMapViewProps, ref: any) => {
+  const MiMapView = React.forwardRef((props: any, ref: any) => {
     globalMiMapViewRef = ref;
     return <View testID="miMapView" ref={ref} {...props} />;
   });
+
   return {
     MiMapView,
     MappedinMap: jest.fn(),
     MappedinDirections: jest.fn(),
     TMappedinDirective: jest.fn(),
     MapViewStore: jest.fn(),
+    MARKER_ANCHOR: { CENTER: 'center' },
+    COLLISION_RANKING_TIERS: { ALWAYS_VISIBLE: 'alwaysVisible' },
   };
 });
+
 
 jest.mock('@/app/components/IndoorNavigation/DirectionsModal', () => {
   const React = require('react');
@@ -200,9 +195,14 @@ describe('IndoorMap Component', () => {
     const fakeSetMap = jest.fn().mockResolvedValue(undefined);
     const fakeMapView = {
       currentMap: { id: 'floor1' },
-      venueData: { maps: [{ id: 'floor1', name: 'Floor 1' }] },
+      venueData: {
+        maps: [{ id: 'floor1', name: 'Floor 1' }],
+        vortexes: [], 
+        locations: [], 
+        nodes: []      
+      },
       setMap: fakeSetMap,
-    };
+    };    
     const validDirectionsForLoad = {
       instructions: [{ instruction: 'Go straight' }],
       distance: 50,
@@ -223,24 +223,29 @@ describe('IndoorMap Component', () => {
 
   it('alerts when no directions found for destination room on first map load', async () => {
     (generateIndoorDirections as jest.Mock).mockReturnValue(null);
-
-    const { getByTestId } = render(<IndoorMap destinationRoom={destinationRoom} />);
-
+  
     const fakeSetMap = jest.fn().mockResolvedValue(undefined);
     const fakeMapView = {
       currentMap: { id: 'floor1' },
-      venueData: { maps: [{ id: 'floor1', name: 'Floor 1' }] },
+      venueData: {
+        maps: [{ id: 'floor1', name: 'Floor 1' }],
+        vortexes: [],
+        locations: [],
+        nodes: []
+      },
       setMap: fakeSetMap,
     };
-
+  
+    const { getByTestId } = render(<IndoorMap destinationRoom={destinationRoom} />);
     globalMiMapViewRef.current = fakeMapView;
-
+  
     await act(async () => {
       await getByTestId('miMapView').props.onFirstMapLoaded();
     });
-
+  
     expect(Alert.alert).toHaveBeenCalledWith('No Directions Found', expect.stringContaining('H-833'));
   });
+  
 
   it('updates map when onMapChanged is called', async () => {
     const fakeSetMap = jest.fn().mockResolvedValue(undefined);
@@ -314,5 +319,79 @@ describe('IndoorMap Component', () => {
       const miMapView = getByTestId('miMapView') as any;
       expect(miMapView.props.options.mapId).toBe("XYZ");
     });
+  });
+  it('renders vertical connections markers by calling createMarker for each valid vortex node', async () => {
+    const fakeCreateMarker = jest.fn().mockReturnValue('verticalMarker1');
+    const fakeRemoveMarker = jest.fn();
+  
+    const fakeMapView = {
+      currentMap: { id: 'floor1', name: 'Floor 1' },
+      venueData: {
+        maps: [{ id: 'floor1', name: 'Floor 1' }],
+        vortexes: [
+          {
+            type: 'escalator',
+            name: 'Escalator A',
+            nodes: ['node1'],
+          },
+        ],
+        nodes: [
+          {
+            id: 'node1',
+            map: { id: 'floor1', name: 'Floor 1' },
+          },
+        ],
+      },
+      setMap: jest.fn().mockResolvedValue(undefined),
+      createMarker: fakeCreateMarker,
+      removeMarker: fakeRemoveMarker,
+    };
+  
+    const { getByTestId } = render(<IndoorMap />);
+    globalMiMapViewRef.current = fakeMapView;
+  
+    await act(async () => {
+      await getByTestId('miMapView').props.onFirstMapLoaded();
+    });
+  
+    expect(fakeCreateMarker).toHaveBeenCalled();
+  });
+  
+  it('renders POI markers by calling createMarker for each location', async () => {
+    const fakeCreateMarker = jest.fn();
+  
+    const fakeMapView = {
+      currentMap: { id: 'floor1', name: 'Floor 1' },
+      venueData: {
+        maps: [{ id: 'floor1', name: 'Floor 1' }],
+        vortexes: [], 
+        locations: [
+          {
+            name: 'Washroom 1',
+            polygons: [{ entrances: [{ x: 0, y: 0 }] }],
+          },
+          {
+            name: 'Fountain 1',
+            nodes: [{ x: 1, y: 1, map: { id: 'floor1', name: 'Floor 1' } }],
+          },
+          {
+            name: 'Shop 1',
+            nodes: [{ x: 2, y: 2, map: { id: 'floor1', name: 'Floor 1' } }],
+          },
+        ],
+        nodes: [],
+      },
+      setMap: jest.fn().mockResolvedValue(undefined),
+      createMarker: fakeCreateMarker,
+    };
+  
+    const { getByTestId } = render(<IndoorMap />);
+    globalMiMapViewRef.current = fakeMapView;
+  
+    await act(async () => {
+      await getByTestId('miMapView').props.onFirstMapLoaded();
+    });
+  
+    expect(fakeCreateMarker).toHaveBeenCalledTimes(3);
   });
 });

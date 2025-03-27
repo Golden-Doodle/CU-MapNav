@@ -3,12 +3,10 @@ import {
   SafeAreaView,
   View,
   ActivityIndicator,
-  StyleSheet,
   TouchableOpacity,
   Text,
   FlatList,
   Alert,
-  Modal,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {
@@ -16,13 +14,24 @@ import {
   MappedinMap,
   MappedinDirections,
   MapViewStore,
+  MARKER_ANCHOR,
+  COLLISION_RANKING_TIERS,
 } from '@mappedin/react-native-sdk';
+
+import { colors } from './Styling/Constants';
+import {
+  getWashroomMarkerHtml,
+  getFountainMarkerHtml,
+  getDefaultMarkerHtml,
+  getVerticalMarkerHtml,
+} from './Styling/markerTemplate';
 
 import DirectionsModal from '@/app/components/IndoorNavigation/DirectionsModal';
 import BuildingFloorModal from '@/app/components/IndoorNavigation/SetBuildingFloorModal';
 import Constants from 'expo-constants';
 import { RoomLocation } from '@/app/utils/types';
 import { generateDirections as generateIndoorDirections } from '@/app/services/Mapped-In/MappedInService';
+import styles from './Styling/IndoorMap.styles';
 
 const buildings = [
   { label: 'Hall', value: '67c87db88e15de000bed1abb' },
@@ -43,8 +52,6 @@ const IndoorMap = ({
   pressedOptimizeRoute,
   indoorBuildingId,
 }: IndoorMapProps) => {
-  console.log('pressedOptimizeRoute:', pressedOptimizeRoute);
-  
   const mapView = useRef<MapViewStore>(null);
   const [levels, setLevels] = useState<MappedinMap[]>();
   const [selectedFloor, setSelectedFloor] = useState<string | null>(null);
@@ -59,10 +66,11 @@ const IndoorMap = ({
   const [activeDirections, setActiveDirections] = useState<MappedinDirections | null>(null);
   const [showDirections, setShowDirections] = useState(false);
 
+  const verticalMarkerIds = useRef<string[]>([]);
+
   useEffect(() => {
     if (indoorBuildingId) {
       let mappedId = indoorBuildingId;
-
       if (indoorBuildingId === "MB") {
         mappedId = "67d974ddf63286000bb80fc3";
       } else if (indoorBuildingId === "H") {
@@ -76,6 +84,94 @@ const IndoorMap = ({
     key,
     secret,
     mapId: selectedBuilding ?? '',
+    labelAllLocationsOnInit: false,
+  };
+
+  useEffect(() => {
+    async function setMapAndMarkers() {
+      if (selectedFloor && selectedFloor !== mapView.current?.currentMap?.id) {
+        await mapView.current?.setMap(selectedFloor);
+      }
+      setTimeout(() => {
+        renderVerticalConnections();
+      }, 100);
+    }
+    setMapAndMarkers();
+  }, [selectedFloor]);
+
+  useEffect(() => {
+    if (mapView.current?.currentMap) {
+      renderVerticalConnections();
+    }
+  }, [mapView.current?.currentMap]);
+
+  const renderVerticalConnections = () => {
+    verticalMarkerIds.current.forEach((id) => {
+      mapView.current?.removeMarker(id);
+    });
+    verticalMarkerIds.current = [];
+    const mappedinData = mapView.current?.venueData;
+    const currentMap = mapView.current?.currentMap;
+    if (mappedinData && currentMap) {
+      const verticalTypes = ["escalator", "elevator", "stairs"];
+      const connections = mappedinData.vortexes.filter(v =>
+        v.type && verticalTypes.includes(v.type.toLowerCase())
+      );
+      connections.forEach((vortex: any) => {
+        (vortex.nodes || []).forEach((nodeId: string) => {
+          const node = mappedinData.nodes.find((n: any) => n.id === nodeId);
+          if (node && node.map.id === currentMap.id) {
+            const typeKey = vortex.type.toLowerCase();
+            const fillColor = colors[typeKey as keyof typeof colors] || 'gray';
+            const connectionLabel =
+              vortex.name && vortex.name.trim().length > 0
+                ? vortex.name
+                : vortex.type.charAt(0).toUpperCase() + vortex.type.slice(1);
+            const markerHtml = getVerticalMarkerHtml(connectionLabel, fillColor);
+            const markerId = mapView.current?.createMarker(node, markerHtml, {
+              anchor: MARKER_ANCHOR.CENTER,
+              rank: COLLISION_RANKING_TIERS.ALWAYS_VISIBLE,
+            });
+            if (markerId) {
+              verticalMarkerIds.current.push(markerId);
+            }
+          }
+        });
+      });
+    }
+  };
+
+  const renderPOIMarkers = () => {
+    const allLocations = mapView.current?.venueData?.locations || [];
+    allLocations.forEach((location: any) => {
+      let markerPosition = null;
+      if (location.polygons?.length > 0) {
+        const firstPolygon = location.polygons[0];
+        if (firstPolygon.entrances?.length > 0) {
+          markerPosition = firstPolygon.entrances[0];
+        } else if (firstPolygon.nodes?.length > 0) {
+          markerPosition = firstPolygon.nodes[0];
+        }
+      } else if (location.nodes?.length > 0) {
+        markerPosition = location.nodes[0];
+      }
+      if (!markerPosition) return;
+  
+      const name = location.name ?? '';
+      let markerHtml = '';
+  
+      if (name.toLowerCase().includes('washroom') || name.toLowerCase().includes('restroom')) {
+        markerHtml = getWashroomMarkerHtml(location.name);
+      } else if (name.toLowerCase().includes('fountain') || name.toLowerCase().includes('water')) {
+        markerHtml = getFountainMarkerHtml(location.name);
+      } else {
+        markerHtml = getDefaultMarkerHtml(location.name);
+      }
+      mapView.current?.createMarker(markerPosition, markerHtml, {
+        anchor: MARKER_ANCHOR.CENTER,
+        rank: COLLISION_RANKING_TIERS.ALWAYS_VISIBLE,
+      });
+    });
   };
 
   const handleFirstMapLoaded = async () => {
@@ -83,17 +179,15 @@ const IndoorMap = ({
     const currentMapId = mapView.current?.currentMap?.id;
     const availableMaps = mapView.current?.venueData?.maps || [];
     setSelectedFloor(currentMapId ?? null);
-
+  
     const items = availableMaps.map((floor) => ({
       label: floor.name,
       value: floor.id,
     }));
     setFloorItems(items);
     setLevels(availableMaps);
-
+  
     if (destinationRoom) {
-      console.log('IndoorMap loaded. Searching for room:', destinationRoom.room);
-
       const directions = generateIndoorDirections(mapView, 'Entrance #1', destinationRoom.room);
       if (directions) {
         setActiveDirections(directions);
@@ -106,16 +200,10 @@ const IndoorMap = ({
         Alert.alert('No Directions Found', `No indoor directions found for room ${destinationRoom.room}`);
       }
     }
+  
+    renderPOIMarkers();
+    renderVerticalConnections();
   };
-
-  useEffect(() => {
-    async function setMap() {
-      if (selectedFloor && selectedFloor !== mapView.current?.currentMap?.id) {
-        await mapView.current?.setMap(selectedFloor);
-      }
-    }
-    setMap();
-  }, [selectedFloor]);
 
   const handleBuildingChange: React.Dispatch<React.SetStateAction<string | null>> = (value) => {
     if (typeof value === 'function') {
@@ -147,7 +235,9 @@ const IndoorMap = ({
             ref={mapView}
             options={options}
             onFirstMapLoaded={handleFirstMapLoaded}
-            onMapChanged={({ map }) => setSelectedFloor(map.id)}
+            onMapChanged={({ map }) => {
+              setSelectedFloor(map.id);
+            }}
           />
           {isMapLoading && (
             <View style={styles.loaderContainer} testID="loaderContainer">
@@ -216,7 +306,7 @@ const IndoorMap = ({
           ) : null}
         </View>
       </View>
-
+  
       <DirectionsModal
         visible={directionsModalVisible}
         onRequestClose={() => setDirectionsModalVisible(false)}
@@ -237,7 +327,7 @@ const IndoorMap = ({
           setDirectionsModalVisible(false);
         }}
       />
-
+  
       <BuildingFloorModal
         visible={settingsModalVisible}
         onRequestClose={() => setSettingsModalVisible(false)}
@@ -253,78 +343,3 @@ const IndoorMap = ({
 };
 
 export default IndoorMap;
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f7f7f7' },
-  contentContainer: { flex: 1 },
-  mapContainer: { flex: 1 },
-  map: { flex: 1 },
-  loaderContainer: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(255,255,255,0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 10,
-  },
-  settingsButton: {
-    position: 'absolute',
-    top: 20,
-    right: 20,
-    padding: 8,
-    zIndex: 20,
-  },
-  directionsButton: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    padding: 8,
-    zIndex: 20,
-  },
-  directionsOverlay: {
-    position: 'absolute',
-    bottom: 20,
-    left: 20,
-    zIndex: 15,
-  },
-  directionsContainer: {
-    backgroundColor: 'rgba(255,255,255,0.95)',
-    borderRadius: 8,
-    padding: 10,
-    width: 280,
-    maxHeight: 300,
-    elevation: 3,
-  },
-  directionsHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  directionsTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 5,
-  },
-  directionsList: { marginVertical: 5 },
-  instruction: {
-    fontSize: 14,
-    color: '#333',
-    marginVertical: 2,
-  },
-  directionsButtonColumn: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  iconButton: { padding: 5 },
-  button: {
-    backgroundColor: '#912338',
-    borderRadius: 25,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    marginTop: 10,
-  },
-  cancelButton: { backgroundColor: '#FF3B30' },
-  showButton: { backgroundColor: '#912338' },
-  buttonText: { color: '#fff', fontWeight: '600' },
-});

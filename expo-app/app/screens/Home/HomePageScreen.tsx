@@ -16,7 +16,7 @@ import HottestSpots from "../../components/HottestSpots/HottestSpots";
 import ShuttleSchedule from "../../components/ShuttleSchedule/ShuttleSchedule";
 import BottomNavigation from "../../components/BottomNavigation/BottomNavigation";
 import { AuthContext } from "@/app/contexts/AuthContext";
-import { fetchGoogleCalendarEvents } from "@/app/services/GoogleCalendar/fetchingUserCalendarData";
+import { fetchCalendarEvents } from "@/app/services/GoogleCalendar/fetchingUserCalendarData";
 import { GoogleCalendarEvent } from "@/app/utils/types";
 
 export default function HomePageScreen() {
@@ -25,14 +25,12 @@ export default function HomePageScreen() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [calendarEvents, setCalendarEvents] = useState<GoogleCalendarEvent[]>([]);
-  const [campus, setCampus] = useState<"LOY" | "SGW">("LOY")
+  const [campus, setCampus] = useState<"LOY" | "SGW">("LOY");
 
-  // Load stored campus selection
   useEffect(() => {
     const loadCampus = async () => {
       const storedCampus = await AsyncStorage.getItem("selectedCampus");
       
-      // Ensure storedCampus is either "LOY" or "SGW"
       if (storedCampus === "LOY" || storedCampus === "SGW") {
         setCampus(storedCampus);
       }
@@ -48,16 +46,7 @@ export default function HomePageScreen() {
     try {
       console.log("Refreshing calendar events...");
 
-      // Retrieve the selected calendar ID from AsyncStorage
-      const selectedCalendarId = await AsyncStorage.getItem("selectedScheduleID");
-
-      if (!selectedCalendarId) {
-        console.warn("No calendar selected. Please choose a calendar in settings.");
-        return;
-      }
-
-      // Fetch events for the selected calendar (next 7 days)
-      const events = await fetchGoogleCalendarEvents(selectedCalendarId, 7);
+      const { events } = await fetchCalendarEvents();
       setCalendarEvents(events);
     } catch (error) {
       console.error("Failed to refresh calendar:", error);
@@ -68,13 +57,8 @@ export default function HomePageScreen() {
 
   useEffect(() => {
     refreshCalendarEvents();
-    // const interval = setInterval(refreshCalendarEvents, 30000);
-    
-    // return () => clearInterval(interval);
-    return () => {};
   }, [refreshCalendarEvents]); 
   
-  // Must make sure this was the intended function (Megered Conflict)
   const toggleCampus = async () => {
     const newCampus = campus === "LOY" ? "SGW" : "LOY";
     setCampus(newCampus);
@@ -111,7 +95,6 @@ export default function HomePageScreen() {
             trackColor={{ false: "#912338", true: "#D3D3D3" }}
             thumbColor={campus === "LOY" ? "#912338" : "#D3D3D3"}
           />
-
           <Text style={styles.switchLabel}>LOY</Text>
         </View>
 
@@ -154,4 +137,3 @@ const styles = StyleSheet.create({
     color: "#333",
   },
 });
-
