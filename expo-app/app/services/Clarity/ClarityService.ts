@@ -5,12 +5,20 @@ import * as Clarity from '@microsoft/react-native-clarity';
 
 // Default config
 const clarityDefaultConfig = {
-  logLevel: Clarity.LogLevel.Verbose
+  //logLevel: Clarity.LogLevel.Verbose
 };
 
+// Project ID set in environment variable
+const clarityProjectId = process.env.CLARITY_PROJECT_ID;
+
 // Initialize Clarity Usability Testing Session
-export function runClarity(projectId: string, config = clarityDefaultConfig){
-    Clarity.initialize(projectId, config);
+export function runClarity(config = clarityDefaultConfig){
+    try{
+        Clarity.initialize(clarityProjectId, config);
+    }catch(error){
+        console.error(error);
+    }
+    
 }
 
 // Pause Clarity Usability Testing Session
@@ -24,13 +32,14 @@ export function resumeClarity(){
 }
 
 // Get Clarity Usability Testing Session Recording
-export function getClarityUrl(): string?{
+export function getClarityUrl(): string{
     Clarity.getCurrentSessionUrl()
         .then((url)=>{
             return url || "could not find url";
         });
 }
 
+// REMOVE, not supported by clarity
 // Stop Clarity Recording
 export function stopClarity(){
     Clarity.stop();
@@ -51,13 +60,12 @@ export function sendCustomEventToClarity(event: string){
 
 
 // Toggle
-export function toggleClarity(clarityIsOn: boolean, projectId: string, config = clarityDefaultConfig){
+export function toggleClarity(clarityIsOn: boolean, config = clarityDefaultConfig){
     if(clarityIsOn){
-        runClarity(projectId, config);
+        runClarity(config);
         clarityIsOn = false;
     }else{
-        stopClarity();
+        pauseClarity();
         clarityIsOn = true;
     }
-    return clarityIsOn;
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, ScrollView, Text, TouchableOpacity, StyleSheet, Switch } from "react-native";
+import { View, ScrollView, Text, TouchableOpacity, StyleSheet, Switch, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { FontAwesome5 } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -24,6 +24,7 @@ export default function SettingsScreen() {
       try {
         const savedNotifications = await AsyncStorage.getItem("notifications");
         const savedDarkMode = await AsyncStorage.getItem("darkMode");
+        const savedUtMode = await AsyncStorage.getItem("utMode");
 
         // Check if the saved values are valid before parsing
         if (savedNotifications !== null && savedNotifications !== undefined) {
@@ -36,6 +37,12 @@ export default function SettingsScreen() {
           setDarkMode(JSON.parse(savedDarkMode));
         } else {
           setDarkMode(false); // default to false if not set
+        }
+
+        if (savedUtMode !== null && savedUtMode !== undefined) {
+          setUsabilityTestingMode(JSON.parse(savedUtMode));
+        } else {
+          setUsabilityTestingMode(false); //default to false if not set
         }
       } catch (error) {
         console.error("Error loading settings:", error);
@@ -107,20 +114,6 @@ export default function SettingsScreen() {
           <Text style={styles.settingText}>{t("Account details")}</Text>
           <FontAwesome5 name="chevron-right" size={16} color="#912338" />
         </TouchableOpacity>
-
-        {/* Usability Testing Toggle */}
-        <TouchableOpacity
-            style={styles.settingOption}
-            onPress={() => {
-                usabilityTestingMode = toggleClarity(usabilityTestingMode);
-            }}
-            testID="usability-testing-toggle-button"
-        >
-            {/* TODO */}
-            <FontAwesome5 name="usability-testing" size={18} color="#912338" />
-            <Text style={styles.settingText}>{t("Usability Testing")}</Text>
-            <FontAwesome5 name="chevron-right" size={16} color="#912338" />
-        </TouchableOpacity>
         
         {/* Support */}
         <TouchableOpacity
@@ -132,6 +125,24 @@ export default function SettingsScreen() {
           <Text style={styles.settingText}>{t("Support")}</Text>
           <FontAwesome5 name="chevron-right" size={16} color="#912338" />
         </TouchableOpacity>
+
+        {/* Usability Testing Toggle */}
+        <View style={styles.settingOption} testID="usability-testing-toggle-button">
+          <FontAwesome5 name="eye" size={18} color="#912338" />
+          <Text style={styles.settingText}>{t("Usability Testing Mode")}</Text>
+          <Switch
+            value={usabilityTestingMode}
+            onValueChange={(value) => {
+              setUsabilityTestingMode(value);
+              saveSetting("utMode", value);
+              toggleClarity(value);
+              if(!value){
+                Alert.alert("Warning", "The CU-MapNav App needs to be restarted to fully exit Clarity usability testing. This only pauses Clarity.");
+              }
+            }}
+            testID="usability-testing-switch"
+          />
+        </View>
 
         {/* Logout */}
         <TouchableOpacity
