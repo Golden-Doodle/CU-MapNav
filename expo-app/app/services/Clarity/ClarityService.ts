@@ -1,3 +1,6 @@
+/*
+ * See npm package details here: https://www.npmjs.com/package/@microsoft/react-native-clarity
+ */
 import * as Clarity from '@microsoft/react-native-clarity';
 
 // Default config
@@ -47,3 +50,14 @@ export function sendCustomEventToClarity(event: string){
 }
 
 
+// Toggle
+export function toggleClarity(clarityIsOn: boolean, projectId: string, config = clarityDefaultConfig){
+    if(clarityIsOn){
+        runClarity(projectId, config);
+        clarityIsOn = false;
+    }else{
+        stopClarity();
+        clarityIsOn = true;
+    }
+    return clarityIsOn;
+}

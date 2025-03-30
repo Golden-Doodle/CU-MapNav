@@ -8,6 +8,7 @@ import SettingsHeader from "../../components/Settings/SettingsHeader";
 import BottomNavigation from "../../components/BottomNavigation/BottomNavigation";
 import LanguageSelector from "@/app/components/LanguagePicker/LanguagePicker";
 import { useTranslation } from "react-i18next";
+import { toggleClarity } from "../../services/Clarity/ClarityService.ts";
 
 export default function SettingsScreen() {
   const { t } = useTranslation("SettingsScreen");
@@ -16,6 +17,7 @@ export default function SettingsScreen() {
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const [usabilityTestingMode, setUsabilityTestingMode] = useState(false);
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -106,6 +108,20 @@ export default function SettingsScreen() {
           <FontAwesome5 name="chevron-right" size={16} color="#912338" />
         </TouchableOpacity>
 
+        {/* Usability Testing Toggle */}
+        <TouchableOpacity
+            style={styles.settingOption}
+            onPress={() => {
+                usabilityTestingMode = toggleClarity(usabilityTestingMode);
+            }}
+            testID="usability-testing-toggle-button"
+        >
+            {/* TODO */}
+            <FontAwesome5 name="usability-testing" size={18} color="#912338" />
+            <Text style={styles.settingText}>{t("Usability Testing")}</Text>
+            <FontAwesome5 name="chevron-right" size={16} color="#912338" />
+        </TouchableOpacity>
+        
         {/* Support */}
         <TouchableOpacity
           style={styles.settingOption}
