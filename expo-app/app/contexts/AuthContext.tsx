@@ -6,6 +6,7 @@ import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { useRouter } from "expo-router";
 import { GoogleCalendarEvent } from "../utils/types";
+import { fetchAllCalendars, fetchGoogleCalendarEvents } from "../services/GoogleCalendar/fetchingUserCalendarData";
 
 export interface AuthContextType {
   user: FirebaseAuthTypes.User | null;
@@ -60,6 +61,41 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchData = async () => {
+      try {
+        let storedCalendarId = await AsyncStorage.getItem("selectedScheduleID");
+
+        if (!storedCalendarId) {
+          const allCalendars = await fetchAllCalendars();
+          const defaultCalendar = allCalendars.find(
+            (cal: any) => cal.summary === "Concordia_Class_Schedule"
+          );
+
+          if (defaultCalendar) {
+            storedCalendarId = defaultCalendar.id;
+            await AsyncStorage.setItem("selectedScheduleID", defaultCalendar.id);
+            await AsyncStorage.setItem("selectedScheduleName", defaultCalendar.summary);
+          } else {
+            console.warn("Default calendar 'Concordia_Class_Schedule' not found.");
+          }
+        }
+
+        if (storedCalendarId) {
+          setSelectedCalendarId(storedCalendarId);
+          const events = await fetchGoogleCalendarEvents(storedCalendarId, 7);
+          setGoogleCalendarEvents(events);
+        }
+      } catch (error) {
+        console.error("Error fetching calendar events:", error);
+      }
+    };
+
+    fetchData();
+  }, [user]);
 
   const handleGoogleSignIn = async () => {
     try {
