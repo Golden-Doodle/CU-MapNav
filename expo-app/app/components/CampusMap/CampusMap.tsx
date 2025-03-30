@@ -62,7 +62,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   const [isRadiusAdjusterVisible, setIsRadiusAdjusterVisible] = useState<boolean>(false);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const [isIndoorMapVisible, setIsIndoorMapVisible] = useState<boolean>(false);
-  
+
   const [activeFilters, setActiveFilters] = useState<string[]>(defaultFilters);
   const [isFilterModalVisible, setIsFilterModalVisible] = useState<boolean>(false);
 
@@ -129,22 +129,22 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         )
       )
         .then((results) => {
-            const markers = results.flatMap((places, index) =>
-              places.map((place: GooglePlace) => ({
-                id: place.place_id + "_" + activeFilters[index],
-                coordinate: {
-                  latitude: place.geometry.location.lat,
-                  longitude: place.geometry.location.lng,
-                },
-                title: place.name,
-                description: place.vicinity,
-                photoUrl: place.photos?.[0]?.imageUrl,
-                rating: place.rating,
-                campus,
-                markerType: activeFilters[index] as "restaurant" | "cafe" | "washroom",
-              }))
-            );
-            setFetchedPlaceResults(markers);
+          const markers = results.flatMap((places, index) =>
+            places.map((place: GooglePlace) => ({
+              id: place.place_id + "_" + activeFilters[index],
+              coordinate: {
+                latitude: place.geometry.location.lat,
+                longitude: place.geometry.location.lng,
+              },
+              title: place.name,
+              description: place.vicinity,
+              photoUrl: place.photos?.[0]?.imageUrl,
+              rating: place.rating,
+              campus,
+              markerType: activeFilters[index] as "restaurant" | "cafe" | "washroom",
+            }))
+          );
+          setFetchedPlaceResults(markers);
         })
         .catch((error) => {
           console.error("Error fetching nearby places: ", error);
@@ -169,6 +169,12 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
       setVisiblePlaceMarkers(filteredMarkers);
     }
   }, [selectedDistance, userLocation, fetchedPlaceResults]);
+
+  useEffect(() => {
+    if (pressedOptimizeRoute) {
+      setIsNextClassModalVisible(true);
+    }
+  }, [pressedOptimizeRoute]);
 
   const handleMarkerPress = useCallback((marker: CustomMarkerType) => {
     const markerToBuilding: Building = {
