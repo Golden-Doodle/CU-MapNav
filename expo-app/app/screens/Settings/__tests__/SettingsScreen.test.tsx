@@ -7,6 +7,14 @@ const mockSignOut = jest.fn();
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
 
+jest.mock("@microsoft/react-native-clarity", () => ({
+  intialize: jest.fn(),
+  pause: jest.fn(), 
+  resume: jest.fn(), 
+  getCurrentSessionUrl: jest.fn(), 
+  sendCustomEvent: jest.fn(),
+}))
+
 jest.mock("@react-native-async-storage/async-storage", () => ({
   getItem: jest.fn(),
   setItem: jest.fn(),
