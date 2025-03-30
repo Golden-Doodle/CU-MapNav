@@ -455,7 +455,7 @@ describe("CampusMap", () => {
     await openSearchModalAndFetchRoute(getByTestId);
   });
 
-  it("should alert when Go Indoor is pressed with no room info", async () => {
+  it("should alert when Go Indoor is pressed with no indoor map available", async () => {
     const alertSpy = jest.spyOn(Alert, "alert");
     const { getByTestId } = renderCampusMap();
     fireEvent.press(getByTestId("building-marker-FB-marker"));
@@ -472,8 +472,8 @@ describe("CampusMap", () => {
     fireEvent.press(getByTestId("indoor-button"));
     await waitFor(() =>
       expect(alertSpy).toHaveBeenCalledWith(
-        "No Room Exists",
-        "There is no room number available for this class."
+        "Indoor Map Not Available",
+        "Indoor map is not available for this building."
       )
     );
   });

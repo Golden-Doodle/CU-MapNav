@@ -287,15 +287,24 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   };
 
   const handleGoIndoor = () => {
-    if (destination && destination.room) {
-      setIsIndoorMapVisible(true);
+    if (destination && destination.building) {
+      const indoorCapableBuildings = ["H", "MB", "JMSB"];
+      if (indoorCapableBuildings.includes(destination.building.id)) {
+        setIsIndoorMapVisible(true);
+      } else {
+        Alert.alert(
+          "Indoor Map Not Available",
+          "Indoor map is not available for this building."
+        );
+      }
     } else {
-      Alert.alert("No Room Exists", "There is no room number available for this class.");
+      Alert.alert(
+        "No Building Selected",
+        "Please select a building for which indoor directions can be provided."
+      );
     }
   };
-
   
-
   return (
     <View style={styles.container}>
       <HamburgerWidget
@@ -507,7 +516,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         onRequestClose={() => setIsIndoorMapVisible(false)}
       >
         <View style={{ flex: 1 }}>
-          <IndoorMap destinationRoom={destination?.room} />
+          <IndoorMap indoorBuildingId={destination?.building?.id}  destinationRoom={destination?.room} />
           <TouchableOpacity
             onPress={() => setIsIndoorMapVisible(false)}
             style={styles.closeIndoorMapButton}
