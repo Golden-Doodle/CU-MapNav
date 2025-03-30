@@ -1,5 +1,6 @@
 import { GoogleCalendarEvent } from "@/app/utils/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getAccessToken } from "../GoogleSignin/accessToken";
 
 /**
  * Helper function to check if a response is unauthorized (401/403).
@@ -21,7 +22,8 @@ const checkUnauthorized = (response: Response) => {
  */
 export const fetchAllCalendars = async () => {
   try {
-    const accessToken = await AsyncStorage.getItem("googleAccessToken");
+    const accessToken = await getAccessToken();
+
     if (!accessToken) {
       throw new Error("No Google access token found. Please sign in again.");
     }
@@ -59,7 +61,8 @@ export const fetchGoogleCalendarEvents = async (
       throw new Error("No calendar ID provided.");
     }
 
-    const accessToken = await AsyncStorage.getItem("googleAccessToken");
+    const accessToken = await getAccessToken();
+
     if (!accessToken) {
       throw new Error("No access token found. Please sign in again.");
     }
@@ -139,7 +142,8 @@ export const fetchCalendarEvents = async () => {
  */
 export const fetchTodaysEventsFromSelectedSchedule = async (): Promise<GoogleCalendarEvent[]> => {
   try {
-    const accessToken = await AsyncStorage.getItem("googleAccessToken");
+    const accessToken = await getAccessToken();
+
     if (!accessToken) {
       throw new Error("No access token found. Please sign in again.");
     }
