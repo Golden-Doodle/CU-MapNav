@@ -28,7 +28,12 @@ export default function HomePageScreen() {
 
         <View style={styles.switchContainer}>
           <Text style={styles.switchLabel}>SGW</Text>
-          <Switch value={campus === "LOY"} onValueChange={toggle} />
+          <Switch
+            value={campus === "LOY"}
+            onValueChange={toggle}
+            trackColor={{ false: "#912338", true: "#D3D3D3" }}
+            thumbColor={campus === "LOY" ? "#912338" : "#D3D3D3"}
+          />
           <Text style={styles.switchLabel}>LOY</Text>
         </View>
 

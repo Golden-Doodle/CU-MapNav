@@ -1,4 +1,6 @@
+// contexts/AuthContext.tsx
 import React, { createContext, useState, useEffect } from "react";
+import { Alert } from "react-native"; // <-- Import Alert
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
@@ -91,6 +93,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       await AsyncStorage.removeItem("user");
       await AsyncStorage.removeItem("selectedScheduleID");
       await AsyncStorage.removeItem("selectedScheduleName");
+      await AsyncStorage.removeItem("googleAccessToken");
       setUser(null);
       setSelectedCalendarId(null);
       setGoogleCalendarEvents([]);
