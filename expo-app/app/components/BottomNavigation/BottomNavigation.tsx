@@ -18,7 +18,11 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({ testID }) => {
       icon: "home",
       path: "/screens/Home/HomePageScreen",
     },
-    { label: t("Services"), icon: "concierge-bell" },
+    { 
+      label: t("Services"), 
+      icon: "concierge-bell",
+      path: "/screens/Services/ServicesScreen",
+    },
     {
       label: t("Report"),
       icon: "exclamation-circle",
