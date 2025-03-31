@@ -1,7 +1,7 @@
 import React from "react";
 import { View, ScrollView, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
-import ServicesHeader from "../../components/Services/ServicesHeader"; // Create this component similar to SettingsHeader
+import ServicesHeader from "../../components/Services/ServicesHeader";
 import BottomNavigation from "../../components/BottomNavigation/BottomNavigation";
 
 export default function ServicesScreen() {
