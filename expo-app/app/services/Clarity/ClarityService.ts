@@ -15,7 +15,7 @@ const clarityProjectId = Constants.expoConfig?.extra?.clarityProjectId;
 // Initialize Clarity Usability Testing Session
 export function runClarity(config = clarityDefaultConfig): Promise<boolean>{
     try{
-        if(Clarity.isPaused){
+        if(isClarityPaused()){
             resumeClarity();
         }
         Clarity.initialize(clarityProjectId, config);
@@ -42,10 +42,10 @@ export function resumeClarity(){
 }
 
 // Get Clarity Usability Testing Session Recording
-export function getClarityUrl(): string{
-    Clarity.getCurrentSessionUrl()
+export function getClarityUrl(): Promise<string>{
+    return Clarity.getCurrentSessionUrl()
         .then((url)=>{
-            return url || "could not find url";
+            return url;
         });
 }
 
@@ -56,14 +56,15 @@ export function stopClarity(){
 }
 
 // Send a custom event to Clarity
-export function sendCustomEventToClarity(event: string){
+export function sendCustomEventToClarity(event: string): Promise<boolean>{
     try{
-        if(event == null || event.length == -1){
+        if(event == null || event.length < 1){
             throw new Error('An empty string is an invalid event for usability testing');
         }
-        Clarity.sendCustomEvent(event);
+        return Clarity.sendCustomEvent(event);
     }catch(error){
         console.error(error);
+        return false;
     }
 }
 
