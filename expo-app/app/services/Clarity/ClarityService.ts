@@ -2,6 +2,7 @@
  * See npm package details here: https://www.npmjs.com/package/@microsoft/react-native-clarity
  */
 import * as Clarity from '@microsoft/react-native-clarity';
+import Constants from 'expo-constants';
 
 // Default config
 const clarityDefaultConfig = {
@@ -9,21 +10,30 @@ const clarityDefaultConfig = {
 };
 
 // Project ID set in environment variable
-const clarityProjectId = process.env.CLARITY_PROJECT_ID;
+const clarityProjectId = Constants.expoConfig?.extra?.clarityProjectId;
 
 // Initialize Clarity Usability Testing Session
-export function runClarity(config = clarityDefaultConfig){
+export function runClarity(config = clarityDefaultConfig): Promise<boolean>{
     try{
+        if(Clarity.isPaused){
+            resumeClarity();
+        }
         Clarity.initialize(clarityProjectId, config);
     }catch(error){
         console.error(error);
+        return false;
     }
-    
+    return true;    
 }
 
 // Pause Clarity Usability Testing Session
 export function pauseClarity(){
     Clarity.pause();
+}
+
+// Check if Clarity Usability Testing Session is paused
+export function isClarityPaused(): Promise<boolean>{
+    return Clarity.isPaused();
 }
 
 // Resume Clarity Usability Testing Session
@@ -44,7 +54,6 @@ export function getClarityUrl(): string{
 export function stopClarity(){
     Clarity.stop();
 }
-
 
 // Send a custom event to Clarity
 export function sendCustomEventToClarity(event: string){
