@@ -138,6 +138,8 @@ export default function SettingsScreen() {
               toggleClarity(value);
               if(!value){
                 Alert.alert("Warning", "The CU-MapNav App needs to be restarted to fully exit Clarity usability testing. This only pauses Clarity.");
+              }else{
+                Alert.alert("Suggested Tasks", "- Navigate to the home screen\n- View both campus maps\n- View shuttle bus schedule\n- Get directions to your next class\n- Get directions to a room/building of choice");//steps to be defined
               }
             }}
             testID="usability-testing-switch"
