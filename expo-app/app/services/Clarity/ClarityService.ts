@@ -16,14 +16,14 @@ const clarityProjectId = Constants.expoConfig?.extra?.clarityProjectId;
 export function runClarity(config = clarityDefaultConfig): Promise<boolean>{
     try{
         if(isClarityPaused()){
-            resumeClarity();
+            Clarity.resume();
         }
         Clarity.initialize(clarityProjectId, config);
     }catch(error){
         console.error(error);
         return false;
     }
-    return true;    
+    return true;
 }
 
 // Pause Clarity Usability Testing Session
@@ -36,23 +36,12 @@ export function isClarityPaused(): Promise<boolean>{
     return Clarity.isPaused();
 }
 
-// Resume Clarity Usability Testing Session
-export function resumeClarity(){
-    Clarity.resume();
-}
-
 // Get Clarity Usability Testing Session Recording
 export function getClarityUrl(): Promise<string>{
     return Clarity.getCurrentSessionUrl()
         .then((url)=>{
             return url;
         });
-}
-
-// REMOVE, not supported by clarity
-// Stop Clarity Recording
-export function stopClarity(){
-    Clarity.stop();
 }
 
 // Send a custom event to Clarity
