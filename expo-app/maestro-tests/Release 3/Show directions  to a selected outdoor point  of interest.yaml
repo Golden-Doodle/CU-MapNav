@@ -1,0 +1,13 @@
+appId: com.goldendoodle.expoapp
+---
+- tapOn:
+    id: "menu-button"
+- tapOn:
+    id: "campus-map-button"
+- tapOn:
+    id: "nav-tab-nav-item-Eat"
+- tapOn: "Map Marker"
+- tapOn:
+    id: "building-info-modal-content-navigate-button"
+- tapOn:
+    id: "transit-modal-modal-go-button-1"
