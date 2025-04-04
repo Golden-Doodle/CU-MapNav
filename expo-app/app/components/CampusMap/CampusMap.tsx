@@ -38,10 +38,11 @@ import { getFillColorWithOpacity } from "@/app/utils/helperFunctions";
 import IndoorMap from "@/app/components/IndoorNavigation/IndoorMap";
 
 interface CampusMapProps {
-  pressedOptimizeRoute: boolean;
+  pressedOptimizeRoute?: boolean;
+  pressedSearch?: boolean;
 }
 
-const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
+const CampusMap = ({ pressedOptimizeRoute = false, pressedSearch = false }: CampusMapProps) => {
   const [campus, setCampus] = useState<Campus>("SGW");
   const [routeCoordinates, setRouteCoordinates] = useState<Coordinates[]>([]);
   const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
@@ -171,10 +172,13 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   }, [selectedDistance, userLocation, fetchedPlaceResults]);
 
   useEffect(() => {
+    // Allows for routing from HomePageScreen to CampusMapScreen
     if (pressedOptimizeRoute) {
       setIsNextClassModalVisible(true);
+    } else if (pressedSearch) {
+      setIsSearchModalVisible(true);
     }
-  }, [pressedOptimizeRoute]);
+  }, [pressedOptimizeRoute, pressedSearch]);
 
   const handleMarkerPress = useCallback((marker: CustomMarkerType) => {
     const markerToBuilding: Building = {
@@ -292,10 +296,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
       if (indoorCapableBuildings.includes(destination.building.id)) {
         setIsIndoorMapVisible(true);
       } else {
-        Alert.alert(
-          "Indoor Map Not Available",
-          "Indoor map is not available for this building."
-        );
+        Alert.alert("Indoor Map Not Available", "Indoor map is not available for this building.");
       }
     } else {
       Alert.alert(
@@ -304,7 +305,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
       );
     }
   };
-  
+
   return (
     <View style={styles.container}>
       <HamburgerWidget
@@ -516,7 +517,10 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         onRequestClose={() => setIsIndoorMapVisible(false)}
       >
         <View style={{ flex: 1 }}>
-          <IndoorMap indoorBuildingId={destination?.building?.id}  destinationRoom={destination?.room} />
+          <IndoorMap
+            indoorBuildingId={destination?.building?.id}
+            destinationRoom={destination?.room}
+          />
           <TouchableOpacity
             onPress={() => setIsIndoorMapVisible(false)}
             style={styles.closeIndoorMapButton}
