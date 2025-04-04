@@ -16,15 +16,6 @@ export default function ButtonSection() {
       },
     });
   };
-  
-  // const onStudySpotPress = () => {
-  //   router.push({
-  //     pathname: "/screens/Home/CampusMapScreen",
-  //     params: {
-  //       pressedOptimizeRoute: "true",
-  //     },
-  //   });
-  // }
 
   return (
     <View style={styles.container}>
