@@ -40,7 +40,7 @@ import IndoorMap from "@/app/components/IndoorNavigation/IndoorMap";
 interface CampusMapProps {
   pressedOptimizeRoute: boolean;
   pressedCoffeeStop?: boolean;
-  pressedFood: boolean;
+  pressedFood?: boolean;
 }
 
 const CampusMap = ({ pressedOptimizeRoute = false, pressedCoffeeStop = false, pressedFood = false }: CampusMapProps) => {
