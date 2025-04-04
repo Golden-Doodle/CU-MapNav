@@ -16,7 +16,6 @@ const useLiveShuttleLocations = (displayLiveShuttleLocation: boolean) => {
       try {
         const locations = await fetchBusCoordinates();
         setLiveShuttleLocations(locations);
-        console.log("Fetched Shuttle Locations: ", locations);
       } catch (error) {
         console.error("Error fetching shuttle locations: ", error);
       }
