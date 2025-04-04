@@ -8,14 +8,16 @@ jest.mock("@microsoft/react-native-clarity", () =>({
     },
     initialize: jest.fn().mockReturnValue()
                 .mockReturnValueOnce()
+                .mockReturnValueOnce(),
+    resume: jest.fn().mockReturnValue()
                 .mockReturnValueOnce()
                 .mockImplementation(()=>{throw new Error();}),
-    resume: jest.fn().mockReturnValue(),
     getCurrentSessionUrl: jest.fn().mockResolvedValue()
                             .mockImplementationOnce(() => Promise.resolve("mocked-clarity-url"))
                             .mockResolvedValueOnce("could not find url"),
     isPaused: jest.fn().mockReturnValue()
                 .mockReturnValueOnce(false)
+                .mockReturnValueOnce(true)
                 .mockReturnValueOnce(true),
     sendCustomEvent: jest.fn().mockReturnValue()
                                 .mockReturnValueOnce(true)
