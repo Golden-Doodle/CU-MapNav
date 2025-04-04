@@ -27,8 +27,6 @@ export const fetchBusCoordinates = async () => {
 
     const Points: ShuttlePointObject[] = data.d.Points;
 
-    console.log("Bus Coordinates Data:", Points); // Debugging log
-
     const busObjects: BusObject[] = Points.map((point: ShuttlePointObject) => {
       if (point.ID.includes("BUS")) {
         return {
