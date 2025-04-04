@@ -178,7 +178,6 @@ const CampusMap = ({ pressedOptimizeRoute = false, pressedCoffeeStop = false }: 
       setActiveFilters(["cafe"]);
       setViewEatingOnCampus(true);
     }
-
   }, [pressedOptimizeRoute, pressedCoffeeStop]);
 
   const handleMarkerPress = useCallback((marker: CustomMarkerType) => {
@@ -540,6 +539,7 @@ const CampusMap = ({ pressedOptimizeRoute = false, pressedCoffeeStop = false }: 
         }}
         onClose={() => setIsFilterModalVisible(false)}
         testID="filter-modal"
+        activeFilters={activeFilters}
       />
     </View>
   );
