@@ -1,0 +1,18 @@
+appId: com.goldendoodle.expoapp
+---
+- assertVisible: "Find your next study spot or coffee stop."
+- tapOn:
+    id: "bottom-navigation-settings-tab"
+- assertVisible: "English"
+- tapOn:
+    id: "android:id/text1"
+- tapOn: "Français"
+- assertVisible: "Accueil"
+- tapOn: "Français"
+- tapOn: "Italiano"
+- assertVisible:
+    text: "Impostazioni"
+    index: 0
+- tapOn:
+    id: "bottom-navigation-casa-tab"
+- assertVisible: "Trova il tuo prossimo posto di studio o pausa caffè."
