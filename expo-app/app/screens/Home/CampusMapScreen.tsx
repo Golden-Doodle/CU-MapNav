@@ -7,7 +7,7 @@ import CampusMap from "../../components/CampusMap/CampusMap";
 
 export default function CampusMapScreen() {
   const router = useRouter();
-  const { pressedOptimizeRoute, pressedCoffeeStop } = useLocalSearchParams();
+  const { pressedOptimizeRoute, pressedCoffeeStop, pressedFood } = useLocalSearchParams();
 
   return (
     <View style={styles.container}>
@@ -25,6 +25,7 @@ export default function CampusMapScreen() {
         <CampusMap
           pressedOptimizeRoute={pressedOptimizeRoute === "true"}
           pressedCoffeeStop={pressedCoffeeStop === "true"}
+          pressedFood={pressedFood === "true"}
         />
       </View>
     </View>
