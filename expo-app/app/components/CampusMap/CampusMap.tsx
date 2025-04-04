@@ -29,7 +29,6 @@ import {
   CustomMarkerType,
   Building,
   GooglePlace,
-  BusObject,
 } from "@/app/utils/types";
 import { useTranslation } from "react-i18next";
 import RadiusAdjuster from "./RadiusAdjuster";
@@ -37,7 +36,7 @@ import { getCustomMapStyle } from "./styles/MapStyles";
 import { calculateDistance, isPointInPolygon } from "@/app/utils/MapUtils";
 import { getFillColorWithOpacity } from "@/app/utils/helperFunctions";
 import IndoorMap from "@/app/components/IndoorNavigation/IndoorMap";
-import { fetchBusCoordinates } from "@/app/services/ConcordiaShuttle/ConcordiaApiShuttle";
+import useLiveShuttleLocations from "@/app/hooks/useLiveShuttleLocations";
 
 interface CampusMapProps {
   pressedOptimizeRoute: boolean;
@@ -71,8 +70,8 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   const markers = campus === "SGW" ? SGWMarkers : LoyolaMarkers;
   const buildings = campus === "SGW" ? SGWBuildings : LoyolaBuildings;
 
-  const [liveShuttleLocations, setLiveShuttleLocations] = useState<BusObject[]>([]);
   const [displayLiveShuttleLocation, setDisplayLiveShuttleLocation] = useState<boolean>(false); 
+  const liveShuttleLocations = useLiveShuttleLocations(displayLiveShuttleLocation);
 
   const { t } = useTranslation("CampusMap");
 
@@ -180,30 +179,6 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
       setIsNextClassModalVisible(true);
     }
   }, [pressedOptimizeRoute]);
-
-  useEffect(() => {
-    if(!displayLiveShuttleLocation) {
-      return;
-    }
-
-    const fetchShuttleLocations = async () => {
-      if (!displayLiveShuttleLocation) {
-        return;
-      }
-      try {
-        const locations = await fetchBusCoordinates();
-        setLiveShuttleLocations(locations);
-        console.log("Fetched Shutasasatle Locations: ", liveShuttleLocations);
-      } catch (error) {
-        console.error("Error fetching shuttle locations: ", error);
-      }
-    };
-
-    fetchShuttleLocations();
-    const interval = setInterval(fetchShuttleLocations, 60000); // Fetch every 60 seconds
-    return () => clearInterval(interval);
-  }, [displayLiveShuttleLocation]);
-
 
   const handleMarkerPress = useCallback((marker: CustomMarkerType) => {
     const markerToBuilding: Building = {

@@ -39,6 +39,12 @@ jest.mock("../HamburgerWidget", () => {
           {props.campus === "LOY" ? "View SGW Campus" : "View Loyola Campus"}
         </Text>
       </TouchableOpacity>
+<TouchableOpacity
+        testID="toggle-live-shuttle-location"
+        onPress={props.toggleCampus}
+      >
+        <Text>Toggle Live Shuttle Location</Text>
+      </TouchableOpacity>
     </>
   );
 });
@@ -253,6 +259,13 @@ jest.mock("../CustomMarker", () => {
     </TouchableOpacity>
   );
 });
+
+jest.mock("@/app/services/ConcordiaShuttle/ConcordiaApiShuttle", () => ({
+  fetchBusCoordinates: jest.fn().mockResolvedValue([
+    { coordinates: { latitude: 45.5017, longitude: -73.5673 } },
+    { coordinates: { latitude: 45.5020, longitude: -73.5680 } },
+  ]),
+}));
 
 import CampusMap from "../CampusMap";
 
