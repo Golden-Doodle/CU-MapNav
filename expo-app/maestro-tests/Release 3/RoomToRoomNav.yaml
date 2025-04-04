@@ -1,0 +1,40 @@
+appId: com.goldendoodle.expoapp
+---
+- assertVisible:
+    id: "menu-button"
+- assertVisible:
+    id: "study-spot-text"
+- tapOn:
+    id: "menu-button"
+- assertVisible:
+    id: "campus-map-button"
+- tapOn:
+    id: "indoor-nav-button"
+- assertVisible:
+    id: "mapContainer"
+- assertVisible:
+    id: "directionsButton"
+- tapOn:
+    id: "directionsButton"
+- assertVisible: "Select Rooms"
+- assertVisible: "Select a start room"
+- assertVisible: "Select a destination room"
+- tapOn: "Select a start room"
+- tapOn: "H-862"
+- tapOn: "Select a destination room"
+- assertVisible: "Search..."
+- inputText: "H-110"
+- assertVisible: "H-110"
+- assertVisible: "H-110-10"
+- tapOn: "H-110-10"
+- tapOn: "Get Directions"
+- assertVisible:
+    id: "directionsButtonColumn"
+- assertVisible:
+    id: "cancelDirectionsButton"
+- assertVisible:
+    id: "showDirectionsButton"
+- tapOn:
+    id: "showDirectionsButton"
+- assertVisible:
+    id: "directionsContainer"

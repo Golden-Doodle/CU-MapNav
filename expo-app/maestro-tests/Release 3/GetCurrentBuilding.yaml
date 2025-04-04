@@ -1,0 +1,9 @@
+appId: com.goldendoodle.expoapp
+---
+- tapOn:
+    id: "menu-button"
+- tapOn:
+    id: "campus-map-button"
+- tapOn: "My Location"
+- assertVisible:
+    id: "campus-map"
