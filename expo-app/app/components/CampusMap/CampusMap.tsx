@@ -181,7 +181,7 @@ const CampusMap = ({
     setViewEatingOnCampus(true);
   };
 
-  const handleOnFoodPress = () => {
+  const handleOnPressFood = () => {
     setSelectedDistance(350); // Set a default distance for food places
     setActiveFilters(["restaurant"]);
     setViewEatingOnCampus(true);
@@ -193,7 +193,7 @@ const CampusMap = ({
     } else if (pressedCoffeeStop) {
       handleOnPressedCoffeeStop();
     } else if (pressedFood) {
-      handleOnFoodPress;
+      handleOnPressFood();
     }
   }, [pressedOptimizeRoute, pressedCoffeeStop, pressedFood]);
 
