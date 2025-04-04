@@ -39,9 +39,10 @@ import IndoorMap from "@/app/components/IndoorNavigation/IndoorMap";
 
 interface CampusMapProps {
   pressedOptimizeRoute: boolean;
+  pressedCoffeeStop?: boolean;
 }
 
-const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
+const CampusMap = ({ pressedOptimizeRoute = false, pressedCoffeeStop = false }: CampusMapProps) => {
   const [campus, setCampus] = useState<Campus>("SGW");
   const [routeCoordinates, setRouteCoordinates] = useState<Coordinates[]>([]);
   const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
@@ -173,8 +174,12 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   useEffect(() => {
     if (pressedOptimizeRoute) {
       setIsNextClassModalVisible(true);
+    } else if (pressedCoffeeStop) {
+      setActiveFilters(["cafe"]);
+      setViewEatingOnCampus(true);
     }
-  }, [pressedOptimizeRoute]);
+
+  }, [pressedOptimizeRoute, pressedCoffeeStop]);
 
   const handleMarkerPress = useCallback((marker: CustomMarkerType) => {
     const markerToBuilding: Building = {
