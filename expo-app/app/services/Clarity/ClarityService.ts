@@ -17,8 +17,9 @@ export function runClarity(config = clarityDefaultConfig): Promise<boolean>{
     try{
         if(isClarityPaused()){
             Clarity.resume();
+        }else{
+            Clarity.initialize(clarityProjectId, config);
         }
-        Clarity.initialize(clarityProjectId, config);
     }catch(error){
         console.error(error);
         return false;
