@@ -38,12 +38,16 @@ import { getFillColorWithOpacity } from "@/app/utils/helperFunctions";
 import IndoorMap from "@/app/components/IndoorNavigation/IndoorMap";
 
 interface CampusMapProps {
-  pressedOptimizeRoute: boolean;
+  pressedOptimizeRoute?: boolean;
   pressedCoffeeStop?: boolean;
   pressedFood?: boolean;
 }
 
-const CampusMap = ({ pressedOptimizeRoute = false, pressedCoffeeStop = false, pressedFood = false }: CampusMapProps) => {
+const CampusMap = ({
+  pressedOptimizeRoute = false,
+  pressedCoffeeStop = false,
+  pressedFood = false,
+}: CampusMapProps) => {
   const [campus, setCampus] = useState<Campus>("SGW");
   const [routeCoordinates, setRouteCoordinates] = useState<Coordinates[]>([]);
   const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
@@ -172,16 +176,24 @@ const CampusMap = ({ pressedOptimizeRoute = false, pressedCoffeeStop = false, pr
     }
   }, [selectedDistance, userLocation, fetchedPlaceResults]);
 
+  const handleOnPressedCoffeeStop = () => {
+    setActiveFilters(["cafe"]);
+    setViewEatingOnCampus(true);
+  };
+
+  const handleOnFoodPress = () => {
+    setSelectedDistance(350); // Set a default distance for food places
+    setActiveFilters(["restaurant"]);
+    setViewEatingOnCampus(true);
+  };
+
   useEffect(() => {
     if (pressedOptimizeRoute) {
       setIsNextClassModalVisible(true);
     } else if (pressedCoffeeStop) {
-      setActiveFilters(["cafe"]);
-      setViewEatingOnCampus(true);
+      handleOnPressedCoffeeStop();
     } else if (pressedFood) {
-      setSelectedDistance(350); // Set a default distance for food places
-      setActiveFilters(["restaurant"]);
-      setViewEatingOnCampus(true);
+      handleOnFoodPress;
     }
   }, [pressedOptimizeRoute, pressedCoffeeStop, pressedFood]);
 
@@ -301,10 +313,7 @@ const CampusMap = ({ pressedOptimizeRoute = false, pressedCoffeeStop = false, pr
       if (indoorCapableBuildings.includes(destination.building.id)) {
         setIsIndoorMapVisible(true);
       } else {
-        Alert.alert(
-          "Indoor Map Not Available",
-          "Indoor map is not available for this building."
-        );
+        Alert.alert("Indoor Map Not Available", "Indoor map is not available for this building.");
       }
     } else {
       Alert.alert(
@@ -313,7 +322,7 @@ const CampusMap = ({ pressedOptimizeRoute = false, pressedCoffeeStop = false, pr
       );
     }
   };
-  
+
   return (
     <View style={styles.container}>
       <HamburgerWidget
@@ -411,12 +420,14 @@ const CampusMap = ({ pressedOptimizeRoute = false, pressedCoffeeStop = false, pr
           <TouchableOpacity
             style={styles.bottomButton}
             onPress={() => setIsRadiusAdjusterVisible(true)}
+            testID="adjust-search-radius-button"
           >
             <Text style={styles.bottomButtonText}>Adjust Search Radius</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.bottomButton}
             onPress={() => setIsFilterModalVisible(true)}
+            testID="filter-places-button"
           >
             <Text style={styles.bottomButtonText}>Filter Places</Text>
           </TouchableOpacity>
@@ -525,7 +536,10 @@ const CampusMap = ({ pressedOptimizeRoute = false, pressedCoffeeStop = false, pr
         onRequestClose={() => setIsIndoorMapVisible(false)}
       >
         <View style={{ flex: 1 }}>
-          <IndoorMap indoorBuildingId={destination?.building?.id}  destinationRoom={destination?.room} />
+          <IndoorMap
+            indoorBuildingId={destination?.building?.id}
+            destinationRoom={destination?.room}
+          />
           <TouchableOpacity
             onPress={() => setIsIndoorMapVisible(false)}
             style={styles.closeIndoorMapButton}
