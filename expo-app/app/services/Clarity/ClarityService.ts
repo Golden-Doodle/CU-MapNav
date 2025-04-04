@@ -14,8 +14,9 @@ const clarityProjectId = Constants.expoConfig?.extra?.clarityProjectId;
 
 // Initialize Clarity Usability Testing Session
 export async function runClarity(config = clarityDefaultConfig): Promise<boolean>{
+    const isPaused = await isClarityPaused();
     try{
-        if(await isClarityPaused()){
+        if(isPaused){
             Clarity.resume();
         }else{
             Clarity.initialize(clarityProjectId, config);
