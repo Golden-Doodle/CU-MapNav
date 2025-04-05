@@ -80,6 +80,7 @@ jest.mock("@/app/utils/MapUtils", () => ({
 
 jest.mock("@/app/utils/helperFunctions", () => ({
   getFillColorWithOpacity: jest.fn(() => "rgba(0,0,0,0.5)"),
+  getCenterCoordinate: jest.fn((coordinates) => coordinates[0]),
 }));
 
 jest.mock("../modals/SearchModal", () => {

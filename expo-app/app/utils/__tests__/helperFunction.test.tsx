@@ -1,4 +1,4 @@
-import { getFillColorWithOpacity } from "../helperFunctions";
+import { getFillColorWithOpacity, getCenterCoordinate } from "../helperFunctions";
 import {
   Building,
 } from "../types";
@@ -64,5 +64,38 @@ describe("getFillColorWithOpacity", () => {
     );
 
     expect(result).toBe("rgba(0, 0, 0, 0.4)");
+  });
+});
+
+
+describe("getCenterCoordinate", () => {
+  it("should return the center for two coordinates", () => {
+    const coordinates = [
+      { latitude: 0, longitude: 0 },
+      { latitude: 2, longitude: 2 },
+    ];
+    const expectedCenter = { latitude: 1, longitude: 1 };
+    const result = getCenterCoordinate(coordinates);
+    expect(result.latitude).toBeCloseTo(expectedCenter.latitude);
+    expect(result.longitude).toBeCloseTo(expectedCenter.longitude);
+  });
+
+  it("should return the same coordinate if only one coordinate is provided", () => {
+    const coordinates = [{ latitude: 5, longitude: -3 }];
+    const result = getCenterCoordinate(coordinates);
+    expect(result.latitude).toBeCloseTo(5);
+    expect(result.longitude).toBeCloseTo(-3);
+  });
+
+  it("should return the correct center for multiple coordinates", () => {
+    const coordinates = [
+      { latitude: 0, longitude: 0 },
+      { latitude: 4, longitude: 4 },
+      { latitude: 2, longitude: 2 },
+    ];
+    const expectedCenter = { latitude: 2, longitude: 2 };
+    const result = getCenterCoordinate(coordinates);
+    expect(result.latitude).toBeCloseTo(expectedCenter.latitude);
+    expect(result.longitude).toBeCloseTo(expectedCenter.longitude);
   });
 });
