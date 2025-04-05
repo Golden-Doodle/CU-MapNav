@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   Modal,
 } from "react-native";
-import MapView, { Polygon, Polyline, Circle } from "react-native-maps";
+import MapView, { Polygon, Polyline, Circle, Marker } from "react-native-maps";
 import CustomMarker from "./CustomMarker";
 import { SGWBuildings, LoyolaBuildings } from "./data/buildingData";
 import { getDirections } from "@/app/utils/directions";
@@ -34,7 +34,7 @@ import { useTranslation } from "react-i18next";
 import RadiusAdjuster from "./RadiusAdjuster";
 import { getCustomMapStyle } from "./styles/MapStyles";
 import { calculateDistance, isPointInPolygon } from "@/app/utils/MapUtils";
-import { getFillColorWithOpacity } from "@/app/utils/helperFunctions";
+import { getFillColorWithOpacity, getCenterCoordinate } from "@/app/utils/helperFunctions";
 import IndoorMap from "@/app/components/IndoorNavigation/IndoorMap";
 
 interface CampusMapProps {
@@ -70,7 +70,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
   const buildings = campus === "SGW" ? SGWBuildings : LoyolaBuildings;
 
   const { t } = useTranslation("CampusMap");
-
+  
   useEffect(() => {
     let subscription: Location.LocationSubscription;
     (async () => {
@@ -304,7 +304,7 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
       );
     }
   };
-  
+
   return (
     <View style={styles.container}>
       <HamburgerWidget
@@ -374,6 +374,18 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
                 testID={`building-marker-${building.id}-marker`}
               />
             ))}
+            {currentBuilding && (
+              <Marker
+                coordinate={getCenterCoordinate(currentBuilding.coordinates)}
+                anchor={{ x: 0.5, y: 0.5 }}
+                tracksViewChanges={false}
+                testID="current-building-marker"
+              >
+                <View style={styles.currentBuildingOverlay}>
+                  <Text style={styles.currentBuildingOverlayText}>Current Building</Text>
+                </View>
+              </Marker>
+            )}
           </>
         )}
 
@@ -602,6 +614,16 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "600",
     fontSize: 16,
+  },
+  currentBuildingOverlay: {
+    backgroundColor: "rgba(0, 0, 0, 1)",
+    padding: 5,
+    borderRadius: 5,
+  },
+  currentBuildingOverlayText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "bold",
   },
 });
 
