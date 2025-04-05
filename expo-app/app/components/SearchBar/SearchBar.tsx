@@ -2,9 +2,10 @@ import React, { useState } from "react";
 import { View, TextInput, StyleSheet } from "react-native";
 import { Feather } from "@expo/vector-icons"; // Search icon
 import { useTranslation } from "react-i18next"; // Translation
+import { useRouter } from "expo-router";
 
 export default function SearchBar() {
-
+  const router = useRouter();
   const { t } = useTranslation("HomePageScreen");
 
   const [searchText, setSearchText] = useState("");
@@ -18,12 +19,19 @@ export default function SearchBar() {
         style={styles.searchInput}
         testID="search-input"
         value={searchText} // Controlled input
-        onChangeText={setSearchText} // Updates state on change
+        onChangeText={setSearchText} // Updates state on change}
+        onFocus={() =>
+          router.push({
+            pathname: "/screens/Home/CampusMapScreen",
+            params: {
+              pressedSearch: "true",
+            },
+          })
+        } 
       />
     </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   searchContainer: {
