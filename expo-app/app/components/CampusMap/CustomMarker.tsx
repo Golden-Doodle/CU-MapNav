@@ -13,12 +13,12 @@ type CustomMarkerProps = {
    * Marker type determines which icon to use.
    * Options: "restaurant", "cafe", "washroom", or "default"
    */
-  markerType?: "restaurant" | "cafe" | "washroom" | "default";
+  markerType?: "restaurant" | "cafe" | "washroom" | "default" | "shuttle";
   onPress?: () => void;
   testID: string;
 };
 
-const getMarkerImage = (markerType: "restaurant" | "cafe" | "washroom" | "default" = "default") => {
+const getMarkerImage = (markerType: "restaurant" | "cafe" | "washroom" | "shuttle" | "default" = "default") => {
   switch (markerType) {
     case "restaurant":
       return require("@/assets/images/restaurant-marker.png");
@@ -26,6 +26,8 @@ const getMarkerImage = (markerType: "restaurant" | "cafe" | "washroom" | "defaul
       return require("@/assets/images/cafe-marker.png");
     case "washroom":
       return require("@/assets/images/washroom-marker.png");
+    case "shuttle":
+      return require("@/assets/images/shuttle-marker.png");
     default:
       return require("@/assets/images/map-marker.png");
   }

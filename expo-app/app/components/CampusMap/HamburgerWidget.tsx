@@ -12,7 +12,9 @@ interface HamburgerWidgetProps {
   setViewCampusMap: React.Dispatch<React.SetStateAction<boolean>>;
   darkMode: boolean;
   onDarkModeChange: (value: boolean) => void;
-  testID: string; 
+  testID: string;
+  displayLiveShuttleLocation: boolean;
+  setDisplayLiveShuttleLocation: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const HamburgerWidget: React.FC<HamburgerWidgetProps> = ({
@@ -22,7 +24,9 @@ const HamburgerWidget: React.FC<HamburgerWidgetProps> = ({
   campus,
   darkMode,
   onDarkModeChange,
-  testID, 
+  testID,
+  displayLiveShuttleLocation,
+  setDisplayLiveShuttleLocation,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
 
@@ -89,6 +93,21 @@ const HamburgerWidget: React.FC<HamburgerWidgetProps> = ({
               trackColor={{ false: "#d3d3d3", true: primaryColor }}
               thumbColor="#fff"
               testID={`${testID}-dark-mode-switch`}
+            />
+          </View>
+          <View
+            style={styles.switchContainer}
+            testID={`${testID}-display-live-shuttle-Location-switch-container`}
+          >
+            <Text style={styles.switchText} testID={`${testID}-display-live-shuttle-Location-text`}>
+              Display Live Shuttle
+            </Text>
+            <Switch
+              value={displayLiveShuttleLocation}
+              onValueChange={() => setDisplayLiveShuttleLocation((prev) => !prev)}
+              trackColor={{ false: "#d3d3d3", true: primaryColor }}
+              thumbColor="#fff"
+              testID={`${testID}-display-live-shuttle-Location-switch`}
             />
           </View>
         </View>
