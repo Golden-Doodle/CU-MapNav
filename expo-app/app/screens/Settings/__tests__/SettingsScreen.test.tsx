@@ -7,6 +7,15 @@ const mockSignOut = jest.fn();
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
 
+jest.mock("@microsoft/react-native-clarity", () => ({
+  intialize: jest.fn(),
+  pause: jest.fn(), 
+  isPaused: jest.fn(),
+  resume: jest.fn(), 
+  getCurrentSessionUrl: jest.fn(), 
+  sendCustomEvent: jest.fn(),
+}))
+
 jest.mock("@react-native-async-storage/async-storage", () => ({
   getItem: jest.fn(),
   setItem: jest.fn(),
@@ -118,10 +127,11 @@ describe("SettingsScreen", () => {
     expect(mockPush).toHaveBeenCalledWith("/screens/Settings/SupportScreen");
   });
 
-  it("loads saved notification and dark mode settings from AsyncStorage", async () => {
+  it("loads saved notification, dark mode and usability testing mode settings from AsyncStorage", async () => {
     (AsyncStorage.getItem as jest.Mock).mockImplementation((key) => {
       if (key === "notifications") return Promise.resolve("true");
       if (key === "darkMode") return Promise.resolve("false");
+      if (key === "utMode") return Promise.resolve("false");
       return Promise.resolve(null);
     });
 
@@ -129,6 +139,7 @@ describe("SettingsScreen", () => {
     await waitFor(() => {
       expect(getByTestId("notifications-switch").props.value).toBe(true);
       expect(getByTestId("dark-mode-switch").props.value).toBe(false);
+      expect(getByTestId("usability-testing-switch").props.value).toBe(false);
     });
   });
 
@@ -139,4 +150,16 @@ describe("SettingsScreen", () => {
     expect(mockConsoleLog).toHaveBeenCalledWith("Delete Account");
     mockConsoleLog.mockRestore();
   });
+
+  it("toggles the usability testing mode switch and saves setting", async () => {
+      const { getByTestId } = render(<SettingsScreen />);
+      const switchElement = getByTestId("usability-testing-switch");
+      
+      fireEvent(switchElement, "valueChange", true);
+      fireEvent(switchElement, "valueChange", false);
+
+      await waitFor(() => expect(AsyncStorage.setItem).toHaveBeenCalledWith("utMode","true"));
+      await waitFor(() => expect(AsyncStorage.setItem).toHaveBeenCalledWith("utMode","false"));
+  });
+
 });
