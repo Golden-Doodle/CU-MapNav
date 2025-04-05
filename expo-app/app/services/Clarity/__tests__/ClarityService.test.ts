@@ -14,7 +14,7 @@ jest.mock("@microsoft/react-native-clarity", () =>({
                 .mockImplementation(()=>{throw new Error();}),
     getCurrentSessionUrl: jest.fn().mockResolvedValue()
                             .mockImplementationOnce(() => Promise.resolve("mocked-clarity-url"))
-                            .mockResolvedValueOnce("could not find url"),
+                            .mockResolvedValueOnce(),
     isPaused: jest.fn().mockReturnValue()
                 .mockReturnValueOnce(false)
                 .mockReturnValueOnce(true)
@@ -59,22 +59,24 @@ describe("Clarity Access and Controls", () => {
     
     it("Get the Clarity url or no url found message", async () => {
         const expectedUrlResponse: string = "mocked-clarity-url";
-        const expectedNoUrlResponse: string = "could not find url";
+        const expectedNoUrlResponse: string = "";
+        const mockConsoleWarning = jest.spyOn(console, "warn").mockImplementation(()=>{});
         
         const response: string = await ClarityService.getClarityUrl();
         const noSessionResponse: string = await ClarityService.getClarityUrl();
 
         expect(response).toBe(expectedUrlResponse);
         expect(noSessionResponse).toBe(expectedNoUrlResponse);
+        expect(mockConsoleWarning).toHaveBeenCalled();
     });
 
-    it("Send custome events to Clarity", () => {
+    it("Send custome events to Clarity", async () => {
         const mockConsoleError = jest.spyOn(console, "error").mockImplementation(()=>{});//mocking error appears unneeded
         const expectedResultInvalidParamString: boolean = false;
         const expectedResultValidParamString: boolean = true;
 
-        const resultValidString: boolean = ClarityService.sendCustomEventToClarity("a-valid-string");
-        const resultInvalidString: boolean = ClarityService.sendCustomEventToClarity("");
+        const resultValidString: boolean = await ClarityService.sendCustomEventToClarity("a-valid-string");
+        const resultInvalidString: boolean = await ClarityService.sendCustomEventToClarity("");
         
         expect(resultValidString).toBe(expectedResultValidParamString);
         expect(resultInvalidString).toBe(expectedResultInvalidParamString);
