@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Modal,
   View,
@@ -15,6 +15,7 @@ interface FilterModalProps {
   onApply: (filters: string[]) => void;
   onClose: () => void;
   testID?: string;
+  activeFilters?: string[];
 }
 
 const availableFilters = [
@@ -27,9 +28,16 @@ const FilterModal: React.FC<FilterModalProps> = ({
   visible,
   onApply,
   onClose,
+  activeFilters = defaultFilters,
   testID = "filter-modal",
 }) => {
-  const [selectedFilters, setSelectedFilters] = useState<string[]>(defaultFilters);
+  const [selectedFilters, setSelectedFilters] = useState<string[]>(activeFilters);
+
+  useEffect(() => {
+    if (visible) {
+      setSelectedFilters(activeFilters); // Sync selectedFilters with activeFilters when modal opens
+    }
+  }, [visible, activeFilters]);
 
   const toggleFilter = (filterKey: string) => {
     if (selectedFilters.includes(filterKey)) {

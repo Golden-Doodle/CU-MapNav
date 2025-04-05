@@ -1,6 +1,11 @@
 import React from "react";
-import { render } from "@testing-library/react-native";
+import { render, fireEvent } from "@testing-library/react-native";
 import QuickShortcuts from "../QuickShortcuts";
+import { useRouter } from "expo-router";
+
+jest.mock("expo-router", () => ({
+  useRouter: jest.fn(),
+}));
 
 describe("QuickShortcuts", () => {
   it("renders all shortcut buttons", () => {
@@ -29,5 +34,22 @@ describe("QuickShortcuts", () => {
     expect(foodIcon).toBeTruthy();
     expect(bathroomIcon).toBeTruthy();
     expect(barIcon).toBeTruthy();
+  });
+
+  it("navigates to the CampusMapScreen with food parameter when food shortcut is pressed", () => {
+    const mockPush = jest.fn();
+    (useRouter as jest.Mock).mockReturnValue({ push: mockPush });
+
+    const { getByTestId } = render(<QuickShortcuts />);
+    const foodShortcut = getByTestId("food-shortcut");
+
+    fireEvent.press(foodShortcut);
+
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: "/screens/Home/CampusMapScreen",
+      params: {
+        pressedFood: "true",
+      },
+    });
   });
 });

@@ -1,6 +1,11 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
 import ButtonSection from "../ButtonSection";
+import { useRouter } from "expo-router";
+
+jest.mock("expo-router", () => ({
+  useRouter: jest.fn(),
+}));
 
 describe("ButtonSection Component", () => {
   it("renders both buttons", () => {
@@ -10,16 +15,20 @@ describe("ButtonSection Component", () => {
     expect(getByText("Coffee Stop")).toBeTruthy();
   });
 
-  it("buttons are clickable", () => {
-    const { getByText } = render(<ButtonSection />);
+  it("navigates to CampusMapScreen with correct params on Coffee Stop button press", () => {
+    const mockPush = jest.fn();
+    (useRouter as jest.Mock).mockReturnValue({ push: mockPush });
 
-    const studySpotButton = getByText("Study Spot");
-    const coffeeStopButton = getByText("Coffee Stop");
+    const { getByTestId } = render(<ButtonSection />);
+    const coffeeStopButton = getByTestId("coffee-stop-button");
 
-    fireEvent.press(studySpotButton);
     fireEvent.press(coffeeStopButton);
 
-    expect(studySpotButton).toBeTruthy();
-    expect(coffeeStopButton).toBeTruthy();
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: "/screens/Home/CampusMapScreen",
+      params: {
+        pressedCoffeeStop: "true",
+      },
+    });
   });
 });
