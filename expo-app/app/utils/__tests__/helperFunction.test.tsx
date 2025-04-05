@@ -83,8 +83,9 @@ describe("getCenterCoordinate", () => {
   it("should return the same coordinate if only one coordinate is provided", () => {
     const coordinates = [{ latitude: 5, longitude: -3 }];
     const result = getCenterCoordinate(coordinates);
-    expect(result.latitude).toBeCloseTo(5);
-    expect(result.longitude).toBeCloseTo(-3);
+    const expected = coordinates[0];
+    expect(result.latitude).toBeCloseTo(expected.latitude);
+    expect(result.longitude).toBeCloseTo(expected.longitude);
   });
 
   it("should return the correct center for multiple coordinates", () => {
