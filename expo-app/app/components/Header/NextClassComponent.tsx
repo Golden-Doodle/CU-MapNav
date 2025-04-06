@@ -125,3 +125,5 @@ const NextClassComponent: FC<NextClassComponentProps> = (props) => {
     </Text>
   );
 };
+
+export default NextClassComponent;
