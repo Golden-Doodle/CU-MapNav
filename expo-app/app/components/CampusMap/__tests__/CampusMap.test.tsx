@@ -555,9 +555,14 @@ describe("Additional Modals and Components", () => {
     const { getByTestId } = render(<CampusMap pressedOptimizeRoute={true} />);
 
     await waitFor(() => {
-      // Check if search modal is automatically opened
       expect(getByTestId("next-class-modal-overlay")).toBeTruthy();
-      // Or check if any other optimize route behavior is triggered
+    });
+  });
+
+  it("should open search modal when pressedSearch is true", async () => {
+    const { getByTestId } = render(<CampusMap pressedSearch={true} />);
+    await waitFor(() => {
+      expect(getByTestId("search-modal")).toBeTruthy();
     });
   });
 });
