@@ -1,5 +1,14 @@
-import React, { useState } from "react";
-import { Modal, View, Text, Button, StyleSheet, ScrollView, Image, TouchableOpacity } from "react-native";
+import React from "react";
+import {
+  Modal,
+  View,
+  Text,
+  Button,
+  StyleSheet,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+} from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 
 interface RestaurantModalProps {
@@ -9,7 +18,12 @@ interface RestaurantModalProps {
   onNavigate: (coordinates: { latitude: number; longitude: number }) => void;
 }
 
-const RestaurantModal: React.FC<RestaurantModalProps> = ({ visible, restaurant, onClose, onNavigate }) => {
+const RestaurantModal: React.FC<RestaurantModalProps> = ({
+  visible,
+  restaurant,
+  onClose,
+  onNavigate,
+}) => {
   return (
     <Modal visible={visible} animationType="slide" transparent={true}>
       <View style={styles.modalOverlay}>
@@ -22,11 +36,19 @@ const RestaurantModal: React.FC<RestaurantModalProps> = ({ visible, restaurant, 
             {/* Restaurant Name and Address */}
             <Text style={styles.title}>{restaurant.name}</Text>
             <Text style={styles.address}>{restaurant.address}</Text>
-            
+
             {/* Image Gallery */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imageGallery}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.imageGallery}
+            >
               {restaurant.images.map((image: string, index: number) => (
-                <Image key={index} source={{ uri: image }} style={styles.image} />
+                <Image
+                  key={index}
+                  source={{ uri: image }}
+                  style={styles.image}
+                />
               ))}
             </ScrollView>
 
