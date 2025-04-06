@@ -44,6 +44,7 @@ import {
 } from "@/app/utils/helperFunctions";
 import IndoorMap from "@/app/components/IndoorNavigation/IndoorMap";
 import useLiveShuttleLocations from "@/app/hooks/useLiveShuttleLocations";
+import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 
 interface CampusMapProps {
   pressedOptimizeRoute?: boolean;
@@ -590,6 +591,22 @@ const CampusMap = ({
           </TouchableOpacity>
         )}
 
+<View
+        style={styles.campusMapInfoNotice}
+      >
+        <FontAwesome5
+          name="info"
+          size={18}
+          color="#666"
+          style={styles.infoNoticeIcon}
+        />
+        <Text
+          style={styles.campusMapInfoNoticeText}
+        >
+          {t("Tap on highlighted buildings to view options")}
+        </Text>
+      </View>
+
       <NavTab
         campus={campus}
         destination={destination}
@@ -656,6 +673,19 @@ const styles = StyleSheet.create({
     left: "50%",
     marginLeft: -25,
     marginTop: -25,
+  },
+  campusMapInfoNotice: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 0,
+    justifyContent: "center",
+  },
+  infoNoticeIcon: {
+    marginRight: 8,
+  },
+  campusMapInfoNoticeText: {
+    fontSize: 14,
+    color: "#666",
   },
   bottomButtonContainer: {
     position: "absolute",
