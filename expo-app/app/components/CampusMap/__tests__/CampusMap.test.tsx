@@ -29,6 +29,12 @@ jest.mock("../HamburgerWidget", () => {
       >
         <Text>{props.campus === "LOY" ? "View SGW Campus" : "View Loyola Campus"}</Text>
       </TouchableOpacity>
+<TouchableOpacity
+        testID="toggle-live-shuttle-location"
+        onPress={props.toggleCampus}
+      >
+        <Text>Toggle Live Shuttle Location</Text>
+      </TouchableOpacity>
     </>
   );
 });
@@ -63,6 +69,7 @@ jest.mock("@/app/utils/MapUtils", () => ({
 
 jest.mock("@/app/utils/helperFunctions", () => ({
   getFillColorWithOpacity: jest.fn(() => "rgba(0,0,0,0.5)"),
+  getCenterCoordinate: jest.fn((coordinates) => coordinates[0]),
 }));
 
 jest.mock("../modals/SearchModal", () => {
@@ -218,6 +225,13 @@ jest.mock("../CustomMarker", () => {
     </TouchableOpacity>
   );
 });
+
+jest.mock("@/app/services/ConcordiaShuttle/ConcordiaApiShuttle", () => ({
+  fetchBusCoordinates: jest.fn().mockResolvedValue([
+    { coordinates: { latitude: 45.5017, longitude: -73.5673 } },
+    { coordinates: { latitude: 45.5020, longitude: -73.5680 } },
+  ]),
+}));
 
 import CampusMap from "../CampusMap";
 
@@ -476,9 +490,14 @@ describe("Additional Modals and Components", () => {
     const { getByTestId } = render(<CampusMap pressedOptimizeRoute={true} />);
 
     await waitFor(() => {
-      // Check if search modal is automatically opened
       expect(getByTestId("next-class-modal-overlay")).toBeTruthy();
-      // Or check if any other optimize route behavior is triggered
+    });
+  });
+
+  it("should open search modal when pressedSearch is true", async () => {
+    const { getByTestId } = render(<CampusMap pressedSearch={true} />);
+    await waitFor(() => {
+      expect(getByTestId("search-modal")).toBeTruthy();
     });
   });
 

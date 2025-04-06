@@ -1,4 +1,4 @@
-import { Building, concordiaBurgendyColor, LocationType } from "./types";
+import { Building, concordiaBurgendyColor, Coordinates } from "./types";
 
 export const getFillColorWithOpacity = (
   building: Building,
@@ -51,3 +51,17 @@ const hexToRgba = (hex: string, alpha: number): string => {
 
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
+
+
+export const getCenterCoordinate = (coordinates: Coordinates[]): Coordinates => {
+    let latSum = 0;
+    let lonSum = 0;
+    coordinates.forEach((coord) => {
+      latSum += coord.latitude;
+      lonSum += coord.longitude;
+    });
+    return {
+      latitude: latSum / coordinates.length,
+      longitude: lonSum / coordinates.length,
+    };
+  };

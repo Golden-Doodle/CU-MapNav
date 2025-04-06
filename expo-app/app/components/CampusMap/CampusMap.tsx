@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   Modal,
 } from "react-native";
-import MapView, { Polygon, Polyline, Circle } from "react-native-maps";
+import MapView, { Polygon, Polyline, Circle, Marker } from "react-native-maps";
 import CustomMarker from "./CustomMarker";
 import { SGWBuildings, LoyolaBuildings } from "./data/buildingData";
 import { getDirections } from "@/app/utils/directions";
@@ -34,17 +34,20 @@ import { useTranslation } from "react-i18next";
 import RadiusAdjuster from "./RadiusAdjuster";
 import { getCustomMapStyle } from "./styles/MapStyles";
 import { calculateDistance, isPointInPolygon } from "@/app/utils/MapUtils";
-import { getFillColorWithOpacity } from "@/app/utils/helperFunctions";
+import { getFillColorWithOpacity, getCenterCoordinate } from "@/app/utils/helperFunctions";
 import IndoorMap from "@/app/components/IndoorNavigation/IndoorMap";
+import useLiveShuttleLocations from "@/app/hooks/useLiveShuttleLocations";
 
 interface CampusMapProps {
   pressedOptimizeRoute?: boolean;
   pressedCoffeeStop?: boolean;
   pressedFood?: boolean;
+  pressedSearch?: boolean;
 }
 
 const CampusMap = ({
-  pressedOptimizeRoute = false,
+  pressedOptimizeRoute = false, 
+  pressedSearch = false,
   pressedCoffeeStop = false,
   pressedFood = false,
 }: CampusMapProps) => {
@@ -75,8 +78,11 @@ const CampusMap = ({
   const markers = campus === "SGW" ? SGWMarkers : LoyolaMarkers;
   const buildings = campus === "SGW" ? SGWBuildings : LoyolaBuildings;
 
-  const { t } = useTranslation("CampusMap");
+  const [displayLiveShuttleLocation, setDisplayLiveShuttleLocation] = useState<boolean>(false); 
+  const liveShuttleLocations = useLiveShuttleLocations(displayLiveShuttleLocation);
 
+  const { t } = useTranslation("CampusMap");
+  
   useEffect(() => {
     let subscription: Location.LocationSubscription;
     (async () => {
@@ -188,14 +194,17 @@ const CampusMap = ({
   };
 
   useEffect(() => {
+    // Allows for routing from HomePageScreen to CampusMapScreen
     if (pressedOptimizeRoute) {
       setIsNextClassModalVisible(true);
     } else if (pressedCoffeeStop) {
       handleOnPressedCoffeeStop();
     } else if (pressedFood) {
       handleOnPressFood();
+    } else if (pressedSearch) {
+      setIsSearchModalVisible(true);
     }
-  }, [pressedOptimizeRoute, pressedCoffeeStop, pressedFood]);
+  }, [pressedOptimizeRoute, pressedCoffeeStop, pressedFood, pressedSearch]);
 
   const handleMarkerPress = useCallback((marker: CustomMarkerType) => {
     const markerToBuilding: Building = {
@@ -333,6 +342,8 @@ const CampusMap = ({
         campus={campus}
         darkMode={isDarkMode}
         onDarkModeChange={setIsDarkMode}
+        displayLiveShuttleLocation={displayLiveShuttleLocation}
+        setDisplayLiveShuttleLocation={setDisplayLiveShuttleLocation}
       />
 
       <MapView
@@ -392,6 +403,18 @@ const CampusMap = ({
                 testID={`building-marker-${building.id}-marker`}
               />
             ))}
+            {currentBuilding && (
+              <Marker
+                coordinate={getCenterCoordinate(currentBuilding.coordinates)}
+                anchor={{ x: 0.5, y: 0.5 }}
+                tracksViewChanges={false}
+                testID="current-building-marker"
+              >
+                <View style={styles.currentBuildingOverlay}>
+                  <Text style={styles.currentBuildingOverlayText}>Current Building</Text>
+                </View>
+              </Marker>
+            )}
           </>
         )}
 
@@ -413,6 +436,18 @@ const CampusMap = ({
             markerType="default"
           />
         )}
+
+        {/* Display live shuttle location */}
+        {displayLiveShuttleLocation && liveShuttleLocations.map((location, index) => (
+          <CustomMarker
+            testID={`shuttle-marker-${index}`}
+            key={`shuttle-${index}`}
+            coordinate={location.coordinates}
+            title="Live Shuttle Location"
+            description="Live Shuttle Location"
+            markerType="shuttle"
+          />
+        ))}
       </MapView>
 
       {viewEatingOnCampus && (
@@ -626,6 +661,16 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "600",
     fontSize: 16,
+  },
+  currentBuildingOverlay: {
+    backgroundColor: "rgba(0, 0, 0, 1)",
+    padding: 5,
+    borderRadius: 5,
+  },
+  currentBuildingOverlayText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "bold",
   },
 });
 
