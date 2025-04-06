@@ -37,6 +37,7 @@ jest.mock("@mappedin/react-native-sdk", () => {
 });
 
 jest.mock("@/app/components/IndoorNavigation/DirectionsModal", () => {
+  const React = require("react");
   const { View, Text, TouchableOpacity } = require("react-native");
   return (props: DirectionsModalProps) => {
     const { visible, onDirectionsSet } = props;
@@ -393,5 +394,79 @@ describe("IndoorMap Component", () => {
     });
 
     expect(fakeCreateMarker).toHaveBeenCalledTimes(3);
+  });
+
+  it("handles accessible directions correctly when accessibility is off", async () => {
+    const accessibleDirections = {
+      instructions: [{ instruction: "Accessible Instruction" }],
+      distance: 200,
+      path: [{ map: { id: "floorAcc" } }],
+      startRoom: "Entrance #1",
+      destinationRoom: "Accessible Room",
+    };
+    (generateIndoorDirections as jest.Mock).mockReturnValueOnce(
+      accessibleDirections
+    );
+
+    const fakeJourney = { draw: jest.fn() };
+    const fakeSetMap = jest.fn().mockResolvedValue(undefined);
+    const fakeMapView = {
+      Journey: fakeJourney,
+      setMap: fakeSetMap,
+    };
+
+    const { getByTestId } = setup();
+    globalMiMapViewRef.current = fakeMapView;
+
+    await triggerDirectionsModal(getByTestId, validDirections);
+
+    fireEvent.press(getByTestId("accessibilityButton"));
+
+    await waitFor(() => {
+      expect(fakeJourney.draw).toHaveBeenCalledWith(accessibleDirections);
+    });
+  });
+
+  it("restores standard directions when accessibility is already on", async () => {
+    const accessibleDirections = {
+      instructions: [{ instruction: "Accessible Instruction" }],
+      distance: 200,
+      path: [{ map: { id: "floorAcc" } }],
+      startRoom: "Entrance #1",
+      destinationRoom: "Accessible Room",
+    };
+    const standardDirections = {
+      instructions: [{ instruction: "Standard Instruction" }],
+      distance: 150,
+      path: [{ map: { id: "floorStd" } }],
+      startRoom: "Entrance #1",
+      destinationRoom: "Standard Room",
+    };
+
+    (generateIndoorDirections as jest.Mock)
+      .mockReturnValueOnce(accessibleDirections)
+      .mockReturnValueOnce(standardDirections);
+
+    const fakeJourney = { draw: jest.fn() };
+    const fakeSetMap = jest.fn().mockResolvedValue(undefined);
+    const fakeMapView = {
+      Journey: fakeJourney,
+      setMap: fakeSetMap,
+    };
+
+    const { getByTestId } = setup();
+    globalMiMapViewRef.current = fakeMapView;
+
+    await triggerDirectionsModal(getByTestId, validDirections);
+
+    fireEvent.press(getByTestId("accessibilityButton"));
+    await waitFor(() => {
+      expect(fakeJourney.draw).toHaveBeenCalledWith(accessibleDirections);
+    });
+
+    fireEvent.press(getByTestId("accessibilityButton"));
+    await waitFor(() => {
+      expect(fakeJourney.draw).toHaveBeenCalledWith(standardDirections);
+    });
   });
 });

@@ -31,7 +31,7 @@ import DirectionsModal from "@/app/components/IndoorNavigation/DirectionsModal";
 import BuildingFloorModal from "@/app/components/IndoorNavigation/SetBuildingFloorModal";
 import Constants from "expo-constants";
 import { RoomLocation } from "@/app/utils/types";
-import { generateDirections as generateIndoorDirections } from "@/app/services/Mapped-In/MappedInService";
+import { generateDirections } from "@/app/services/Mapped-In/MappedInService";
 import styles from "./Styling/IndoorMap.styles";
 
 const buildings = [
@@ -48,6 +48,11 @@ export interface IndoorMapProps {
   indoorBuildingId?: string;
 }
 
+interface ExtendedMappedinDirections extends MappedinDirections {
+  startRoom: string;
+  destinationRoom: string;
+}
+
 const IndoorMap = ({
   destinationRoom,
   pressedOptimizeRoute,
@@ -59,8 +64,7 @@ const IndoorMap = ({
   const [selectedBuilding, setSelectedBuilding] = useState<string | null>(
     indoorBuildingId ?? buildings[0].value
   );
-  const [buildingItems] =
-    useState<{ label: string; value: string }[]>(buildings);
+  const [buildingItems] = useState(buildings);
   const [floorItems, setFloorItems] = useState<
     { label: string; value: string }[]
   >([]);
@@ -69,17 +73,18 @@ const IndoorMap = ({
   const [activeDirections, setActiveDirections] =
     useState<MappedinDirections | null>(null);
   const [showDirections, setShowDirections] = useState(false);
-
+  const [activeEndpoints, setActiveEndpoints] = useState<{
+    start: string;
+    destination: string;
+  } | null>(null);
+  const [isAccessibilityOn, setIsAccessibilityOn] = useState(false);
   const verticalMarkerIds = useRef<string[]>([]);
 
   useEffect(() => {
     if (indoorBuildingId) {
       let mappedId = indoorBuildingId;
-      if (indoorBuildingId === "MB") {
-        mappedId = "67d974ddf63286000bb80fc3";
-      } else if (indoorBuildingId === "H") {
-        mappedId = "67c87db88e15de000bed1abb";
-      }
+      if (indoorBuildingId === "MB") mappedId = "67d974ddf63286000bb80fc3";
+      else if (indoorBuildingId === "H") mappedId = "67c87db88e15de000bed1abb";
       setSelectedBuilding(mappedId);
     }
   }, [indoorBuildingId]);
@@ -96,52 +101,45 @@ const IndoorMap = ({
       if (selectedFloor && selectedFloor !== mapView.current?.currentMap?.id) {
         await mapView.current?.setMap(selectedFloor);
       }
-      setTimeout(() => {
-        renderVerticalConnections();
-      }, 100);
+      setTimeout(renderVerticalConnections, 100);
     }
     setMapAndMarkers();
   }, [selectedFloor]);
 
   useEffect(() => {
-    if (mapView.current?.currentMap) {
-      renderVerticalConnections();
-    }
+    if (mapView.current?.currentMap) renderVerticalConnections();
   }, [mapView.current?.currentMap]);
 
   const renderVerticalConnections = () => {
-    verticalMarkerIds.current.forEach((id) => {
-      mapView.current?.removeMarker(id);
-    });
+    verticalMarkerIds.current.forEach((id) =>
+      mapView.current?.removeMarker(id)
+    );
     verticalMarkerIds.current = [];
+
     const mappedinData = mapView.current?.venueData;
     const currentMap = mapView.current?.currentMap;
     if (!mappedinData || !currentMap) return;
+
     const verticalTypes = ["escalator", "elevator", "stairs"];
     const connections = mappedinData.vortexes.filter(
       (v) => v.type && verticalTypes.includes(v.type.toLowerCase())
     );
-    connections.forEach((vortex: MappedinVortex) => {
-      (vortex.nodes ?? []).forEach((nodeId: string) => {
-        const node = mappedinData.nodes.find(
-          (n: MappedinNode) => n.id === nodeId
-        );
+
+    connections.forEach((vortex: any) => {
+      (vortex.nodes || []).forEach((nodeId: string) => {
+        const node = mappedinData.nodes.find((n: any) => n.id === nodeId);
         if (node && node.map.id === currentMap.id) {
-          const typeKey = vortex.type?.toLowerCase();
+          const typeKey = vortex.type.toLowerCase();
           const fillColor = colors[typeKey as keyof typeof colors] || "gray";
-          const connectionLabel =
-            vortex.name && vortex.name.trim().length > 0
-              ? vortex.name
-              : vortex.type?.charAt(0).toUpperCase() ??
-                "" + vortex.type?.slice(1);
-          const markerHtml = getVerticalMarkerHtml(connectionLabel, fillColor);
+          const label = vortex.name?.trim().length
+            ? vortex.name
+            : vortex.type.charAt(0).toUpperCase() + vortex.type.slice(1);
+          const markerHtml = getVerticalMarkerHtml(label, fillColor);
           const markerId = mapView.current?.createMarker(node, markerHtml, {
             anchor: MARKER_ANCHOR.CENTER,
             rank: COLLISION_RANKING_TIERS.ALWAYS_VISIBLE,
           });
-          if (markerId) {
-            verticalMarkerIds.current.push(markerId);
-          }
+          if (markerId) verticalMarkerIds.current.push(markerId);
         }
       });
     });
@@ -150,35 +148,19 @@ const IndoorMap = ({
   const renderPOIMarkers = () => {
     const allLocations = mapView.current?.venueData?.locations || [];
     allLocations.forEach((location: any) => {
-      let markerPosition = null;
-      if (location.polygons?.length > 0) {
-        const firstPolygon = location.polygons[0];
-        if (firstPolygon.entrances?.length > 0) {
-          markerPosition = firstPolygon.entrances[0];
-        } else if (firstPolygon.nodes?.length > 0) {
-          markerPosition = firstPolygon.nodes[0];
-        }
-      } else if (location.nodes?.length > 0) {
-        markerPosition = location.nodes[0];
-      }
+      let markerPosition =
+        location.polygons?.[0]?.entrances?.[0] ||
+        location.polygons?.[0]?.nodes?.[0] ||
+        location.nodes?.[0];
       if (!markerPosition) return;
 
       const name = location.name ?? "";
-      let markerHtml = "";
+      let markerHtml = name.toLowerCase().includes("washroom")
+        ? getWashroomMarkerHtml(name)
+        : name.toLowerCase().includes("fountain")
+        ? getFountainMarkerHtml(name)
+        : getDefaultMarkerHtml(name);
 
-      if (
-        name.toLowerCase().includes("washroom") ||
-        name.toLowerCase().includes("restroom")
-      ) {
-        markerHtml = getWashroomMarkerHtml(location.name);
-      } else if (
-        name.toLowerCase().includes("fountain") ||
-        name.toLowerCase().includes("water")
-      ) {
-        markerHtml = getFountainMarkerHtml(location.name);
-      } else {
-        markerHtml = getDefaultMarkerHtml(location.name);
-      }
       mapView.current?.createMarker(markerPosition, markerHtml, {
         anchor: MARKER_ANCHOR.CENTER,
         rank: COLLISION_RANKING_TIERS.ALWAYS_VISIBLE,
@@ -189,31 +171,29 @@ const IndoorMap = ({
   const handleFirstMapLoaded = async () => {
     setIsMapLoading(false);
     const currentMapId = mapView.current?.currentMap?.id;
-    const availableMaps = mapView.current?.venueData?.maps || [];
     setSelectedFloor(currentMapId ?? null);
 
-    const items = availableMaps.map((floor) => ({
-      label: floor.name,
-      value: floor.id,
-    }));
+    const availableMaps = mapView.current?.venueData?.maps || [];
+    const items = availableMaps.map((f) => ({ label: f.name, value: f.id }));
     setFloorItems(items);
+    setLevels(availableMaps);
 
     if (destinationRoom) {
-      const directions = generateIndoorDirections(
+      const startRoom = "Entrance #1";
+      const directions = generateDirections(
         mapView,
-        "Entrance #1",
+        startRoom,
         destinationRoom.room
       );
       if (directions) {
         setActiveDirections(directions);
-        if (
-          directions.path &&
-          directions.path.length > 0 &&
-          directions.path[0].map
-        ) {
-          const startingMapId = directions.path[0].map.id;
-          await mapView.current?.setMap(startingMapId);
-          setSelectedFloor(startingMapId);
+        setActiveEndpoints({
+          start: startRoom,
+          destination: destinationRoom.room,
+        });
+        if (directions.path?.[0]?.map?.id) {
+          await mapView.current?.setMap(directions.path[0].map.id);
+          setSelectedFloor(directions.path[0].map.id);
         }
       } else {
         Alert.alert(
@@ -227,25 +207,71 @@ const IndoorMap = ({
     renderVerticalConnections();
   };
 
-  const handleBuildingChange: React.Dispatch<
-    React.SetStateAction<string | null>
-  > = (value) => {
-    if (typeof value === "function") {
-      setSelectedBuilding(value(selectedBuilding));
-    } else {
-      setSelectedBuilding(value);
-      setSelectedFloor(null);
-      setIsMapLoading(true);
-      setFloorItems([]);
-      setActiveDirections(null);
-    }
+  const cancelDirections = () => {
+    mapView.current?.Journey?.clear?.();
+    setActiveDirections(null);
+    setActiveEndpoints(null);
+    setIsAccessibilityOn(false);
+    setShowDirections(false);
   };
 
-  const cancelDirections = () => {
-    if (mapView.current?.Journey.clear) {
-      mapView.current.Journey.clear();
+  const handleAccessibleDirections = () => {
+    if (!activeEndpoints) {
+      Alert.alert(
+        "Directions Unavailable",
+        "No valid start and destination available."
+      );
+      return;
     }
-    setActiveDirections(null);
+
+    const { start, destination } = activeEndpoints;
+
+    if (isAccessibilityOn) {
+      const standardDirections = generateDirections(
+        mapView,
+        start,
+        destination
+      );
+      if (!standardDirections || !standardDirections.instructions?.length) {
+        Alert.alert("No directions found");
+        return;
+      }
+
+      mapView.current?.Journey.draw(standardDirections);
+      setActiveDirections(standardDirections);
+      const extDir = standardDirections as ExtendedMappedinDirections;
+      setActiveEndpoints({
+        start: extDir.startRoom,
+        destination: extDir.destinationRoom,
+      });
+      setIsAccessibilityOn(false);
+      setShowDirections(true);
+      return;
+    }
+
+    const accessibleDirections = generateDirections(
+      mapView,
+      start,
+      destination,
+      {
+        accessible: true,
+      }
+    );
+
+    if (!accessibleDirections || !accessibleDirections.instructions?.length) {
+      Alert.alert("No accessible route found");
+      return;
+    }
+
+    mapView.current?.Journey.draw(accessibleDirections);
+    setActiveDirections(accessibleDirections);
+    const extDir = accessibleDirections as ExtendedMappedinDirections;
+    setActiveEndpoints({
+      start: extDir.startRoom,
+      destination: extDir.destinationRoom,
+    });
+    setIsAccessibilityOn(true);
+    setShowDirections(true);
   };
 
   return (
@@ -258,15 +284,14 @@ const IndoorMap = ({
             ref={mapView}
             options={options}
             onFirstMapLoaded={handleFirstMapLoaded}
-            onMapChanged={({ map }) => {
-              setSelectedFloor(map.id);
-            }}
+            onMapChanged={({ map }) => setSelectedFloor(map.id)}
           />
           {isMapLoading && (
             <View style={styles.loaderContainer} testID="loaderContainer">
               <ActivityIndicator size="large" color="#912338" />
             </View>
           )}
+
           <TouchableOpacity
             style={styles.settingsButton}
             onPress={() => setSettingsModalVisible(true)}
@@ -274,6 +299,26 @@ const IndoorMap = ({
           >
             <Icon name="settings" size={32} color="#912338" />
           </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.accessibilityButton}
+            onPress={handleAccessibleDirections}
+            disabled={!activeEndpoints}
+            testID="accessibilityButton"
+          >
+            <Icon
+              name="accessible"
+              size={35}
+              color={
+                !activeEndpoints
+                  ? "#999"
+                  : isAccessibilityOn
+                  ? "#912338"
+                  : "#666"
+              }
+            />
+          </TouchableOpacity>
+
           <TouchableOpacity
             style={styles.directionsButton}
             onPress={() => setDirectionsModalVisible(true)}
@@ -281,21 +326,19 @@ const IndoorMap = ({
           >
             <Icon name="directions-walk" size={35} color="#912338" />
           </TouchableOpacity>
+
           {activeDirections?.instructions?.length ? (
             <View
               style={styles.directionsOverlay}
-              testID="directionsOverlay"
               pointerEvents="box-none"
+              testID="directionsOverlay"
             >
               {showDirections ? (
                 <View
                   style={styles.directionsContainer}
                   testID="directionsContainer"
                 >
-                  <View
-                    style={styles.directionsHeaderRow}
-                    testID="directionsHeaderRow"
-                  >
+                  <View style={styles.directionsHeaderRow}>
                     <Text
                       style={styles.directionsTitle}
                       testID="directionsTitle"
@@ -317,14 +360,10 @@ const IndoorMap = ({
                     )}
                     keyExtractor={(_, index) => index.toString()}
                     style={styles.directionsList}
-                    testID="directionsList"
                   />
                 </View>
               ) : (
-                <View
-                  style={styles.directionsButtonColumn}
-                  testID="directionsButtonColumn"
-                >
+                <View style={styles.directionsButtonColumn}>
                   <TouchableOpacity
                     style={[styles.button, styles.cancelButton]}
                     onPress={cancelDirections}
@@ -350,18 +389,18 @@ const IndoorMap = ({
         visible={directionsModalVisible}
         onRequestClose={() => setDirectionsModalVisible(false)}
         mapView={mapView}
-        onDirectionsSet={(directions) => {
-          if (
-            !directions?.instructions ||
-            directions.instructions.length === 0 ||
-            (directions.distance === 0 &&
-              directions.instructions.length === 1 &&
-              directions.path.length === 0)
-          ) {
+        onDirectionsSet={(directions: MappedinDirections | null) => {
+          if (!directions || !directions.instructions?.length) {
             Alert.alert("Directions Unavailable", "No valid paths found.");
             return;
           }
+          const extended = directions as ExtendedMappedinDirections;
           setActiveDirections(directions);
+          setActiveEndpoints({
+            start: extended.startRoom,
+            destination: extended.destinationRoom,
+          });
+          setIsAccessibilityOn(false);
           setDirectionsModalVisible(false);
         }}
       />
@@ -370,7 +409,7 @@ const IndoorMap = ({
         visible={settingsModalVisible}
         onRequestClose={() => setSettingsModalVisible(false)}
         selectedBuilding={selectedBuilding}
-        onChangeBuilding={handleBuildingChange}
+        onChangeBuilding={setSelectedBuilding}
         buildingItems={buildingItems}
         selectedFloor={selectedFloor}
         onChangeFloor={setSelectedFloor}

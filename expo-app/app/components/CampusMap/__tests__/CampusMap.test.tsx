@@ -49,8 +49,9 @@ jest.mock("../HamburgerWidget", () => {
 });
 
 jest.mock("@/app/components/IndoorNavigation/IndoorMap", () => {
+  const React = require("react");
   return function MockIndoorMap(props: any) {
-    return <></>;
+    return <React.Fragment />;
   };
 });
 
@@ -581,6 +582,24 @@ describe("Additional Modals and Components", () => {
     const { getByTestId } = render(<CampusMap pressedSearch={true} />);
     await waitFor(() => {
       expect(getByTestId("search-modal")).toBeTruthy();
+    });
+  });
+
+  it("should trigger coffee stop behavior when pressedCoffeeStop is true", async () => {
+    const { getByTestId } = render(<CampusMap pressedCoffeeStop={true} />);
+
+    await waitFor(() => {
+      expect(getByTestId("adjust-search-radius-button")).toBeTruthy();
+      expect(getByTestId("filter-places-button")).toBeTruthy();
+    });
+  });
+
+  it("should trigger food behavior when pressedFood is true", async () => {
+    const { getByTestId } = render(<CampusMap pressedFood={true} />);
+
+    await waitFor(() => {
+      expect(getByTestId("adjust-search-radius-button")).toBeTruthy();
+      expect(getByTestId("filter-places-button")).toBeTruthy();
     });
   });
 });

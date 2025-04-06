@@ -47,12 +47,16 @@ import useLiveShuttleLocations from "@/app/hooks/useLiveShuttleLocations";
 
 interface CampusMapProps {
   pressedOptimizeRoute?: boolean;
+  pressedCoffeeStop?: boolean;
+  pressedFood?: boolean;
   pressedSearch?: boolean;
 }
 
 const CampusMap = ({
   pressedOptimizeRoute = false,
   pressedSearch = false,
+  pressedCoffeeStop = false,
+  pressedFood = false,
 }: CampusMapProps) => {
   const [campus, setCampus] = useState<Campus>("SGW");
   const [routeCoordinates, setRouteCoordinates] = useState<Coordinates[]>([]);
@@ -214,18 +218,29 @@ const CampusMap = ({
     }
   }, [selectedDistance, userLocation, fetchedPlaceResults]);
 
+  const handleOnPressedCoffeeStop = () => {
+    setActiveFilters(["cafe"]);
+    setViewEatingOnCampus(true);
+  };
+
+  const handleOnPressFood = () => {
+    setSelectedDistance(350); // Set a default distance for food places
+    setActiveFilters(["restaurant"]);
+    setViewEatingOnCampus(true);
+  };
+
   useEffect(() => {
     // Allows for routing from HomePageScreen to CampusMapScreen
     if (pressedOptimizeRoute) {
       setIsNextClassModalVisible(true);
-    }
-  }, [pressedOptimizeRoute]);
-
-  useEffect(() => {
-    if (pressedSearch) {
+    } else if (pressedCoffeeStop) {
+      handleOnPressedCoffeeStop();
+    } else if (pressedFood) {
+      handleOnPressFood();
+    } else if (pressedSearch) {
       setIsSearchModalVisible(true);
     }
-  }, [pressedSearch]);
+  }, [pressedOptimizeRoute, pressedCoffeeStop, pressedFood, pressedSearch]);
 
   const handleMarkerPress = useCallback((marker: CustomMarkerType) => {
     const markerToBuilding: Building = {
@@ -489,12 +504,14 @@ const CampusMap = ({
           <TouchableOpacity
             style={styles.bottomButton}
             onPress={() => setIsRadiusAdjusterVisible(true)}
+            testID="adjust-search-radius-button"
           >
             <Text style={styles.bottomButtonText}>Adjust Search Radius</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.bottomButton}
             onPress={() => setIsFilterModalVisible(true)}
+            testID="filter-places-button"
           >
             <Text style={styles.bottomButtonText}>Filter Places</Text>
           </TouchableOpacity>
@@ -624,6 +641,7 @@ const CampusMap = ({
         }}
         onClose={() => setIsFilterModalVisible(false)}
         testID="filter-modal"
+        activeFilters={activeFilters}
       />
     </View>
   );
