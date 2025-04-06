@@ -107,10 +107,10 @@ const NextClassComponent: FC<NextClassComponentProps> = (props) => {
         eventStart <= endOfDay
       );
     });
-
+    
     if (todayEvents.length === 0) return null;
-
-    return todayEvents.toSorted(
+    
+    return todayEvents.slice().sort(
       (a, b) =>
         new Date(a.start.dateTime).getTime() -
         new Date(b.start.dateTime).getTime()
