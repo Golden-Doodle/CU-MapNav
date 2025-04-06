@@ -15,8 +15,6 @@ import {
   MapViewStore,
   MARKER_ANCHOR,
   COLLISION_RANKING_TIERS,
-  MappedinVortex,
-  MappedinNode,
 } from "@mappedin/react-native-sdk";
 
 import { colors } from "./Styling/Constants";
@@ -176,7 +174,6 @@ const IndoorMap = ({
     const availableMaps = mapView.current?.venueData?.maps || [];
     const items = availableMaps.map((f) => ({ label: f.name, value: f.id }));
     setFloorItems(items);
-    setLevels(availableMaps);
 
     if (destinationRoom) {
       const startRoom = "Entrance #1";
@@ -232,7 +229,7 @@ const IndoorMap = ({
         start,
         destination
       );
-      if (!standardDirections || !standardDirections.instructions?.length) {
+      if (!standardDirections?.instructions?.length) {
         Alert.alert("No directions found");
         return;
       }
@@ -258,7 +255,7 @@ const IndoorMap = ({
       }
     );
 
-    if (!accessibleDirections || !accessibleDirections.instructions?.length) {
+    if (!accessibleDirections?.instructions?.length) {
       Alert.alert("No accessible route found");
       return;
     }
@@ -390,7 +387,7 @@ const IndoorMap = ({
         onRequestClose={() => setDirectionsModalVisible(false)}
         mapView={mapView}
         onDirectionsSet={(directions: MappedinDirections | null) => {
-          if (!directions || !directions.instructions?.length) {
+          if (!directions?.instructions?.length) {
             Alert.alert("Directions Unavailable", "No valid paths found.");
             return;
           }

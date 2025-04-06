@@ -37,7 +37,6 @@ jest.mock("@mappedin/react-native-sdk", () => {
 });
 
 jest.mock("@/app/components/IndoorNavigation/DirectionsModal", () => {
-  const React = require("react");
   const { View, Text, TouchableOpacity } = require("react-native");
   return (props: DirectionsModalProps) => {
     const { visible, onDirectionsSet } = props;

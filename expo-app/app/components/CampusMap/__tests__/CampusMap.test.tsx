@@ -49,9 +49,8 @@ jest.mock("../HamburgerWidget", () => {
 });
 
 jest.mock("@/app/components/IndoorNavigation/IndoorMap", () => {
-  const React = require("react");
   return function MockIndoorMap(props: any) {
-    return <React.Fragment />;
+    return <></>;
   };
 });
 
