@@ -36,6 +36,7 @@ import { getCustomMapStyle } from "./styles/MapStyles";
 import { calculateDistance, isPointInPolygon } from "@/app/utils/MapUtils";
 import { getFillColorWithOpacity, getCenterCoordinate } from "@/app/utils/helperFunctions";
 import IndoorMap from "@/app/components/IndoorNavigation/IndoorMap";
+import useLiveShuttleLocations from "@/app/hooks/useLiveShuttleLocations";
 
 interface CampusMapProps {
   pressedOptimizeRoute: boolean;
@@ -68,6 +69,9 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
 
   const markers = campus === "SGW" ? SGWMarkers : LoyolaMarkers;
   const buildings = campus === "SGW" ? SGWBuildings : LoyolaBuildings;
+
+  const [displayLiveShuttleLocation, setDisplayLiveShuttleLocation] = useState<boolean>(false); 
+  const liveShuttleLocations = useLiveShuttleLocations(displayLiveShuttleLocation);
 
   const { t } = useTranslation("CampusMap");
   
@@ -315,6 +319,8 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         campus={campus}
         darkMode={isDarkMode}
         onDarkModeChange={setIsDarkMode}
+        displayLiveShuttleLocation={displayLiveShuttleLocation}
+        setDisplayLiveShuttleLocation={setDisplayLiveShuttleLocation}
       />
 
       <MapView
@@ -407,6 +413,18 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
             markerType="default"
           />
         )}
+
+        {/* Display live shuttle location */}
+        {displayLiveShuttleLocation && liveShuttleLocations.map((location, index) => (
+          <CustomMarker
+            testID={`shuttle-marker-${index}`}
+            key={`shuttle-${index}`}
+            coordinate={location.coordinates}
+            title="Live Shuttle Location"
+            description="Live Shuttle Location"
+            markerType="shuttle"
+          />
+        ))}
       </MapView>
 
       {viewEatingOnCampus && (
