@@ -16,6 +16,8 @@ import {
   MapViewStore,
   MARKER_ANCHOR,
   COLLISION_RANKING_TIERS,
+  MappedinVortex,
+  MappedinNode,
 } from "@mappedin/react-native-sdk";
 
 import { colors } from "./Styling/Constants";
@@ -121,16 +123,19 @@ const IndoorMap = ({
     const connections = mappedinData.vortexes.filter(
       (v) => v.type && verticalTypes.includes(v.type.toLowerCase())
     );
-    connections.forEach((vortex: any) => {
+    connections.forEach((vortex: MappedinVortex) => {
       (vortex.nodes ?? []).forEach((nodeId: string) => {
-        const node = mappedinData.nodes.find((n: any) => n.id === nodeId);
+        const node = mappedinData.nodes.find(
+          (n: MappedinNode) => n.id === nodeId
+        );
         if (node && node.map.id === currentMap.id) {
-          const typeKey = vortex.type.toLowerCase();
+          const typeKey = vortex.type?.toLowerCase();
           const fillColor = colors[typeKey as keyof typeof colors] || "gray";
           const connectionLabel =
             vortex.name && vortex.name.trim().length > 0
               ? vortex.name
-              : vortex.type.charAt(0).toUpperCase() + vortex.type.slice(1);
+              : vortex.type?.charAt(0).toUpperCase() ??
+                "" + vortex.type?.slice(1);
           const markerHtml = getVerticalMarkerHtml(connectionLabel, fillColor);
           const markerId = mapView.current?.createMarker(node, markerHtml, {
             anchor: MARKER_ANCHOR.CENTER,
@@ -351,8 +356,7 @@ const IndoorMap = ({
         mapView={mapView}
         onDirectionsSet={(directions) => {
           if (
-            !directions ||
-            !directions.instructions ||
+            !directions?.instructions ||
             directions.instructions.length === 0 ||
             (directions.distance === 0 &&
               directions.instructions.length === 1 &&

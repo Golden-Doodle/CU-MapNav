@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,12 +6,12 @@ import {
   TouchableOpacity,
   StyleSheet,
   Modal,
-} from 'react-native';
-import SearchablePicker from './SearchablePicker';
-import { MappedinDirections, MapViewStore } from '@mappedin/react-native-sdk';
-import { generateDirections } from '../../services/Mapped-In/MappedInService';
+} from "react-native";
+import SearchablePicker from "./SearchablePicker";
+import { MappedinDirections, MapViewStore } from "@mappedin/react-native-sdk";
+import { generateDirections } from "../../services/Mapped-In/MappedInService";
 
-interface DirectionsModalProps {
+export interface DirectionsModalProps {
   visible: boolean;
   onRequestClose: () => void;
   mapView: React.RefObject<MapViewStore>;
@@ -24,12 +24,14 @@ const DirectionsModal: React.FC<DirectionsModalProps> = ({
   mapView,
   onDirectionsSet,
 }) => {
-  const [startRoom, setStartRoom] = useState<string>('');
-  const [destinationRoom, setDestinationRoom] = useState<string>('');
-  const [roomItems, setRoomItems] = useState<{ label: string; value: string }[]>([]);
+  const [startRoom, setStartRoom] = useState<string>("");
+  const [destinationRoom, setDestinationRoom] = useState<string>("");
+  const [roomItems, setRoomItems] = useState<
+    { label: string; value: string }[]
+  >([]);
 
   useEffect(() => {
-    if (mapView.current && mapView.current.venueData) {
+    if (mapView.current?.venueData) {
       const locations = mapView.current.venueData.locations || [];
       const items = locations.map((loc: any) => ({
         label: loc.name,
@@ -41,7 +43,10 @@ const DirectionsModal: React.FC<DirectionsModalProps> = ({
 
   const getDirections = () => {
     if (!startRoom || !destinationRoom) {
-      Alert.alert('Select Room', 'Please select both a start and destination room.');
+      Alert.alert(
+        "Select Room",
+        "Please select both a start and destination room."
+      );
       return;
     }
     const directions = generateDirections(mapView, startRoom, destinationRoom);
@@ -53,7 +58,7 @@ const DirectionsModal: React.FC<DirectionsModalProps> = ({
           mapView.current?.setMap(departure.toMap);
         } else if (departure.nodes && departure.nodes.length > 0) {
           const node = departure.nodes[0];
-          if (node.map && node.map.id) {
+          if (node.map?.id) {
             mapView.current?.setMap(node.map.id);
           }
         }
@@ -61,7 +66,10 @@ const DirectionsModal: React.FC<DirectionsModalProps> = ({
       onDirectionsSet(directions);
       onRequestClose();
     } else {
-      Alert.alert('Directions Unavailable', 'No directions found between these locations.');
+      Alert.alert(
+        "Directions Unavailable",
+        "No directions found between these locations."
+      );
     }
   };
 
@@ -123,22 +131,22 @@ export default DirectionsModal;
 const styles = StyleSheet.create({
   modalBackground: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
   modalCard: {
-    width: '80%',
-    backgroundColor: '#fff',
+    width: "80%",
+    backgroundColor: "#fff",
     borderRadius: 10,
     padding: 20,
   },
   headerText: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 10,
   },
   label: {
@@ -147,21 +155,21 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginTop: 20,
   },
   button: {
-    backgroundColor: '#912338',
+    backgroundColor: "#912338",
     borderRadius: 25,
     paddingHorizontal: 15,
     paddingVertical: 10,
   },
   closeButton: {
-    backgroundColor: '#666',
+    backgroundColor: "#666",
   },
   buttonText: {
-    color: '#fff',
-    fontWeight: '600',
+    color: "#fff",
+    fontWeight: "600",
   },
 });

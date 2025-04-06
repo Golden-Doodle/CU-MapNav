@@ -218,10 +218,14 @@ const CampusMap = ({
     // Allows for routing from HomePageScreen to CampusMapScreen
     if (pressedOptimizeRoute) {
       setIsNextClassModalVisible(true);
-    } else if (pressedSearch) {
+    }
+  }, [pressedOptimizeRoute]);
+
+  useEffect(() => {
+    if (pressedSearch) {
       setIsSearchModalVisible(true);
     }
-  }, [pressedOptimizeRoute, pressedSearch]);
+  }, [pressedSearch]);
 
   const handleMarkerPress = useCallback((marker: CustomMarkerType) => {
     const markerToBuilding: Building = {
@@ -337,7 +341,7 @@ const CampusMap = ({
   };
 
   const handleGoIndoor = () => {
-    if (destination && destination.building) {
+    if (destination?.building) {
       const indoorCapableBuildings = ["H", "MB", "JMSB"];
       if (indoorCapableBuildings.includes(destination.building.id)) {
         setIsIndoorMapVisible(true);
@@ -398,7 +402,7 @@ const CampusMap = ({
                     coordinate={marker.coordinate}
                     title={marker.title}
                     description={marker.description}
-                    markerType={marker.markerType || "default"}
+                    markerType={marker.markerType ?? "default"}
                     onPress={() => handleMarkerPress(marker)}
                   />
                 ))}
@@ -416,7 +420,7 @@ const CampusMap = ({
                 strokeColor={
                   isDarkMode
                     ? "#fff"
-                    : currentBuilding && currentBuilding.id === building.id
+                    : currentBuilding?.id === building.id
                     ? "rgb(0, 0, 0)"
                     : building.strokeColor
                 }
@@ -553,8 +557,7 @@ const CampusMap = ({
       />
 
       {routeCoordinates.length > 0 &&
-        destination &&
-        destination.building &&
+        destination?.building &&
         currentBuilding &&
         currentBuilding.id === destination.building.id && (
           <TouchableOpacity

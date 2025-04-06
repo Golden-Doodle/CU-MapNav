@@ -4,6 +4,8 @@ import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import { Alert } from "react-native";
 import IndoorMap from "../IndoorMap";
 import { generateDirections as generateIndoorDirections } from "@/app/services/Mapped-In/MappedInService";
+import { DirectionsModalProps } from "../DirectionsModal";
+import { IBuildingFloorSettingsModalProps } from "../SetBuildingFloorModal";
 
 let mockTriggerDirections:
   | ((onDirectionsSet: (directions: any) => void) => void)
@@ -13,25 +15,6 @@ let mockTriggerBuildingChange:
   | undefined = undefined;
 
 let globalMiMapViewRef: { current: any } = { current: null };
-
-type DirectionsModalProps = {
-  visible: boolean;
-  onDirectionsSet: (directions: any) => void;
-  onRequestClose?: () => void;
-  [key: string]: any;
-};
-
-type BuildingFloorModalProps = {
-  visible: boolean;
-  onChangeBuilding: (v: any) => void;
-  onRequestClose?: () => void;
-  selectedBuilding?: string;
-  buildingItems?: Array<{ label: string; value: string }>;
-  selectedFloor?: string | null;
-  onChangeFloor?: (floor: string | null) => void;
-  floorItems?: Array<{ label: string; value: string }>;
-  [key: string]: any;
-};
 
 jest.mock("@mappedin/react-native-sdk", () => {
   const React = require("react");
@@ -54,7 +37,6 @@ jest.mock("@mappedin/react-native-sdk", () => {
 });
 
 jest.mock("@/app/components/IndoorNavigation/DirectionsModal", () => {
-  const React = require("react");
   const { View, Text, TouchableOpacity } = require("react-native");
   return (props: DirectionsModalProps) => {
     const { visible, onDirectionsSet } = props;
@@ -77,9 +59,8 @@ jest.mock("@/app/components/IndoorNavigation/DirectionsModal", () => {
 });
 
 jest.mock("@/app/components/IndoorNavigation/SetBuildingFloorModal", () => {
-  const React = require("react");
   const { View, Text, TouchableOpacity } = require("react-native");
-  return (props: BuildingFloorModalProps) => {
+  return (props: IBuildingFloorSettingsModalProps) => {
     const { visible, onChangeBuilding } = props;
     return visible ? (
       <View testID="buildingFloorModal">
