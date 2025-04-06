@@ -117,7 +117,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       await GoogleSignin.hasPlayServices({
         showPlayServicesUpdateDialog: true,
       });
-      const signInResponse = await GoogleSignin.signIn();
+      await GoogleSignin.signIn();
       const { idToken, accessToken } = await GoogleSignin.getTokens();
 
       if (!idToken)
