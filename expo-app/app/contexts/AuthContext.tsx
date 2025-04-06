@@ -1,12 +1,14 @@
 // contexts/AuthContext.tsx
 import React, { createContext, useState, useEffect } from "react";
-import { Alert } from "react-native"; // <-- Import Alert
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { useRouter } from "expo-router";
 import { GoogleCalendarEvent } from "../utils/types";
-import { fetchAllCalendars, fetchGoogleCalendarEvents } from "../services/GoogleCalendar/fetchingUserCalendarData";
+import {
+  fetchAllCalendars,
+  fetchGoogleCalendarEvents,
+} from "../services/GoogleCalendar/fetchingUserCalendarData";
 
 export interface AuthContextType {
   user: FirebaseAuthTypes.User | null;
@@ -26,12 +28,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [googleCalendarEvents, setGoogleCalendarEvents] = useState<GoogleCalendarEvent[]>([]);
-  const [selectedCalendarId, setSelectedCalendarId] = useState<string | null>(null);
+  const [googleCalendarEvents, setGoogleCalendarEvents] = useState<
+    GoogleCalendarEvent[]
+  >([]);
+  const [selectedCalendarId, setSelectedCalendarId] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     GoogleSignin.configure({
-      webClientId: "259837654437-eo18pu30v9grv1i3dog8ba5i64ipj1q7.apps.googleusercontent.com",
+      webClientId:
+        "259837654437-eo18pu30v9grv1i3dog8ba5i64ipj1q7.apps.googleusercontent.com",
       scopes: ["https://www.googleapis.com/auth/calendar.readonly"],
     });
   }, []);
@@ -77,10 +84,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
           if (defaultCalendar) {
             storedCalendarId = defaultCalendar.id;
-            await AsyncStorage.setItem("selectedScheduleID", defaultCalendar.id);
-            await AsyncStorage.setItem("selectedScheduleName", defaultCalendar.summary);
+            await AsyncStorage.setItem(
+              "selectedScheduleID",
+              defaultCalendar.id
+            );
+            await AsyncStorage.setItem(
+              "selectedScheduleName",
+              defaultCalendar.summary
+            );
           } else {
-            console.warn("Default calendar 'Concordia_Class_Schedule' not found.");
+            console.warn(
+              "Default calendar 'Concordia_Class_Schedule' not found."
+            );
           }
         }
 
@@ -99,15 +114,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const handleGoogleSignIn = async () => {
     try {
-      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-      const signInResponse = await GoogleSignin.signIn();
+      await GoogleSignin.hasPlayServices({
+        showPlayServicesUpdateDialog: true,
+      });
+      await GoogleSignin.signIn();
       const { idToken, accessToken } = await GoogleSignin.getTokens();
 
-      if (!idToken) throw new Error("Google Sign-In failed: No ID Token received.");
-      if (!accessToken) throw new Error("Google Sign-In failed: No Access Token received.");
+      if (!idToken)
+        throw new Error("Google Sign-In failed: No ID Token received.");
+      if (!accessToken)
+        throw new Error("Google Sign-In failed: No Access Token received.");
 
       const googleCredential = auth.GoogleAuthProvider.credential(idToken);
-      const userCredential = await auth().signInWithCredential(googleCredential);
+      const userCredential = await auth().signInWithCredential(
+        googleCredential
+      );
 
       await AsyncStorage.setItem("user", JSON.stringify(userCredential.user));
 

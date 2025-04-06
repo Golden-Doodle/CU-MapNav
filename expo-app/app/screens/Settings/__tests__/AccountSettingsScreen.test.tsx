@@ -1,5 +1,10 @@
 import React from "react";
-import { render, fireEvent, waitFor, cleanup } from "@testing-library/react-native";
+import {
+  render,
+  fireEvent,
+  waitFor,
+  cleanup,
+} from "@testing-library/react-native";
 import { AuthContext } from "../../../contexts/AuthContext";
 import AccountSettingsScreen from "../AccountSettingsScreen";
 import { useRouter } from "expo-router";
@@ -41,7 +46,9 @@ jest.mock("@react-native-firebase/auth", () => ({
 
 jest.mock("expo-image-picker", () => ({
   ...jest.requireActual("expo-image-picker"),
-  requestMediaLibraryPermissionsAsync: jest.fn().mockResolvedValue({ status: "granted" }),
+  requestMediaLibraryPermissionsAsync: jest
+    .fn()
+    .mockResolvedValue({ status: "granted" }),
   launchImageLibraryAsync: jest.fn(),
 }));
 
@@ -101,7 +108,7 @@ describe("AccountSettingsScreen", () => {
 
     expect(getByTestId("header")).toBeTruthy();
     expect(getByTestId("profile-image")).toBeTruthy();
-    
+
     const emailInput = getByTestId("input-email");
     expect(emailInput.props.value).toBe("test@example.com");
   });
@@ -137,7 +144,9 @@ describe("AccountSettingsScreen", () => {
     });
 
     await waitFor(() => {
-      expect(getByTestId("profile-image").props.source.uri).toBe("https://example.com/photo.jpg");
+      expect(getByTestId("profile-image").props.source.uri).toBe(
+        "https://example.com/photo.jpg"
+      );
     });
   });
 
@@ -147,19 +156,18 @@ describe("AccountSettingsScreen", () => {
         <AccountSettingsScreen />
       </AuthContext.Provider>
     );
-  
+
     const editNameButton = getByTestId("edit-name");
     fireEvent.press(editNameButton);
-  
+
     await waitFor(() => {
       const modal = getByTestId("modal-container");
       expect(modal).toBeTruthy();
     });
-  
+
     const modalInput = getByTestId("modal-input");
     expect(modalInput.props.value).toBe("Johnny Woodstorm");
   });
-  
 
   it("edits profile field and saves changes", () => {
     const { getByTestId } = render(
@@ -186,7 +194,7 @@ describe("AccountSettingsScreen", () => {
       selectedCalendarId: null,
     };
 
-    const { getByTestId, queryByText } = render(
+    const { queryByText } = render(
       <AuthContext.Provider value={mockAuthContextNoSchedules}>
         <AccountSettingsScreen />
       </AuthContext.Provider>
@@ -201,9 +209,9 @@ describe("AccountSettingsScreen", () => {
         <AccountSettingsScreen />
       </AuthContext.Provider>
     );
-  
+
     const initialProfileImage = getByTestId("profile-image").props.source.uri;
-  
+
     const pickImageButton = getByTestId("edit-photo-button");
     fireEvent.press(pickImageButton);
 
@@ -211,12 +219,13 @@ describe("AccountSettingsScreen", () => {
       canceled: true,
       assets: [],
     });
-  
+
     await waitFor(() => {
-      expect(getByTestId("profile-image").props.source.uri).toBe(initialProfileImage);
+      expect(getByTestId("profile-image").props.source.uri).toBe(
+        initialProfileImage
+      );
     });
   });
-  
 
   it("opens profile modal for editing and cancels correctly", async () => {
     const { getByTestId, queryByTestId } = render(
@@ -224,58 +233,60 @@ describe("AccountSettingsScreen", () => {
         <AccountSettingsScreen />
       </AuthContext.Provider>
     );
-  
+
     const editNameButton = getByTestId("edit-name");
     fireEvent.press(editNameButton);
-  
+
     const modal = getByTestId("modal-container");
     expect(modal).toBeTruthy();
-  
+
     const cancelButton = getByTestId("cancel-button");
     fireEvent.press(cancelButton);
-  
+
     expect(queryByTestId("modal-container")).toBeNull();
   });
-  
 
   // ** Needs to be updated later when implementation is done **
   it("selects a schedule and saves the changes", async () => {
-  const mockSchedules = [
-    { id: "1", summary: "Work Schedule" },
-    { id: "2", summary: "School Schedule" },
-  ];
+    const mockSchedules = [
+      { id: "1", summary: "Work Schedule" },
+      { id: "2", summary: "School Schedule" },
+    ];
 
-  jest.spyOn(require('@/app/services/GoogleCalendar/fetchingUserCalendarData'), 'fetchAllCalendars').mockResolvedValue(mockSchedules);
+    jest
+      .spyOn(
+        require("@/app/services/GoogleCalendar/fetchingUserCalendarData"),
+        "fetchAllCalendars"
+      )
+      .mockResolvedValue(mockSchedules);
 
-  const mockAuthContextWithSchedules = {
-    ...mockAuthContext,
-    selectedCalendarId: null, 
-    setSelectedCalendarId: jest.fn(), 
-  };
+    const mockAuthContextWithSchedules = {
+      ...mockAuthContext,
+      selectedCalendarId: null,
+      setSelectedCalendarId: jest.fn(),
+    };
 
-  const { getByTestId, getByText } = render(
-    <AuthContext.Provider value={mockAuthContextWithSchedules}>
-      <AccountSettingsScreen />
-    </AuthContext.Provider>
-  );
+    const { getByTestId, getByText } = render(
+      <AuthContext.Provider value={mockAuthContextWithSchedules}>
+        <AccountSettingsScreen />
+      </AuthContext.Provider>
+    );
 
-  await waitFor(() => {
-    expect(getByText("Work Schedule")).toBeTruthy();
-    expect(getByText("School Schedule")).toBeTruthy();
+    await waitFor(() => {
+      expect(getByText("Work Schedule")).toBeTruthy();
+      expect(getByText("School Schedule")).toBeTruthy();
+    });
+
+    const scheduleSwitch1 = getByTestId("switch-1");
+    fireEvent(scheduleSwitch1, "valueChange", true);
+
+    const saveButton = getByTestId("save-button");
+    await waitFor(() => {
+      expect(saveButton).toHaveStyle({ opacity: 1 });
+    });
+
+    fireEvent.press(saveButton);
+
+    console.log(mockAuthContextWithSchedules.setSelectedCalendarId.mock.calls);
   });
-
-  const scheduleSwitch1 = getByTestId("switch-1");
-  fireEvent(scheduleSwitch1, "valueChange", true); 
-
-  const saveButton = getByTestId("save-button");
-  await waitFor(() => {
-    expect(saveButton).toHaveStyle({ opacity: 1 });
-  });
-
-  fireEvent.press(saveButton);
-
-
-  console.log(mockAuthContextWithSchedules.setSelectedCalendarId.mock.calls);
-});
-
 });

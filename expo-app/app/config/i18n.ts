@@ -3,7 +3,7 @@ import { initReactI18next } from "react-i18next";
 import * as Localization from "expo-localization";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import resources from "@/app/config/resources"; 
+import resources from "@/app/config/resources";
 
 // Function to load the saved language or default to device language
 const getLanguage = async () => {
@@ -12,7 +12,7 @@ const getLanguage = async () => {
     if (savedLang) return savedLang;
 
     const locales = Localization.getLocales();
-    return locales[0]?.languageCode || "en"; // Use device language if no saved language || default to English
+    return locales[0]?.languageCode ?? "en"; // Use device language if no saved language || default to English
   } catch (error) {
     console.error("Error loading language:", error);
     return "en";
@@ -22,7 +22,7 @@ const getLanguage = async () => {
 // Initialize i18n after getting the language
 (async () => {
   const lng = await getLanguage();
-  // const lng = "en"; // For testing purposes - you may set the language here
+  // For testing purposes - you may set the language here
   i18n.use(initReactI18next).init({
     resources,
     lng,

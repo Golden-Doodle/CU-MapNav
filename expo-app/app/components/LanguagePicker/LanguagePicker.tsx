@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTranslation } from "react-i18next";
@@ -27,13 +27,14 @@ const LanguageSelector = () => {
     await AsyncStorage.setItem("language", lang);
   };
 
-  const selectedLanguageLabel =
-    supportedLanguages.find((lang) => lang.code === selectedLanguage)?.label || "English";
-
   return (
     <View style={styles.settingOption}>
       <FontAwesome5 name="language" size={18} color="#912338" />
-      <Picker selectedValue={selectedLanguage} onValueChange={changeLanguage} style={styles.picker}>
+      <Picker
+        selectedValue={selectedLanguage}
+        onValueChange={changeLanguage}
+        style={styles.picker}
+      >
         {supportedLanguages.map((lang) => (
           <Picker.Item key={lang.code} label={lang.label} value={lang.code} />
         ))}
