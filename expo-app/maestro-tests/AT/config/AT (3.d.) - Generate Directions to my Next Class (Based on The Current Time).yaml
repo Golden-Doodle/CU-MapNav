@@ -1,0 +1,38 @@
+appId: com.goldendoodle.expoapp
+---
+- assertVisible:
+    id: "study-spot-text"
+- assertVisible:
+    id: "next-class-component"
+- assertVisible:
+    id: "optimize-route-button"
+- tapOn:
+    id: "optimize-route-button"
+- assertVisible:
+    id: "modal-title"
+- assertVisible:
+    id: "class-name"
+- assertVisible:
+    id: "class-time"
+- assertVisible:
+    id: "room-label"
+- assertVisible:
+    id: "building-label"
+- assertVisible:
+    id: "campus-label"
+- assertVisible:
+    id: "room-value"
+- assertVisible:
+    id: "building-value"
+- assertVisible:
+    id: "campus-value"
+- tapOn:
+    id: "get-directions-button"
+- assertVisible: ", Directions"
+- tapOn: ", Directions"
+- assertVisible:
+    id: "card-container"
+    index: 1
+- tapOn:
+    id: "card"
+    index: 1
