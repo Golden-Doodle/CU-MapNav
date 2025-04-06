@@ -19,6 +19,13 @@ const styles = StyleSheet.create({
     padding: 8,
     zIndex: 20,
   },
+  accessibilityButton: {
+    position: 'absolute',
+    bottom: 80,
+    right: 20,
+    padding: 8,
+    zIndex: 20,
+  },
   directionsButton: {
     position: 'absolute',
     bottom: 20,
