@@ -408,28 +408,32 @@ const CampusMap = ({
                 ))}
               </>
             )}
-            {buildings.map((building: Building) => (
-              <Polygon
-                key={building.id}
-                coordinates={building.coordinates}
-                fillColor={getFillColorWithOpacity(
-                  building,
-                  currentBuilding,
-                  destination?.selectedBuilding ? destination.building : null
-                )}
-                strokeColor={
-                  isDarkMode
-                    ? "#fff"
-                    : currentBuilding?.id === building.id
-                    ? "rgb(0, 0, 0)"
-                    : building.strokeColor
-                }
-                strokeWidth={2}
-                tappable={true}
-                onPress={handleBuildingPressed(building)}
-                testID={`building-marker-${building.id}-marker`}
-              />
-            ))}
+            {buildings.map((building: Building) => {
+              let strokeColor: string;
+              if (isDarkMode) strokeColor = "#fff";
+              else if (currentBuilding?.id === building.id) {
+                strokeColor = "rgb(0, 0, 0)";
+              } else {
+                strokeColor = building.strokeColor;
+              }
+
+              return (
+                <Polygon
+                  key={building.id}
+                  coordinates={building.coordinates}
+                  fillColor={getFillColorWithOpacity(
+                    building,
+                    currentBuilding,
+                    destination?.selectedBuilding ? destination.building : null
+                  )}
+                  strokeColor={strokeColor}
+                  strokeWidth={2}
+                  tappable={true}
+                  onPress={handleBuildingPressed(building)}
+                  testID={`building-marker-${building.id}-marker`}
+                />
+              );
+            })}
             {currentBuilding && (
               <Marker
                 coordinate={getCenterCoordinate(currentBuilding.coordinates)}
