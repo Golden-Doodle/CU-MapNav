@@ -11,7 +11,6 @@ import {
 import Icon from "react-native-vector-icons/MaterialIcons";
 import {
   MiMapView,
-  MappedinMap,
   MappedinDirections,
   MapViewStore,
   MARKER_ANCHOR,
