@@ -72,6 +72,16 @@ export default function HomeMenuScreen() {
       >
         <Text style={styles.menuText}>🏢 {t("Indoor Map")}</Text>
       </TouchableOpacity>
+
+      
+      <TouchableOpacity
+        style={styles.menuItem}
+        activeOpacity={0.8}
+        onPress={() => router.push("/screens/Schedule/MultiStopPlanner")}
+      >
+        <Text style={styles.menuText}>📖 {t("Multi Stop Planner")}</Text>
+      </TouchableOpacity>
+
     </View>
   );
 }
