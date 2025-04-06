@@ -1,11 +1,6 @@
 jest.setTimeout(10000);
 import React from "react";
-import {
-  render,
-  fireEvent,
-  waitFor,
-  RenderAPI,
-} from "@testing-library/react-native";
+import { render, fireEvent, waitFor, RenderAPI } from "@testing-library/react-native";
 import { Alert } from "react-native";
 
 jest.mock("@/app/services/GoogleMap/googlePlacesService", () => ({
@@ -25,19 +20,14 @@ jest.mock("../HamburgerWidget", () => {
   const { TouchableOpacity, Text } = require("react-native");
   return (props: { toggleCampus: () => void; campus?: string }) => (
     <>
-      <TouchableOpacity
-        testID="toggle-campus-button-hamburger-button"
-        onPress={props.toggleCampus}
-      >
+      <TouchableOpacity testID="toggle-campus-button-hamburger-button" onPress={props.toggleCampus}>
         <Text>Hamburger</Text>
       </TouchableOpacity>
       <TouchableOpacity
         testID="toggle-campus-button-toggle-campus-button"
         onPress={props.toggleCampus}
       >
-        <Text>
-          {props.campus === "LOY" ? "View SGW Campus" : "View Loyola Campus"}
-        </Text>
+        <Text>{props.campus === "LOY" ? "View SGW Campus" : "View Loyola Campus"}</Text>
       </TouchableOpacity>
 <TouchableOpacity
         testID="toggle-live-shuttle-location"
@@ -49,21 +39,16 @@ jest.mock("../HamburgerWidget", () => {
   );
 });
 
-jest.mock(
-  "@/app/components/IndoorNavigation/IndoorMap",
-  () => {
-    const React = require("react");
-    return function MockIndoorMap(props: any) {
-      return <React.Fragment />;
-    };
-  }
-);
+jest.mock("@/app/components/IndoorNavigation/IndoorMap", () => {
+  const React = require("react");
+  return function MockIndoorMap(props: any) {
+    return <React.Fragment />;
+  };
+});
 
 jest.mock("expo-location", () => ({
   Accuracy: { High: 3 },
-  requestForegroundPermissionsAsync: jest
-    .fn()
-    .mockResolvedValue({ status: "granted" }),
+  requestForegroundPermissionsAsync: jest.fn().mockResolvedValue({ status: "granted" }),
   getCurrentPositionAsync: jest.fn().mockResolvedValue({
     coords: { latitude: 45.5017, longitude: -73.5673 },
   }),
@@ -74,9 +59,7 @@ jest.mock("expo-location", () => ({
 }));
 
 jest.mock("@/app/utils/directions", () => ({
-  getDirections: jest
-    .fn()
-    .mockResolvedValue([{ latitude: 45.5017, longitude: -73.5673 }]),
+  getDirections: jest.fn().mockResolvedValue([{ latitude: 45.5017, longitude: -73.5673 }]),
 }));
 
 jest.mock("@/app/utils/MapUtils", () => ({
@@ -101,10 +84,7 @@ jest.mock("../modals/SearchModal", () => {
         >
           <Text>Get Directions</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          testID="search-modal-close-icon"
-          onPress={props.onClose}
-        >
+        <TouchableOpacity testID="search-modal-close-icon" onPress={props.onClose}>
           <Text>Close</Text>
         </TouchableOpacity>
       </View>
@@ -127,10 +107,7 @@ jest.mock("../CampusMapNavTab", () => {
       <TouchableOpacity testID="nav-tab-nav-item-Search" onPress={props.onSearchPress}>
         <Text>Search</Text>
       </TouchableOpacity>
-      <TouchableOpacity
-        testID="nav-tab-nav-item-Directions"
-        onPress={props.onDirectionsPress}
-      >
+      <TouchableOpacity testID="nav-tab-nav-item-Directions" onPress={props.onDirectionsPress}>
         <Text>Directions</Text>
       </TouchableOpacity>
       <TouchableOpacity testID="nav-tab-nav-item-Eat" onPress={props.onEatPress}>
@@ -142,10 +119,7 @@ jest.mock("../CampusMapNavTab", () => {
       <TouchableOpacity testID="nav-tab-nav-item-Back" onPress={props.onBackPress}>
         <Text>Back</Text>
       </TouchableOpacity>
-      <TouchableOpacity
-        testID="nav-tab-nav-item-MoreOptions"
-        onPress={props.onMoreOptionsPress}
-      >
+      <TouchableOpacity testID="nav-tab-nav-item-MoreOptions" onPress={props.onMoreOptionsPress}>
         <Text>More Options</Text>
       </TouchableOpacity>
       <TouchableOpacity testID="nav-tab-nav-item-Info" onPress={props.onInfoPress}>
@@ -162,10 +136,7 @@ jest.mock("../modals/BuildingInfoModal", () => {
     if (!props.visible) return null;
     return (
       <View testID="building-info-modal-content">
-        <TouchableOpacity
-          testID="building-info-modal-close-button"
-          onPress={props.onClose}
-        >
+        <TouchableOpacity testID="building-info-modal-close-button" onPress={props.onClose}>
           <Text>Close</Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -186,10 +157,7 @@ jest.mock("../modals/TransitModal", () => {
     if (!props.visible) return null;
     return (
       <View testID="transit-modal-modal">
-        <TouchableOpacity
-          testID="transit-modal-close-button"
-          onPress={props.onClose}
-        >
+        <TouchableOpacity testID="transit-modal-close-button" onPress={props.onClose}>
           <Text>Close</Text>
         </TouchableOpacity>
       </View>
@@ -204,10 +172,7 @@ jest.mock("../modals/NextClassModal", () => {
     if (!props.visible) return null;
     return (
       <View testID="next-class-modal-overlay">
-        <TouchableOpacity
-          testID="next-class-modal-close-button"
-          onPress={props.onClose}
-        >
+        <TouchableOpacity testID="next-class-modal-close-button" onPress={props.onClose}>
           <Text>Close</Text>
         </TouchableOpacity>
       </View>
@@ -367,29 +332,21 @@ describe("CampusMap", () => {
   it("should display a destination marker when a location is long-pressed on the map", async () => {
     const { getByTestId } = renderCampusMap();
     simulateLongPressOnMap(getByTestId);
-    await waitFor(() =>
-      expect(getByTestId("destination-marker-marker")).toBeTruthy()
-    );
+    await waitFor(() => expect(getByTestId("destination-marker-marker")).toBeTruthy());
   });
 
   it("should display building markers on the map and open modal when clicked", async () => {
     const { getByTestId, queryByTestId } = renderCampusMap();
     fireEvent.press(getByTestId("building-marker-FB-marker"));
-    await waitFor(() =>
-      expect(getByTestId("building-info-modal-content")).toBeTruthy()
-    );
+    await waitFor(() => expect(getByTestId("building-info-modal-content")).toBeTruthy());
     fireEvent.press(getByTestId("building-info-modal-close-button"));
-    await waitFor(() =>
-      expect(queryByTestId("building-info-modal-content")).toBeNull()
-    );
+    await waitFor(() => expect(queryByTestId("building-info-modal-content")).toBeNull());
   });
 
   it("should open and close the TransitModal when the directions button is pressed", async () => {
     const renderAPI = renderCampusMap();
     simulateLongPressOnMap(renderAPI.getByTestId);
-    await waitFor(() =>
-      expect(renderAPI.getByTestId("destination-marker-marker")).toBeTruthy()
-    );
+    await waitFor(() => expect(renderAPI.getByTestId("destination-marker-marker")).toBeTruthy());
     await openCloseModal(renderAPI, {
       openButtonId: "nav-tab-nav-item-Directions",
       modalId: "transit-modal-modal",
@@ -409,13 +366,9 @@ describe("CampusMap", () => {
   it("should reset destination when back button is pressed in NavTab", async () => {
     const { getByTestId, queryByTestId } = renderCampusMap();
     simulateLongPressOnMap(getByTestId);
-    await waitFor(() =>
-      expect(getByTestId("destination-marker-marker")).toBeTruthy()
-    );
+    await waitFor(() => expect(getByTestId("destination-marker-marker")).toBeTruthy());
     fireEvent.press(getByTestId("nav-tab-nav-item-Back"));
-    await waitFor(() =>
-      expect(queryByTestId("destination-marker-marker")).toBeNull()
-    );
+    await waitFor(() => expect(queryByTestId("destination-marker-marker")).toBeNull());
   });
 
   it("should open and close the Search Modal when the search button is pressed", async () => {
@@ -455,17 +408,13 @@ describe("CampusMap", () => {
     fireEvent.press(getByTestId("nav-tab-nav-item-Search"));
     await waitFor(() => expect(getByTestId("search-modal")).toBeTruthy());
     fireEvent.press(getByTestId("search-modal-get-directions-button"));
-    await waitFor(() =>
-      expect(alertSpy).toHaveBeenCalledWith("Select a destination point")
-    );
+    await waitFor(() => expect(alertSpy).toHaveBeenCalledWith("Select a destination point"));
   });
 
   it("should fetch route and render polyline when origin and destination exist", async () => {
     const { getByTestId } = renderCampusMap();
     simulateLongPressOnMap(getByTestId);
-    await waitFor(() =>
-      expect(getByTestId("destination-marker-marker")).toBeTruthy()
-    );
+    await waitFor(() => expect(getByTestId("destination-marker-marker")).toBeTruthy());
     await openSearchModalAndFetchRoute(getByTestId);
   });
 
@@ -473,9 +422,7 @@ describe("CampusMap", () => {
     const alertSpy = jest.spyOn(Alert, "alert");
     const { getByTestId } = renderCampusMap();
     fireEvent.press(getByTestId("building-marker-FB-marker"));
-    await waitFor(() =>
-      expect(getByTestId("building-info-modal-content")).toBeTruthy()
-    );
+    await waitFor(() => expect(getByTestId("building-info-modal-content")).toBeTruthy());
     fireEvent.press(getByTestId("nav-tab-nav-item-Search"));
     await waitFor(() => expect(getByTestId("search-modal")).toBeTruthy());
     fireEvent.press(getByTestId("search-modal-get-directions-button"));
@@ -496,25 +443,19 @@ describe("CampusMap", () => {
     const alertSpy = jest.spyOn(Alert, "alert");
     const { getByTestId } = renderCampusMap();
     fireEvent.press(getByTestId("nav-tab-nav-item-MoreOptions"));
-    await waitFor(() =>
-      expect(alertSpy).toHaveBeenCalledWith("More Options pressed")
-    );
+    await waitFor(() => expect(alertSpy).toHaveBeenCalledWith("More Options pressed"));
   });
 
   it("should open BuildingInfoModal when Info is pressed in NavTab", async () => {
     const { getByTestId } = renderCampusMap();
     fireEvent.press(getByTestId("nav-tab-nav-item-Info"));
-    await waitFor(() =>
-      expect(getByTestId("building-info-modal-content")).toBeTruthy()
-    );
+    await waitFor(() => expect(getByTestId("building-info-modal-content")).toBeTruthy());
   });
 
   it("should show radius adjuster when eating mode is activated", async () => {
     const { getByTestId, getByText } = renderCampusMap();
     openEatMode(getByTestId);
-    await waitFor(() =>
-      expect(getByText("Adjust Search Radius")).toBeTruthy()
-    );
+    await waitFor(() => expect(getByText("Adjust Search Radius")).toBeTruthy());
     fireEvent.press(getByText("Adjust Search Radius"));
   });
 });
@@ -526,9 +467,7 @@ describe("Additional Modals and Components", () => {
     const slider = getByTestId("radius-adjuster-radius-slider");
     fireEvent(slider, "valueChange", 200);
     fireEvent.press(getByTestId("radius-adjuster-apply-button"));
-    await waitFor(() =>
-      expect(queryByTestId("radius-adjuster-modal")).toBeNull()
-    );
+    await waitFor(() => expect(queryByTestId("radius-adjuster-modal")).toBeNull());
   });
 
   it("should open the FilterModal and close it after applying filters", async () => {
@@ -537,18 +476,14 @@ describe("Additional Modals and Components", () => {
     const restaurantSwitch = getByTestId("filter-modal-switch-restaurant");
     fireEvent(restaurantSwitch, "valueChange", false);
     fireEvent.press(getByTestId("filter-modal-apply-button"));
-    await waitFor(() =>
-      expect(queryByTestId("filter-modal")).toBeNull()
-    );
+    await waitFor(() => expect(queryByTestId("filter-modal")).toBeNull());
   });
 
   it("should close the FilterModal when the cancel button is pressed", async () => {
     const { getByTestId, getByText, queryByTestId } = renderCampusMap();
     await openFilterModal(getByTestId, getByText);
     fireEvent.press(getByTestId("filter-modal-cancel-button"));
-    await waitFor(() =>
-      expect(queryByTestId("filter-modal")).toBeNull()
-    );
+    await waitFor(() => expect(queryByTestId("filter-modal")).toBeNull());
   });
 
   it("should trigger optimize route behavior when pressedOptimizeRoute is true", async () => {
@@ -563,6 +498,24 @@ describe("Additional Modals and Components", () => {
     const { getByTestId } = render(<CampusMap pressedSearch={true} />);
     await waitFor(() => {
       expect(getByTestId("search-modal")).toBeTruthy();
+    });
+  });
+
+  it("should trigger coffee stop behavior when pressedCoffeeStop is true", async () => {
+    const { getByTestId } = render(<CampusMap pressedCoffeeStop={true} />);
+
+    await waitFor(() => {
+      expect(getByTestId("adjust-search-radius-button")).toBeTruthy();
+      expect(getByTestId("filter-places-button")).toBeTruthy();
+    });
+  });
+
+  it("should trigger food behavior when pressedFood is true", async () => {
+    const { getByTestId } = render(<CampusMap pressedFood={true} />);
+
+    await waitFor(() => {
+      expect(getByTestId("adjust-search-radius-button")).toBeTruthy();
+      expect(getByTestId("filter-places-button")).toBeTruthy();
     });
   });
 });

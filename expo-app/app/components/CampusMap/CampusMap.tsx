@@ -40,10 +40,17 @@ import useLiveShuttleLocations from "@/app/hooks/useLiveShuttleLocations";
 
 interface CampusMapProps {
   pressedOptimizeRoute?: boolean;
+  pressedCoffeeStop?: boolean;
+  pressedFood?: boolean;
   pressedSearch?: boolean;
 }
 
-const CampusMap = ({ pressedOptimizeRoute = false, pressedSearch = false }: CampusMapProps) => {
+const CampusMap = ({
+  pressedOptimizeRoute = false, 
+  pressedSearch = false,
+  pressedCoffeeStop = false,
+  pressedFood = false,
+}: CampusMapProps) => {
   const [campus, setCampus] = useState<Campus>("SGW");
   const [routeCoordinates, setRouteCoordinates] = useState<Coordinates[]>([]);
   const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
@@ -175,14 +182,29 @@ const CampusMap = ({ pressedOptimizeRoute = false, pressedSearch = false }: Camp
     }
   }, [selectedDistance, userLocation, fetchedPlaceResults]);
 
+  const handleOnPressedCoffeeStop = () => {
+    setActiveFilters(["cafe"]);
+    setViewEatingOnCampus(true);
+  };
+
+  const handleOnPressFood = () => {
+    setSelectedDistance(350); // Set a default distance for food places
+    setActiveFilters(["restaurant"]);
+    setViewEatingOnCampus(true);
+  };
+
   useEffect(() => {
     // Allows for routing from HomePageScreen to CampusMapScreen
     if (pressedOptimizeRoute) {
       setIsNextClassModalVisible(true);
+    } else if (pressedCoffeeStop) {
+      handleOnPressedCoffeeStop();
+    } else if (pressedFood) {
+      handleOnPressFood();
     } else if (pressedSearch) {
       setIsSearchModalVisible(true);
     }
-  }, [pressedOptimizeRoute, pressedSearch]);
+  }, [pressedOptimizeRoute, pressedCoffeeStop, pressedFood, pressedSearch]);
 
   const handleMarkerPress = useCallback((marker: CustomMarkerType) => {
     const markerToBuilding: Building = {
@@ -433,12 +455,14 @@ const CampusMap = ({ pressedOptimizeRoute = false, pressedSearch = false }: Camp
           <TouchableOpacity
             style={styles.bottomButton}
             onPress={() => setIsRadiusAdjusterVisible(true)}
+            testID="adjust-search-radius-button"
           >
             <Text style={styles.bottomButtonText}>Adjust Search Radius</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.bottomButton}
             onPress={() => setIsFilterModalVisible(true)}
+            testID="filter-places-button"
           >
             <Text style={styles.bottomButtonText}>Filter Places</Text>
           </TouchableOpacity>
@@ -569,6 +593,7 @@ const CampusMap = ({ pressedOptimizeRoute = false, pressedSearch = false }: Camp
         }}
         onClose={() => setIsFilterModalVisible(false)}
         testID="filter-modal"
+        activeFilters={activeFilters}
       />
     </View>
   );
