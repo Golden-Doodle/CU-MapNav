@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, ScrollView, Text, TouchableOpacity, StyleSheet, Switch } from "react-native";
+import { View, ScrollView, Text, TouchableOpacity, StyleSheet, Switch, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { FontAwesome5 } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -8,6 +8,7 @@ import SettingsHeader from "../../components/Settings/SettingsHeader";
 import BottomNavigation from "../../components/BottomNavigation/BottomNavigation";
 import LanguageSelector from "@/app/components/LanguagePicker/LanguagePicker";
 import { useTranslation } from "react-i18next";
+import { toggleClarity } from "../../services/Clarity/ClarityService.ts";
 
 export default function SettingsScreen() {
   const { t } = useTranslation("SettingsScreen");
@@ -16,12 +17,14 @@ export default function SettingsScreen() {
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const [usabilityTestingMode, setUsabilityTestingMode] = useState(false);
 
   useEffect(() => {
     const loadSettings = async () => {
       try {
         const savedNotifications = await AsyncStorage.getItem("notifications");
         const savedDarkMode = await AsyncStorage.getItem("darkMode");
+        const savedUtMode = await AsyncStorage.getItem("utMode");
 
         // Check if the saved values are valid before parsing
         if (savedNotifications !== null && savedNotifications !== undefined) {
@@ -34,6 +37,12 @@ export default function SettingsScreen() {
           setDarkMode(JSON.parse(savedDarkMode));
         } else {
           setDarkMode(false); // default to false if not set
+        }
+
+        if (savedUtMode !== null && savedUtMode !== undefined) {
+          setUsabilityTestingMode(JSON.parse(savedUtMode));
+        } else {
+          setUsabilityTestingMode(false); //default to false if not set
         }
       } catch (error) {
         console.error("Error loading settings:", error);
@@ -105,7 +114,7 @@ export default function SettingsScreen() {
           <Text style={styles.settingText}>{t("Account details")}</Text>
           <FontAwesome5 name="chevron-right" size={16} color="#912338" />
         </TouchableOpacity>
-
+        
         {/* Support */}
         <TouchableOpacity
           style={styles.settingOption}
@@ -116,6 +125,26 @@ export default function SettingsScreen() {
           <Text style={styles.settingText}>{t("Support")}</Text>
           <FontAwesome5 name="chevron-right" size={16} color="#912338" />
         </TouchableOpacity>
+
+        {/* Usability Testing Toggle */}
+        <View style={styles.settingOption} testID="usability-testing-toggle-button">
+          <FontAwesome5 name="eye" size={18} color="#912338" />
+          <Text style={styles.settingText}>{t("Usability Testing Mode")}</Text>
+          <Switch
+            value={usabilityTestingMode}
+            onValueChange={(value) => {
+              setUsabilityTestingMode(value);
+              saveSetting("utMode", value);
+              toggleClarity(value);
+              if(!value){
+                Alert.alert("Warning", "The CU-MapNav App needs to be restarted to fully exit Clarity usability testing. This only pauses Clarity.");
+              }else{
+                Alert.alert("Suggested Tasks", "- Navigate to the home screen\n- View both campus maps\n- View shuttle bus schedule\n- Get directions to your next class\n- Get directions to a room/building of choice");//steps to be defined
+              }
+            }}
+            testID="usability-testing-switch"
+          />
+        </View>
 
         {/* Logout */}
         <TouchableOpacity

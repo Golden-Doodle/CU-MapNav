@@ -105,10 +105,10 @@ describe("HomePageScreen Component", () => {
     fireEvent(switchButton, "valueChange", true); 
   
     await waitFor(() => {
-      expect(getByTestId("shuttle-schedule").props["data-route"]).toBe("SGW");
+      expect(getByTestId("shuttle-schedule").props["data-route"]).toBe("LOY");
     });
   
-    expect(AsyncStorage.setItem).toHaveBeenCalledWith("selectedCampus", "SGW");
+    expect(AsyncStorage.setItem).toHaveBeenCalledWith("selectedCampus", "LOY");
   });
 
   test("loads stored campus selection from AsyncStorage on mount", async () => {

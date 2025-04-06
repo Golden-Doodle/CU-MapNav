@@ -14,8 +14,15 @@ export default function TimePicker({ selectedTime, setSelectedTime, testID }: Ti
     const [tempTime, setTempTime] = useState<Date>(selectedTime);
 
     const handleTimeChange = (_event: any, newTime?: Date) => {
-        if (newTime) {
-            setTempTime(newTime);
+        if (Platform.OS === "android") {
+            setShowPicker(false);
+            if (newTime) {
+                setSelectedTime(newTime);
+            }
+        } else {
+            if (newTime) {
+                setTempTime(newTime);
+            }
         }
     };
 
@@ -28,7 +35,10 @@ export default function TimePicker({ selectedTime, setSelectedTime, testID }: Ti
         <View style={styles.container} testID={testID}>
             <TouchableOpacity
                 style={styles.timeButton}
-                onPress={() => setShowPicker(true)}
+                onPress={() => {
+                    setTempTime(selectedTime);
+                    setShowPicker(true);
+                }}
                 testID={`${testID}-time-button`}
             >
                 <FontAwesome5 name="clock" size={18} color="#990000" />
@@ -38,29 +48,38 @@ export default function TimePicker({ selectedTime, setSelectedTime, testID }: Ti
             </TouchableOpacity>
 
             {showPicker && (
-                <Modal transparent animationType="fade" testID={`${testID}-time-picker-modal`}>
-                    <View style={styles.overlay} testID={`${testID}-modal-overlay`}>
-                        <View style={styles.modalContainer} testID={`${testID}-modal-container`}>
-                            <DateTimePicker
-                                value={tempTime}
-                                mode="time"
-                                display={Platform.OS === "ios" ? "spinner" : "default"}
-                                textColor="#000"
-                                onChange={handleTimeChange}
-                                testID={`${testID}-date-time-picker`}
-                            />
-                            <TouchableOpacity
-                                style={styles.doneButton}
-                                onPress={confirmTimeSelection}
-                                testID={`${testID}-confirm-button`}
-                            >
-                                <Text style={styles.doneButtonText} testID={`${testID}-done-button-text`}>
-                                    Done
-                                </Text>
-                            </TouchableOpacity>
+                Platform.OS === "ios" ? (
+                    <Modal transparent animationType="fade" testID={`${testID}-time-picker-modal`}>
+                        <View style={styles.overlay} testID={`${testID}-modal-overlay`}>
+                            <View style={styles.modalContainer} testID={`${testID}-modal-container`}>
+                                <DateTimePicker
+                                    value={tempTime}
+                                    mode="time"
+                                    display="spinner"
+                                    onChange={handleTimeChange}
+                                    testID={`${testID}-date-time-picker`}
+                                />
+                                <TouchableOpacity
+                                    style={styles.doneButton}
+                                    onPress={confirmTimeSelection}
+                                    testID={`${testID}-confirm-button`}
+                                >
+                                    <Text style={styles.doneButtonText} testID={`${testID}-done-button-text`}>
+                                        Done
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
-                    </View>
-                </Modal>
+                    </Modal>
+                ) : (
+                    <DateTimePicker
+                        value={selectedTime}
+                        mode="time"
+                        display="default"
+                        onChange={handleTimeChange}
+                        testID={`${testID}-date-time-picker`}
+                    />
+                )
             )}
         </View>
     );

@@ -36,4 +36,48 @@ describe("CustomMarker", () => {
     fireEvent.press(getByTestId(`${testID}-marker`));
     expect(onPressMock).toHaveBeenCalled();
   });
+
+  it("renders the correct image for cafe marker", () => {
+    const { getByTestId, queryByTestId } = render(
+      <CustomMarker coordinate={coordinate} testID={testID} markerType="cafe" />
+    );
+    expect(getByTestId(`${testID}-marker`)).toBeTruthy();
+    expect(getByTestId(`${testID}-cafe-marker`)).toBeTruthy();
+    expect(queryByTestId(`${testID}-default-marker`)).toBeNull();
+    expect(queryByTestId(`${testID}-restaurant-marker`)).toBeNull();
+    expect(queryByTestId(`${testID}-washroom-marker`)).toBeNull();
+  });
+
+  it("renders the correct image for washroom marker", () => {
+    const { getByTestId, queryByTestId } = render(
+      <CustomMarker coordinate={coordinate} testID={testID} markerType="washroom" />
+    );
+    expect(getByTestId(`${testID}-marker`)).toBeTruthy();
+    expect(getByTestId(`${testID}-washroom-marker`)).toBeTruthy();
+    expect(queryByTestId(`${testID}-default-marker`)).toBeNull();
+    expect(queryByTestId(`${testID}-restaurant-marker`)).toBeNull();
+    expect(queryByTestId(`${testID}-cafe-marker`)).toBeNull();
+  });
+
+  it("renders the correct image for shuttle marker", () => {
+    const { getByTestId, queryByTestId } = render(
+      <CustomMarker coordinate={coordinate} testID={testID} markerType="shuttle" />
+    );
+    expect(getByTestId(`${testID}-marker`)).toBeTruthy();
+    expect(getByTestId(`${testID}-shuttle-marker`)).toBeTruthy();
+    expect(queryByTestId(`${testID}-default-marker`)).toBeNull();
+    expect(queryByTestId(`${testID}-restaurant-marker`)).toBeNull();
+    expect(queryByTestId(`${testID}-cafe-marker`)).toBeNull();
+  });
+
+  it("renders the correct image for default marker", () => {
+    const { getByTestId, queryByTestId } = render(
+      <CustomMarker coordinate={coordinate} testID={testID} markerType="default" />
+    );
+    expect(getByTestId(`${testID}-marker`)).toBeTruthy();
+    expect(getByTestId(`${testID}-default-marker`)).toBeTruthy();
+    expect(queryByTestId(`${testID}-restaurant-marker`)).toBeNull();
+    expect(queryByTestId(`${testID}-cafe-marker`)).toBeNull();
+    expect(queryByTestId(`${testID}-washroom-marker`)).toBeNull();
+  });
 });

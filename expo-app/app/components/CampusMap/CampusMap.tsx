@@ -8,11 +8,15 @@ import {
   TouchableOpacity,
   Modal,
 } from "react-native";
-import MapView, { Polygon, Polyline, Circle } from "react-native-maps";
+import MapView, { Polygon, Polyline, Circle, Marker } from "react-native-maps";
 import CustomMarker from "./CustomMarker";
 import { SGWBuildings, LoyolaBuildings } from "./data/buildingData";
 import { getDirections } from "@/app/utils/directions";
-import { initialRegion, SGWMarkers, LoyolaMarkers } from "./data/customMarkerData";
+import {
+  initialRegion,
+  SGWMarkers,
+  LoyolaMarkers,
+} from "./data/customMarkerData";
 import NavTab from "./CampusMapNavTab";
 import * as Location from "expo-location";
 import BuildingInfoModal from "./modals/BuildingInfoModal";
@@ -34,40 +38,64 @@ import { useTranslation } from "react-i18next";
 import RadiusAdjuster from "./RadiusAdjuster";
 import { getCustomMapStyle } from "./styles/MapStyles";
 import { calculateDistance, isPointInPolygon } from "@/app/utils/MapUtils";
-import { getFillColorWithOpacity } from "@/app/utils/helperFunctions";
+import {
+  getFillColorWithOpacity,
+  getCenterCoordinate,
+} from "@/app/utils/helperFunctions";
 import IndoorMap from "@/app/components/IndoorNavigation/IndoorMap";
+import useLiveShuttleLocations from "@/app/hooks/useLiveShuttleLocations";
 
 interface CampusMapProps {
-  pressedOptimizeRoute: boolean;
+  pressedOptimizeRoute?: boolean;
+  pressedSearch?: boolean;
 }
 
-const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
+const CampusMap = ({
+  pressedOptimizeRoute = false,
+  pressedSearch = false,
+}: CampusMapProps) => {
   const [campus, setCampus] = useState<Campus>("SGW");
   const [routeCoordinates, setRouteCoordinates] = useState<Coordinates[]>([]);
   const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
   const [destination, setDestination] = useState<LocationType>(null);
   const [origin, setOrigin] = useState<LocationType>(null);
   const [viewCampusMap, setViewCampusMap] = useState<boolean>(true);
-  const [isBuildingInfoModalVisible, setIsBuildingInfoModalVisible] = useState<boolean>(false);
-  const [isNextClassModalVisible, setIsNextClassModalVisible] = useState<boolean>(false);
+  const [isBuildingInfoModalVisible, setIsBuildingInfoModalVisible] =
+    useState<boolean>(false);
+  const [isNextClassModalVisible, setIsNextClassModalVisible] =
+    useState<boolean>(false);
   const [viewEatingOnCampus, setViewEatingOnCampus] = useState<boolean>(false);
-  const [isSearchModalVisible, setIsSearchModalVisible] = useState<boolean>(false);
-  const [isTransitModalVisible, setIsTransitModalVisible] = useState<boolean>(false);
-  const [fetchedPlaceResults, setFetchedPlaceResults] = useState<CustomMarkerType[]>([]);
-  const [visiblePlaceMarkers, setVisiblePlaceMarkers] = useState<CustomMarkerType[]>([]);
+  const [isSearchModalVisible, setIsSearchModalVisible] =
+    useState<boolean>(false);
+  const [isTransitModalVisible, setIsTransitModalVisible] =
+    useState<boolean>(false);
+  const [fetchedPlaceResults, setFetchedPlaceResults] = useState<
+    CustomMarkerType[]
+  >([]);
+  const [visiblePlaceMarkers, setVisiblePlaceMarkers] = useState<
+    CustomMarkerType[]
+  >([]);
   const [mapRegion, setMapRegion] = useState(initialRegion[campus]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [currentBuilding, setCurrentBuilding] = useState<Building | null>(null);
   const [selectedDistance, setSelectedDistance] = useState<number>(100);
-  const [isRadiusAdjusterVisible, setIsRadiusAdjusterVisible] = useState<boolean>(false);
+  const [isRadiusAdjusterVisible, setIsRadiusAdjusterVisible] =
+    useState<boolean>(false);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const [isIndoorMapVisible, setIsIndoorMapVisible] = useState<boolean>(false);
 
   const [activeFilters, setActiveFilters] = useState<string[]>(defaultFilters);
-  const [isFilterModalVisible, setIsFilterModalVisible] = useState<boolean>(false);
+  const [isFilterModalVisible, setIsFilterModalVisible] =
+    useState<boolean>(false);
 
   const markers = campus === "SGW" ? SGWMarkers : LoyolaMarkers;
   const buildings = campus === "SGW" ? SGWBuildings : LoyolaBuildings;
+
+  const [displayLiveShuttleLocation, setDisplayLiveShuttleLocation] =
+    useState<boolean>(false);
+  const liveShuttleLocations = useLiveShuttleLocations(
+    displayLiveShuttleLocation
+  );
 
   const { t } = useTranslation("CampusMap");
 
@@ -76,7 +104,10 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        Alert.alert(t("Permission Denied"), t("Allow location access to navigate."));
+        Alert.alert(
+          t("Permission Denied"),
+          t("Allow location access to navigate.")
+        );
         return;
       }
 
@@ -112,7 +143,10 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
 
   useEffect(() => {
     if (!userLocation) {
-      const fallbackLocation = { latitude: mapRegion.latitude, longitude: mapRegion.longitude };
+      const fallbackLocation = {
+        latitude: mapRegion.latitude,
+        longitude: mapRegion.longitude,
+      };
       const foundBuilding = buildings.find((building) =>
         isPointInPolygon(fallbackLocation, building.coordinates)
       );
@@ -126,7 +160,14 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
     if (userLocation && viewEatingOnCampus && activeFilters.length > 0) {
       setIsLoading(true);
       try {
-        const results = await Promise.all(activeFilters.map((filter) => fetchNearbyPlaces(userLocation, filter as "restaurant" | "cafe" | "washroom")));
+        const results = await Promise.all(
+          activeFilters.map((filter) =>
+            fetchNearbyPlaces(
+              userLocation,
+              filter as "restaurant" | "cafe" | "washroom"
+            )
+          )
+        );
         const markers = results.flatMap((places, index) =>
           places.map((place: GooglePlace) => ({
             id: place.place_id + "_" + activeFilters[index],
@@ -139,14 +180,16 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
             photoUrl: place.photos?.[0]?.imageUrl,
             rating: place.rating,
             campus,
-            markerType: activeFilters[index] as "restaurant" | "cafe" | "washroom",
+            markerType: activeFilters[index] as
+              | "restaurant"
+              | "cafe"
+              | "washroom",
           }))
         );
         setFetchedPlaceResults(markers);
       } catch (error) {
         console.error("Error fetching nearby places: ", error);
-      }
-      finally {
+      } finally {
         setIsLoading(false);
       }
     }
@@ -170,6 +213,15 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
       setVisiblePlaceMarkers(filteredMarkers);
     }
   }, [selectedDistance, userLocation, fetchedPlaceResults]);
+
+  useEffect(() => {
+    // Allows for routing from HomePageScreen to CampusMapScreen
+    if (pressedOptimizeRoute) {
+      setIsNextClassModalVisible(true);
+    } else if (pressedSearch) {
+      setIsSearchModalVisible(true);
+    }
+  }, [pressedOptimizeRoute, pressedSearch]);
 
   const handleMarkerPress = useCallback((marker: CustomMarkerType) => {
     const markerToBuilding: Building = {
@@ -228,7 +280,10 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
       Alert.alert(t("Select a destination point"));
       return;
     }
-    const route = await getDirections(origin.coordinates, destination.coordinates);
+    const route = await getDirections(
+      origin.coordinates,
+      destination.coordinates
+    );
     if (route) {
       setRouteCoordinates(route);
     }
@@ -285,7 +340,10 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
     if (destination?.room) {
       setIsIndoorMapVisible(true);
     } else {
-      Alert.alert("No Room Exists", "There is no room number available for this class.");
+      Alert.alert(
+        "No Building Selected",
+        "Please select a building for which indoor directions can be provided."
+      );
     }
   };
 
@@ -299,6 +357,8 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         campus={campus}
         darkMode={isDarkMode}
         onDarkModeChange={setIsDarkMode}
+        displayLiveShuttleLocation={displayLiveShuttleLocation}
+        setDisplayLiveShuttleLocation={setDisplayLiveShuttleLocation}
       />
 
       <MapView
@@ -349,8 +409,8 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
                   isDarkMode
                     ? "#fff"
                     : currentBuilding?.id === building.id
-                      ? "rgb(0, 0, 0)"
-                      : building.strokeColor
+                    ? "rgb(0, 0, 0)"
+                    : building.strokeColor
                 }
                 strokeWidth={2}
                 tappable={true}
@@ -358,6 +418,20 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
                 testID={`building-marker-${building.id}-marker`}
               />
             ))}
+            {currentBuilding && (
+              <Marker
+                coordinate={getCenterCoordinate(currentBuilding.coordinates)}
+                anchor={{ x: 0.5, y: 0.5 }}
+                tracksViewChanges={false}
+                testID="current-building-marker"
+              >
+                <View style={styles.currentBuildingOverlay}>
+                  <Text style={styles.currentBuildingOverlayText}>
+                    Current Building
+                  </Text>
+                </View>
+              </Marker>
+            )}
           </>
         )}
 
@@ -379,6 +453,19 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
             markerType="default"
           />
         )}
+
+        {/* Display live shuttle location */}
+        {displayLiveShuttleLocation &&
+          liveShuttleLocations.map((location, index) => (
+            <CustomMarker
+              testID={`shuttle-marker-${index}`}
+              key={`shuttle-${index}`}
+              coordinate={location.coordinates}
+              title="Live Shuttle Location"
+              description="Live Shuttle Location"
+              markerType="shuttle"
+            />
+          ))}
       </MapView>
 
       {viewEatingOnCampus && (
@@ -500,7 +587,10 @@ const CampusMap = ({ pressedOptimizeRoute = false }: CampusMapProps) => {
         onRequestClose={() => setIsIndoorMapVisible(false)}
       >
         <View style={{ flex: 1 }}>
-          <IndoorMap destinationRoom={destination?.room} />
+          <IndoorMap
+            indoorBuildingId={destination?.building?.id}
+            destinationRoom={destination?.room}
+          />
           <TouchableOpacity
             onPress={() => setIsIndoorMapVisible(false)}
             style={styles.closeIndoorMapButton}
@@ -586,6 +676,16 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "600",
     fontSize: 16,
+  },
+  currentBuildingOverlay: {
+    backgroundColor: "rgba(0, 0, 0, 1)",
+    padding: 5,
+    borderRadius: 5,
+  },
+  currentBuildingOverlayText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "bold",
   },
 });
 

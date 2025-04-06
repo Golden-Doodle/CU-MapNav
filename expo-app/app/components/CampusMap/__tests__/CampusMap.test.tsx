@@ -39,6 +39,12 @@ jest.mock("../HamburgerWidget", () => {
           {props.campus === "LOY" ? "View SGW Campus" : "View Loyola Campus"}
         </Text>
       </TouchableOpacity>
+<TouchableOpacity
+        testID="toggle-live-shuttle-location"
+        onPress={props.toggleCampus}
+      >
+        <Text>Toggle Live Shuttle Location</Text>
+      </TouchableOpacity>
     </>
   );
 });
@@ -80,6 +86,7 @@ jest.mock("@/app/utils/MapUtils", () => ({
 
 jest.mock("@/app/utils/helperFunctions", () => ({
   getFillColorWithOpacity: jest.fn(() => "rgba(0,0,0,0.5)"),
+  getCenterCoordinate: jest.fn((coordinates) => coordinates[0]),
 }));
 
 jest.mock("../modals/SearchModal", () => {
@@ -253,6 +260,13 @@ jest.mock("../CustomMarker", () => {
     </TouchableOpacity>
   );
 });
+
+jest.mock("@/app/services/ConcordiaShuttle/ConcordiaApiShuttle", () => ({
+  fetchBusCoordinates: jest.fn().mockResolvedValue([
+    { coordinates: { latitude: 45.5017, longitude: -73.5673 } },
+    { coordinates: { latitude: 45.5020, longitude: -73.5680 } },
+  ]),
+}));
 
 import CampusMap from "../CampusMap";
 
@@ -455,7 +469,7 @@ describe("CampusMap", () => {
     await openSearchModalAndFetchRoute(getByTestId);
   });
 
-  it("should alert when Go Indoor is pressed with no room info", async () => {
+  it("should alert when Go Indoor is pressed with no indoor map available", async () => {
     const alertSpy = jest.spyOn(Alert, "alert");
     const { getByTestId } = renderCampusMap();
     fireEvent.press(getByTestId("building-marker-FB-marker"));
@@ -472,8 +486,8 @@ describe("CampusMap", () => {
     fireEvent.press(getByTestId("indoor-button"));
     await waitFor(() =>
       expect(alertSpy).toHaveBeenCalledWith(
-        "No Room Exists",
-        "There is no room number available for this class."
+        "Indoor Map Not Available",
+        "Indoor map is not available for this building."
       )
     );
   });
@@ -535,5 +549,20 @@ describe("Additional Modals and Components", () => {
     await waitFor(() =>
       expect(queryByTestId("filter-modal")).toBeNull()
     );
+  });
+
+  it("should trigger optimize route behavior when pressedOptimizeRoute is true", async () => {
+    const { getByTestId } = render(<CampusMap pressedOptimizeRoute={true} />);
+
+    await waitFor(() => {
+      expect(getByTestId("next-class-modal-overlay")).toBeTruthy();
+    });
+  });
+
+  it("should open search modal when pressedSearch is true", async () => {
+    const { getByTestId } = render(<CampusMap pressedSearch={true} />);
+    await waitFor(() => {
+      expect(getByTestId("search-modal")).toBeTruthy();
+    });
   });
 });

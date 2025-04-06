@@ -1,9 +1,28 @@
 import { GoogleCalendarEvent } from "@/app/utils/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getAccessToken } from "../GoogleSignin/accessToken";
 
-const fetchAllCalendars = async () => {
+/**
+ * Helper function to check if a response is unauthorized (401/403).
+ * If so, throws an Error("UNAUTHORIZED").
+ * Otherwise, throws a general error if response is not OK.
+ */
+const checkUnauthorized = (response: Response) => {
+  if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      throw new Error("UNAUTHORIZED");
+    }
+    throw new Error("Error fetching calendars");
+  }
+  return response;
+};
+
+/**
+ * Fetch all calendars in the user's Google Calendar account
+ */
+export const fetchAllCalendars = async () => {
   try {
-    const accessToken = await AsyncStorage.getItem("googleAccessToken");
+    const accessToken = await getAccessToken();
 
     if (!accessToken) {
       throw new Error("No Google access token found. Please sign in again.");
@@ -20,29 +39,29 @@ const fetchAllCalendars = async () => {
       }
     );
 
-    if (!response.ok) {
-      throw new Error("Error fetching calendars");
-    }
+    checkUnauthorized(response);
 
     const data = await response.json();
-    return data.items || []; // List of all calendars (including primary, shared, etc.)
+    return data.items || [];
   } catch (error) {
     console.error("Error fetching calendars:", error);
-    return [];
+    throw error;
   }
 };
 
-// Fetch events based on a given calendar ID and duration
+/**
+ * Fetch events from a given calendar ID for X days ahead
+ */
 export const fetchGoogleCalendarEvents = async (
   calendarId: string,
   daysAhead: number
 ): Promise<GoogleCalendarEvent[]> => {
   try {
-    if (!calendarId || calendarId === "") {
+    if (!calendarId) {
       throw new Error("No calendar ID provided.");
     }
 
-    const accessToken = await AsyncStorage.getItem("googleAccessToken");
+    const accessToken = await getAccessToken();
 
     if (!accessToken) {
       throw new Error("No access token found. Please sign in again.");
@@ -50,13 +69,13 @@ export const fetchGoogleCalendarEvents = async (
 
     const now = new Date();
     const futureDate = new Date();
-    futureDate.setDate(now.getDate() + daysAhead); 
+    futureDate.setDate(now.getDate() + daysAhead);
 
     const timeMin = now.toISOString();
     const timeMax = futureDate.toISOString();
 
-    console.log("calendarid: ", calendarId)
-    
+    console.log("Fetching events from calendar:", calendarId);
+
     const response = await fetch(
       `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?timeMin=${timeMin}&timeMax=${timeMax}&maxResults=10&orderBy=startTime&singleEvents=true`,
       {
@@ -68,65 +87,69 @@ export const fetchGoogleCalendarEvents = async (
       }
     );
 
-    if (!response.ok) {
-      throw new Error("Error fetching events from Google Calendar.");
-    }
+    checkUnauthorized(response);
 
     const data = await response.json();
     return data.items || [];
   } catch (error) {
     console.error("Google Calendar Fetch Error:", error);
-    return [];
+    throw error;
   }
 };
 
-// Function to fetch events based on selected schedule
+/**
+ * Example function to fetch events from a 'selectedScheduleID' 
+ */
 export const fetchCalendarEvents = async () => {
-  const storedCalendarID = (await AsyncStorage.getItem("selectedScheduleID")) || "";
-  const storedScheduleName = (await AsyncStorage.getItem("selectedScheduleName")) || "Default Schedule";
-  
-  
-  let scheduleID = storedCalendarID;
-  let scheduleName = storedScheduleName;
-  
+  try {
+    const storedCalendarID = (await AsyncStorage.getItem("selectedScheduleID")) || "";
+    const storedScheduleName =
+      (await AsyncStorage.getItem("selectedScheduleName")) || "Default Schedule";
 
-  if (!storedCalendarID || storedCalendarID === "") {
-    const allCalendars = await fetchAllCalendars();
+    let scheduleID = storedCalendarID;
+    let scheduleName = storedScheduleName;
 
-    const concordiaCalendar = allCalendars.find((calendar: any) =>
-      calendar.summary.includes("Schedule")
-    );
+    if (!storedCalendarID) {
+      const allCalendars = await fetchAllCalendars();
+      const concordiaCalendar = allCalendars.find((calendar: any) =>
+        calendar.summary.includes("Schedule")
+      );
 
-    if (!concordiaCalendar) {
-      throw new Error("No schedule calendar found.");
+      if (!concordiaCalendar) {
+        throw new Error("No schedule calendar found.");
+      }
+
+      scheduleID = concordiaCalendar.id;
+      scheduleName = concordiaCalendar.summary;
+
+      await AsyncStorage.setItem("selectedScheduleID", scheduleID);
+      await AsyncStorage.setItem("selectedScheduleName", scheduleName);
     }
 
-    scheduleID = concordiaCalendar.id;
-    scheduleName = concordiaCalendar.summary;
-
-    await AsyncStorage.setItem("selectedScheduleID", scheduleID);
-    await AsyncStorage.setItem("selectedScheduleName", scheduleName);
+    const events = await fetchGoogleCalendarEvents(scheduleID, 7);
+    return {
+      scheduleName,
+      events,
+    };
+  } catch (error) {
+    console.error("Error fetching calendar events:", error);
+    throw error;
   }
-
-  return {
-    scheduleName,
-    events: await fetchGoogleCalendarEvents(scheduleID, 7),
-  };
 };
 
-// Function to fetch today's events at the current time and later, but not tomorrow, based on selected schedule
+/**
+ * Fetch today's events only
+ */
 export const fetchTodaysEventsFromSelectedSchedule = async (): Promise<GoogleCalendarEvent[]> => {
   try {
-    const accessToken = await AsyncStorage.getItem("googleAccessToken");
+    const accessToken = await getAccessToken();
 
     if (!accessToken) {
       throw new Error("No access token found. Please sign in again.");
     }
 
     const now = new Date();
-
     const timeMin = now.toISOString();
-
     const timeMax = new Date(now);
     timeMax.setHours(23, 59, 59, 999);
     const timeMaxISOString = timeMax.toISOString();
@@ -149,17 +172,12 @@ export const fetchTodaysEventsFromSelectedSchedule = async (): Promise<GoogleCal
       }
     );
 
-    if (!response.ok) {
-      throw new Error("Error fetching events from Google Calendar.");
-    }
+    checkUnauthorized(response);
 
     const data = await response.json();
     return data.items || [];
   } catch (error) {
     console.error("Error fetching today's events from selected schedule:", error);
-    return [];
+    throw error;
   }
 };
-
-
-export { fetchAllCalendars };

@@ -1,13 +1,5 @@
-import React, { useState, useEffect, useCallback, useContext } from "react";
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  RefreshControl,
-  Text,
-  Switch
-} from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useContext } from "react";
+import { View, StyleSheet, ScrollView, RefreshControl, Text, Switch } from "react-native";
 import Header from "../../components/Header/Header";
 import ButtonSection from "../../components/ButtonSection/ButtonSection";
 import SearchBar from "../../components/SearchBar/SearchBar";
@@ -16,109 +8,37 @@ import HottestSpots from "../../components/HottestSpots/HottestSpots";
 import ShuttleSchedule from "../../components/ShuttleSchedule/ShuttleSchedule";
 import BottomNavigation from "../../components/BottomNavigation/BottomNavigation";
 import { AuthContext } from "@/app/contexts/AuthContext";
-import { fetchGoogleCalendarEvents } from "@/app/services/GoogleCalendar/fetchingUserCalendarData";
-import { GoogleCalendarEvent } from "@/app/utils/types";
+import { useCalendarEvents } from "@/app/hooks/useCalendarEvents";
+import { useCampus } from "@/app/hooks/useCampus";
 
 export default function HomePageScreen() {
   const auth = useContext(AuthContext);
   const user = auth?.user;
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [calendarEvents, setCalendarEvents] = useState<GoogleCalendarEvent[]>([]);
-  const [campus, setCampus] = useState<"LOY" | "SGW">("LOY")
-
-  // Load stored campus selection
-  useEffect(() => {
-    const loadCampus = async () => {
-      const storedCampus = await AsyncStorage.getItem("selectedCampus");
-      
-      // Ensure storedCampus is either "LOY" or "SGW"
-      if (storedCampus === "LOY" || storedCampus === "SGW") {
-        setCampus(storedCampus);
-      }
-    };
-  
-    loadCampus();
-  }, []);
-
-  const refreshCalendarEvents = useCallback(async () => {
-    if (!user) return;
-    setIsLoading(true);
-
-    try {
-      console.log("Refreshing calendar events...");
-
-      // Retrieve the selected calendar ID from AsyncStorage
-      const selectedCalendarId = await AsyncStorage.getItem("selectedScheduleID");
-
-      if (!selectedCalendarId) {
-        console.warn("No calendar selected. Please choose a calendar in settings.");
-        return;
-      }
-
-      // Fetch events for the selected calendar (next 7 days)
-      const events = await fetchGoogleCalendarEvents(selectedCalendarId, 7);
-      setCalendarEvents(events);
-    } catch (error) {
-      console.error("Failed to refresh calendar:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user]);
-
-  useEffect(() => {
-    refreshCalendarEvents();
-    // const interval = setInterval(refreshCalendarEvents, 30000);
-    
-    // return () => clearInterval(interval);
-    return () => {};
-  }, [refreshCalendarEvents]); 
-  
-  // Must make sure this was the intended function (Megered Conflict)
-  const toggleCampus = async () => {
-    const newCampus = campus === "LOY" ? "SGW" : "LOY";
-    setCampus(newCampus);
-    await AsyncStorage.setItem("selectedCampus", newCampus);
-  };
+  const { events, loading, refresh } = useCalendarEvents(user?.uid ?? null);
+  const { campus, toggle } = useCampus();
 
   return (
     <View style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.content}
-        refreshControl={
-          <RefreshControl
-            refreshing={isLoading}
-            onRefresh={refreshCalendarEvents}
-          />
-        }
-      >
-        <Header
-          refreshCalendarEvents={refreshCalendarEvents}
-          isLoading={isLoading}
-          calendarEvents={calendarEvents}
-        />
+      <ScrollView refreshControl={<RefreshControl refreshing={loading} onRefresh={refresh} />}>
+        <Header refreshCalendarEvents={refresh} isLoading={loading} calendarEvents={events} />
         <ButtonSection />
         <SearchBar />
         <QuickShortcuts />
         <HottestSpots />
 
-        {/* Shuttle Schedule Toggle */}
         <View style={styles.switchContainer}>
           <Text style={styles.switchLabel}>SGW</Text>
           <Switch
             value={campus === "LOY"}
-            onValueChange={toggleCampus}
+            onValueChange={toggle}
             trackColor={{ false: "#912338", true: "#D3D3D3" }}
             thumbColor={campus === "LOY" ? "#912338" : "#D3D3D3"}
           />
-
           <Text style={styles.switchLabel}>LOY</Text>
         </View>
 
-        {/* Shuttle Schedule Component */}
         <ShuttleSchedule route={campus} />
       </ScrollView>
-
       <BottomNavigation testID="bottom-navigation" />
     </View>
   );
@@ -154,4 +74,3 @@ const styles = StyleSheet.create({
     color: "#333",
   },
 });
-

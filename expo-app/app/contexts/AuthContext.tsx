@@ -1,10 +1,12 @@
+// contexts/AuthContext.tsx
 import React, { createContext, useState, useEffect } from "react";
+import { Alert } from "react-native"; // <-- Import Alert
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { useRouter } from "expo-router";
-import { fetchAllCalendars, fetchGoogleCalendarEvents } from "@/app/services/GoogleCalendar/fetchingUserCalendarData";
 import { GoogleCalendarEvent } from "../utils/types";
+import { fetchAllCalendars, fetchGoogleCalendarEvents } from "../services/GoogleCalendar/fetchingUserCalendarData";
 
 export interface AuthContextType {
   user: FirebaseAuthTypes.User | null;
@@ -69,7 +71,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         if (!storedCalendarId) {
           const allCalendars = await fetchAllCalendars();
-          const defaultCalendar = allCalendars.find((cal:any) => cal.summary === "Concordia_Class_Schedule");
+          const defaultCalendar = allCalendars.find(
+            (cal: any) => cal.summary === "Concordia_Class_Schedule"
+          );
 
           if (defaultCalendar) {
             storedCalendarId = defaultCalendar.id;
@@ -106,7 +110,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const userCredential = await auth().signInWithCredential(googleCredential);
 
       await AsyncStorage.setItem("user", JSON.stringify(userCredential.user));
-      await AsyncStorage.setItem("googleAccessToken", accessToken);
 
       router.replace("/screens/Home/HomePageScreen");
     } catch (error) {
@@ -126,6 +129,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       await AsyncStorage.removeItem("user");
       await AsyncStorage.removeItem("selectedScheduleID");
       await AsyncStorage.removeItem("selectedScheduleName");
+      await AsyncStorage.removeItem("googleAccessToken");
       setUser(null);
       setSelectedCalendarId(null);
       setGoogleCalendarEvents([]);
