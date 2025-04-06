@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,14 +8,11 @@ import {
 } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
-import { fetchBusLocations } from "@/app/services/ConcordiaShuttle/ConcordiaApiShuttle";
-import { AuthContext } from "@/app/contexts/AuthContext";
 
 interface ShuttleScheduleProps {
-  route: "LOY" | "SGW"; 
-  testID?: string; 
+  route: "LOY" | "SGW";
+  testID?: string;
 }
-
 
 // TODO: Move this to function helper file
 /**
@@ -33,13 +30,18 @@ function parseTime12ToDate(time12: string): Date {
   }
 
   const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
+  return new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    hours,
+    minutes
+  );
 }
 
-export default function ShuttleSchedule({ route, testID }: ShuttleScheduleProps) {
-
-  const {t} = useTranslation("HomePageScreen");
-
+const ShuttleSchedule: FC<ShuttleScheduleProps> = (props) => {
+  const { route, testID } = props;
+  const { t } = useTranslation("HomePageScreen");
 
   const [schedule, setSchedule] = useState<string[]>([]);
 
@@ -47,16 +49,44 @@ export default function ShuttleSchedule({ route, testID }: ShuttleScheduleProps)
 
   const schedules: Record<"LOY" | "SGW", string[]> = {
     LOY: [
-      "9:15 AM", "9:45 AM", "10:15 AM", "11:15 AM", "11:45 AM",
-      "12:15 PM", "12:45 PM", "1:15 PM", "1:45 PM", "2:15 PM",
-      "2:45 PM", "3:15 PM", "3:45 PM", "4:15 PM", "4:45 PM",
-      "5:45 PM", "6:15 PM", "6:45 PM",
+      "9:15 AM",
+      "9:45 AM",
+      "10:15 AM",
+      "11:15 AM",
+      "11:45 AM",
+      "12:15 PM",
+      "12:45 PM",
+      "1:15 PM",
+      "1:45 PM",
+      "2:15 PM",
+      "2:45 PM",
+      "3:15 PM",
+      "3:45 PM",
+      "4:15 PM",
+      "4:45 PM",
+      "5:45 PM",
+      "6:15 PM",
+      "6:45 PM",
     ],
     SGW: [
-      "9:15 AM", "9:45 AM", "10:15 AM", "10:45 AM", "11:45 AM",
-      "12:15 PM", "12:45 PM", "1:15 PM", "1:45 PM", "2:15 PM",
-      "2:45 PM", "3:15 PM", "3:45 PM", "4:15 PM", "5:15 PM",
-      "5:45 PM", "6:15 PM", "6:45 PM",
+      "9:15 AM",
+      "9:45 AM",
+      "10:15 AM",
+      "10:45 AM",
+      "11:45 AM",
+      "12:15 PM",
+      "12:45 PM",
+      "1:15 PM",
+      "1:45 PM",
+      "2:15 PM",
+      "2:45 PM",
+      "3:15 PM",
+      "3:45 PM",
+      "4:15 PM",
+      "5:15 PM",
+      "5:45 PM",
+      "6:15 PM",
+      "6:45 PM",
     ],
   };
 
@@ -67,18 +97,21 @@ export default function ShuttleSchedule({ route, testID }: ShuttleScheduleProps)
     }
   }, [route]);
 
-
   const isPastTime = (timeStr: string): boolean => {
     const now = new Date();
     const shuttleTime = parseTime12ToDate(timeStr);
     return shuttleTime < now;
   };
 
-
   const renderInfoPanel = () => (
-    <View style={styles.infoPanel} testID={testID ? `${testID}-info-panel` : undefined}>
+    <View
+      style={styles.infoPanel}
+      testID={testID ? `${testID}-info-panel` : undefined}
+    >
       <Text style={styles.infoPanelTitle}>{t("Pickup Location")}</Text>
-      <Text style={styles.infoPanelDetails}>Henry F Hall building, front doors</Text>
+      <Text style={styles.infoPanelDetails}>
+        Henry F Hall building, front doors
+      </Text>
       <Text style={styles.infoPanelDetails}>1455 De Maisonneuve Blvd. W</Text>
 
       <View style={styles.badgeRow}>
@@ -104,9 +137,15 @@ export default function ShuttleSchedule({ route, testID }: ShuttleScheduleProps)
   }
 
   return (
-    <View style={{ flex: 1 }} testID={testID ? `${testID}-shuttle-schedule-container` : undefined}>
+    <View
+      style={{ flex: 1 }}
+      testID={testID ? `${testID}-shuttle-schedule-container` : undefined}
+    >
       {/* NEW: ID Card Notice at top */}
-      <View style={styles.idCardNotice} testID={testID ? `${testID}-id-card-notice` : undefined}>
+      <View
+        style={styles.idCardNotice}
+        testID={testID ? `${testID}-id-card-notice` : undefined}
+      >
         <FontAwesome5
           name="id-card"
           size={18}
@@ -143,7 +182,10 @@ export default function ShuttleSchedule({ route, testID }: ShuttleScheduleProps)
               testID={testID ? `${testID}-time-row-${time}` : undefined}
             >
               <TouchableOpacity
-                style={[styles.timeButton, past ? styles.timeButtonPast : styles.timeButtonFuture]}
+                style={[
+                  styles.timeButton,
+                  past ? styles.timeButtonPast : styles.timeButtonFuture,
+                ]}
                 disabled={past}
                 onPress={() => {
                   if (isSelected) {
@@ -169,7 +211,7 @@ export default function ShuttleSchedule({ route, testID }: ShuttleScheduleProps)
       </ScrollView>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   scrollContent: {
@@ -271,3 +313,5 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
 });
+
+export default ShuttleSchedule;
