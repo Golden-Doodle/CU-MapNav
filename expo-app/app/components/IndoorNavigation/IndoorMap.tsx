@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from "react";
 import {
   SafeAreaView,
   View,
@@ -7,8 +7,8 @@ import {
   Text,
   FlatList,
   Alert,
-} from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+} from "react-native";
+import Icon from "react-native-vector-icons/MaterialIcons";
 import {
   MiMapView,
   MappedinMap,
@@ -16,26 +16,26 @@ import {
   MapViewStore,
   MARKER_ANCHOR,
   COLLISION_RANKING_TIERS,
-} from '@mappedin/react-native-sdk';
+} from "@mappedin/react-native-sdk";
 
-import { colors } from './Styling/Constants';
+import { colors } from "./Styling/Constants";
 import {
   getWashroomMarkerHtml,
   getFountainMarkerHtml,
   getDefaultMarkerHtml,
   getVerticalMarkerHtml,
-} from './Styling/markerTemplate';
+} from "./Styling/markerTemplate";
 
-import DirectionsModal from '@/app/components/IndoorNavigation/DirectionsModal';
-import BuildingFloorModal from '@/app/components/IndoorNavigation/SetBuildingFloorModal';
-import Constants from 'expo-constants';
-import { RoomLocation } from '@/app/utils/types';
-import { generateDirections as generateIndoorDirections } from '@/app/services/Mapped-In/MappedInService';
-import styles from './Styling/IndoorMap.styles';
+import DirectionsModal from "@/app/components/IndoorNavigation/DirectionsModal";
+import BuildingFloorModal from "@/app/components/IndoorNavigation/SetBuildingFloorModal";
+import Constants from "expo-constants";
+import { RoomLocation } from "@/app/utils/types";
+import { generateDirections as generateIndoorDirections } from "@/app/services/Mapped-In/MappedInService";
+import styles from "./Styling/IndoorMap.styles";
 
 const buildings = [
-  { label: 'Hall', value: '67c87db88e15de000bed1abb' },
-  { label: 'JMSB', value: '67d974ddf63286000bb80fc3' },
+  { label: "Hall", value: "67c87db88e15de000bed1abb" },
+  { label: "JMSB", value: "67d974ddf63286000bb80fc3" },
 ];
 
 const key = Constants.expoConfig?.extra?.mappedInApiKey;
@@ -59,11 +59,15 @@ const IndoorMap = ({
   const [selectedBuilding, setSelectedBuilding] = useState<string | null>(
     indoorBuildingId ?? buildings[0].value
   );
-  const [buildingItems] = useState<{ label: string; value: string }[]>(buildings);
-  const [floorItems, setFloorItems] = useState<{ label: string; value: string }[]>([]);
+  const [buildingItems] =
+    useState<{ label: string; value: string }[]>(buildings);
+  const [floorItems, setFloorItems] = useState<
+    { label: string; value: string }[]
+  >([]);
   const [directionsModalVisible, setDirectionsModalVisible] = useState(false);
   const [settingsModalVisible, setSettingsModalVisible] = useState(false);
-  const [activeDirections, setActiveDirections] = useState<MappedinDirections | null>(null);
+  const [activeDirections, setActiveDirections] =
+    useState<MappedinDirections | null>(null);
   const [showDirections, setShowDirections] = useState(false);
 
   const verticalMarkerIds = useRef<string[]>([]);
@@ -83,7 +87,7 @@ const IndoorMap = ({
   const options = {
     key,
     secret,
-    mapId: selectedBuilding ?? '',
+    mapId: selectedBuilding ?? "",
     labelAllLocationsOnInit: false,
   };
 
@@ -112,33 +116,32 @@ const IndoorMap = ({
     verticalMarkerIds.current = [];
     const mappedinData = mapView.current?.venueData;
     const currentMap = mapView.current?.currentMap;
-    if (mappedinData && currentMap) {
-      const verticalTypes = ["escalator", "elevator", "stairs"];
-      const connections = mappedinData.vortexes.filter(v =>
-        v.type && verticalTypes.includes(v.type.toLowerCase())
-      );
-      connections.forEach((vortex: any) => {
-        (vortex.nodes || []).forEach((nodeId: string) => {
-          const node = mappedinData.nodes.find((n: any) => n.id === nodeId);
-          if (node && node.map.id === currentMap.id) {
-            const typeKey = vortex.type.toLowerCase();
-            const fillColor = colors[typeKey as keyof typeof colors] || 'gray';
-            const connectionLabel =
-              vortex.name && vortex.name.trim().length > 0
-                ? vortex.name
-                : vortex.type.charAt(0).toUpperCase() + vortex.type.slice(1);
-            const markerHtml = getVerticalMarkerHtml(connectionLabel, fillColor);
-            const markerId = mapView.current?.createMarker(node, markerHtml, {
-              anchor: MARKER_ANCHOR.CENTER,
-              rank: COLLISION_RANKING_TIERS.ALWAYS_VISIBLE,
-            });
-            if (markerId) {
-              verticalMarkerIds.current.push(markerId);
-            }
+    if (!mappedinData || !currentMap) return;
+    const verticalTypes = ["escalator", "elevator", "stairs"];
+    const connections = mappedinData.vortexes.filter(
+      (v) => v.type && verticalTypes.includes(v.type.toLowerCase())
+    );
+    connections.forEach((vortex: any) => {
+      (vortex.nodes ?? []).forEach((nodeId: string) => {
+        const node = mappedinData.nodes.find((n: any) => n.id === nodeId);
+        if (node && node.map.id === currentMap.id) {
+          const typeKey = vortex.type.toLowerCase();
+          const fillColor = colors[typeKey as keyof typeof colors] || "gray";
+          const connectionLabel =
+            vortex.name && vortex.name.trim().length > 0
+              ? vortex.name
+              : vortex.type.charAt(0).toUpperCase() + vortex.type.slice(1);
+          const markerHtml = getVerticalMarkerHtml(connectionLabel, fillColor);
+          const markerId = mapView.current?.createMarker(node, markerHtml, {
+            anchor: MARKER_ANCHOR.CENTER,
+            rank: COLLISION_RANKING_TIERS.ALWAYS_VISIBLE,
+          });
+          if (markerId) {
+            verticalMarkerIds.current.push(markerId);
           }
-        });
+        }
       });
-    }
+    });
   };
 
   const renderPOIMarkers = () => {
@@ -156,13 +159,19 @@ const IndoorMap = ({
         markerPosition = location.nodes[0];
       }
       if (!markerPosition) return;
-  
-      const name = location.name ?? '';
-      let markerHtml = '';
-  
-      if (name.toLowerCase().includes('washroom') || name.toLowerCase().includes('restroom')) {
+
+      const name = location.name ?? "";
+      let markerHtml = "";
+
+      if (
+        name.toLowerCase().includes("washroom") ||
+        name.toLowerCase().includes("restroom")
+      ) {
         markerHtml = getWashroomMarkerHtml(location.name);
-      } else if (name.toLowerCase().includes('fountain') || name.toLowerCase().includes('water')) {
+      } else if (
+        name.toLowerCase().includes("fountain") ||
+        name.toLowerCase().includes("water")
+      ) {
         markerHtml = getFountainMarkerHtml(location.name);
       } else {
         markerHtml = getDefaultMarkerHtml(location.name);
@@ -179,34 +188,47 @@ const IndoorMap = ({
     const currentMapId = mapView.current?.currentMap?.id;
     const availableMaps = mapView.current?.venueData?.maps || [];
     setSelectedFloor(currentMapId ?? null);
-  
+
     const items = availableMaps.map((floor) => ({
       label: floor.name,
       value: floor.id,
     }));
     setFloorItems(items);
     setLevels(availableMaps);
-  
+
     if (destinationRoom) {
-      const directions = generateIndoorDirections(mapView, 'Entrance #1', destinationRoom.room);
+      const directions = generateIndoorDirections(
+        mapView,
+        "Entrance #1",
+        destinationRoom.room
+      );
       if (directions) {
         setActiveDirections(directions);
-        if (directions.path && directions.path.length > 0 && directions.path[0].map) {
+        if (
+          directions.path &&
+          directions.path.length > 0 &&
+          directions.path[0].map
+        ) {
           const startingMapId = directions.path[0].map.id;
           await mapView.current?.setMap(startingMapId);
           setSelectedFloor(startingMapId);
         }
       } else {
-        Alert.alert('No Directions Found', `No indoor directions found for room ${destinationRoom.room}`);
+        Alert.alert(
+          "No Directions Found",
+          `No indoor directions found for room ${destinationRoom.room}`
+        );
       }
     }
-  
+
     renderPOIMarkers();
     renderVerticalConnections();
   };
 
-  const handleBuildingChange: React.Dispatch<React.SetStateAction<string | null>> = (value) => {
-    if (typeof value === 'function') {
+  const handleBuildingChange: React.Dispatch<
+    React.SetStateAction<string | null>
+  > = (value) => {
+    if (typeof value === "function") {
       setSelectedBuilding(value(selectedBuilding));
     } else {
       setSelectedBuilding(value);
@@ -231,7 +253,7 @@ const IndoorMap = ({
         <View style={styles.mapContainer} testID="mapContainer">
           <MiMapView
             style={styles.map}
-            key={selectedBuilding ?? 'default'}
+            key={selectedBuilding ?? "default"}
             ref={mapView}
             options={options}
             onFirstMapLoaded={handleFirstMapLoaded}
@@ -259,11 +281,24 @@ const IndoorMap = ({
             <Icon name="directions-walk" size={35} color="#912338" />
           </TouchableOpacity>
           {activeDirections?.instructions?.length ? (
-            <View style={styles.directionsOverlay} testID="directionsOverlay" pointerEvents="box-none">
+            <View
+              style={styles.directionsOverlay}
+              testID="directionsOverlay"
+              pointerEvents="box-none"
+            >
               {showDirections ? (
-                <View style={styles.directionsContainer} testID="directionsContainer">
-                  <View style={styles.directionsHeaderRow} testID="directionsHeaderRow">
-                    <Text style={styles.directionsTitle} testID="directionsTitle">
+                <View
+                  style={styles.directionsContainer}
+                  testID="directionsContainer"
+                >
+                  <View
+                    style={styles.directionsHeaderRow}
+                    testID="directionsHeaderRow"
+                  >
+                    <Text
+                      style={styles.directionsTitle}
+                      testID="directionsTitle"
+                    >
                       Directions
                     </Text>
                     <TouchableOpacity
@@ -285,7 +320,10 @@ const IndoorMap = ({
                   />
                 </View>
               ) : (
-                <View style={styles.directionsButtonColumn} testID="directionsButtonColumn">
+                <View
+                  style={styles.directionsButtonColumn}
+                  testID="directionsButtonColumn"
+                >
                   <TouchableOpacity
                     style={[styles.button, styles.cancelButton]}
                     onPress={cancelDirections}
@@ -306,7 +344,7 @@ const IndoorMap = ({
           ) : null}
         </View>
       </View>
-  
+
       <DirectionsModal
         visible={directionsModalVisible}
         onRequestClose={() => setDirectionsModalVisible(false)}
@@ -320,14 +358,14 @@ const IndoorMap = ({
               directions.instructions.length === 1 &&
               directions.path.length === 0)
           ) {
-            Alert.alert('Directions Unavailable', 'No valid paths found.');
+            Alert.alert("Directions Unavailable", "No valid paths found.");
             return;
           }
           setActiveDirections(directions);
           setDirectionsModalVisible(false);
         }}
       />
-  
+
       <BuildingFloorModal
         visible={settingsModalVisible}
         onRequestClose={() => setSettingsModalVisible(false)}
