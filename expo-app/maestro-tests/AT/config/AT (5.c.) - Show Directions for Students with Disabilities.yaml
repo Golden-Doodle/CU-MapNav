@@ -1,0 +1,16 @@
+appId: com.goldendoodle.expoapp
+---
+- tapOn:
+    id: "menu-button"
+- tapOn:
+    id: "indoor-nav-button"
+- tapOn:
+    id: "directionsButton"
+- tapOn: "Select a start room"
+- tapOn: "H-838.01"
+- tapOn: "Select a destination room"
+- inputText: "H-1"
+- tapOn: "H-110"
+- tapOn: "Get Directions"
+- tapOn:
+    id: "accessibilityButton"
