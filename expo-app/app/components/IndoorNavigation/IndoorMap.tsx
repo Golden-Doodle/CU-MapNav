@@ -55,7 +55,6 @@ const IndoorMap = ({
   indoorBuildingId,
 }: IndoorMapProps) => {
   const mapView = useRef<MapViewStore>(null);
-  const [levels, setLevels] = useState<MappedinMap[]>();
   const [selectedFloor, setSelectedFloor] = useState<string | null>(null);
   const [isMapLoading, setIsMapLoading] = useState(true);
   const [selectedBuilding, setSelectedBuilding] = useState<string | null>(
@@ -199,7 +198,6 @@ const IndoorMap = ({
       value: floor.id,
     }));
     setFloorItems(items);
-    setLevels(availableMaps);
 
     if (destinationRoom) {
       const directions = generateIndoorDirections(
@@ -237,7 +235,6 @@ const IndoorMap = ({
       setSelectedBuilding(value(selectedBuilding));
     } else {
       setSelectedBuilding(value);
-      setLevels(undefined);
       setSelectedFloor(null);
       setIsMapLoading(true);
       setFloorItems([]);
