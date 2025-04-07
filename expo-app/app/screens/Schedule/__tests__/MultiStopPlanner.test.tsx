@@ -1,5 +1,5 @@
 import React from "react";
-import { render, fireEvent, waitFor, act } from "@testing-library/react-native";
+import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import { Alert } from "react-native";
 import CompleteDistanceMatrixChunked from "../MultiStopPlanner";
 import * as Location from "expo-location";
@@ -54,6 +54,7 @@ describe("CompleteDistanceMatrixChunked", () => {
         location: JSON.stringify({ building: "Hall Building" }),
       },
     ]);
+
     (fetchNearbyPlaces as jest.Mock).mockResolvedValue([
       {
         place_id: "place1",
@@ -91,6 +92,32 @@ describe("CompleteDistanceMatrixChunked", () => {
     });
   });
 
+  it("uses fallback coordinates if location permission denied", async () => {
+    (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValueOnce({
+      status: "denied",
+    });
+    const { getByTestId } = render(<CompleteDistanceMatrixChunked />);
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith(
+        "Location permission not granted; using fallback coords"
+      );
+      expect(getByTestId("generic-header")).toBeTruthy();
+    });
+  });
+
+
+  it("resets places if only 'campus' category is selected", async () => {
+    const { getByTestId, getByText, queryByText } = render(<CompleteDistanceMatrixChunked />);
+    await waitFor(() => {
+      fireEvent.press(getByTestId("category-dropdown"));
+      fireEvent.press(getByText("campus"));
+    });
+
+    await waitFor(() => {
+      expect(queryByText("campus ✓")).toBeTruthy();
+    });
+  });
+
   it("changes start location", async () => {
     const { getByText, getByTestId } = render(<CompleteDistanceMatrixChunked />);
     await waitFor(() => {
@@ -104,12 +131,11 @@ describe("CompleteDistanceMatrixChunked", () => {
     });
   });
 
-  it("shows alert when not enough tasks are selected for route", async () => {
+  it("shows alert when not enough tasks are selected", async () => {
     const { getByText } = render(<CompleteDistanceMatrixChunked />);
     await waitFor(() => {
-      expect(getByText("Build Best Route (TSP)")).toBeTruthy();
+      fireEvent.press(getByText("Build Best Route (TSP)"));
     });
-    fireEvent.press(getByText("Build Best Route (TSP)"));
     await waitFor(() => {
       expect(Alert.alert).toHaveBeenCalledWith(
         "Select at least 2 tasks (including your start)!"
@@ -123,35 +149,32 @@ describe("CompleteDistanceMatrixChunked", () => {
     );
     const { getByText, getAllByRole } = render(<CompleteDistanceMatrixChunked />);
     await waitFor(() => {
-      expect(getByText("Math Class")).toBeTruthy();
+      const switches = getAllByRole("switch");
+      fireEvent(switches[0], "valueChange", true);
+      fireEvent(switches[1], "valueChange", true);
+      fireEvent.press(getByText("Build Best Route (TSP)"));
     });
-    const switches = getAllByRole("switch");
-    fireEvent(switches[0], "valueChange", true);
-    fireEvent(switches[1], "valueChange", true);
-    fireEvent.press(getByText("Build Best Route (TSP)"));
     await waitFor(() => {
       expect(Alert.alert).toHaveBeenCalledWith("Failed to build route");
     });
   });
 
-  it("builds route and shows modal with route steps", async () => {
+  it("builds route and shows modal with steps", async () => {
     const { getByText, getByTestId, queryByTestId, getAllByRole } = render(
       <CompleteDistanceMatrixChunked />
     );
     await waitFor(() => {
-      expect(getByText("Math Class")).toBeTruthy();
+      const switches = getAllByRole("switch");
+      fireEvent(switches[0], "valueChange", true);
+      fireEvent(switches[1], "valueChange", true);
+      fireEvent.press(getByText("Build Best Route (TSP)"));
     });
-    const switches = getAllByRole("switch");
-    fireEvent(switches[0], "valueChange", true);
-    fireEvent(switches[1], "valueChange", true);
-
-    fireEvent.press(getByText("Build Best Route (TSP)"));
 
     await waitFor(() => {
       expect(getByTestId("list-modal")).toBeTruthy();
     });
-    const routeSteps = getByTestId("route-steps-list");
-    expect(routeSteps).toBeTruthy();
+
+    expect(getByTestId("route-steps-list")).toBeTruthy();
 
     fireEvent.press(getByTestId("close-button"));
     await waitFor(() => {
@@ -159,26 +182,12 @@ describe("CompleteDistanceMatrixChunked", () => {
     });
   });
 
-  it("handles location permission not granted", async () => {
-    (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValue({
-      status: "denied",
-    });
-    const { getByText } = render(<CompleteDistanceMatrixChunked />);
-    await waitFor(() => {
-      expect(Alert.alert).toHaveBeenCalledWith(
-        "Location permission not granted; using fallback coords"
-      );
-    });
-  });
-
   it("toggles a task's selection state", async () => {
-    const { getByText, getAllByRole } = render(<CompleteDistanceMatrixChunked />);
+    const { getAllByRole } = render(<CompleteDistanceMatrixChunked />);
     await waitFor(() => {
-      expect(getByText("Math Class")).toBeTruthy();
+      const switches = getAllByRole("switch");
+      fireEvent(switches[0], "valueChange", true);
+      fireEvent(switches[0], "valueChange", false);
     });
-    const switches = getAllByRole("switch");
-    const firstSwitch = switches[0];
-    fireEvent(firstSwitch, "valueChange", true);
-    fireEvent(firstSwitch, "valueChange", false);
   });
 });
