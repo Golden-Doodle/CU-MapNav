@@ -16,15 +16,23 @@ import * as Location from "expo-location";
 import { fetchTodaysEventsFromSelectedSchedule } from "@/app/services/GoogleCalendar/fetchingUserCalendarData";
 
 // For typed definitions
-import { GoogleCalendarEvent, GooglePlace, Coordinates } from "@/app/utils/types";
+import {
+  GoogleCalendarEvent,
+  GooglePlace,
+  Coordinates,
+} from "@/app/utils/types";
 
 // Import your buildings array:
-import { LoyolaBuildings, SGWBuildings } from "@/app/components/CampusMap/data/buildingData";
+import {
+  LoyolaBuildings,
+  SGWBuildings,
+} from "@/app/components/CampusMap/data/buildingData";
 const myBuildings = [...LoyolaBuildings, ...SGWBuildings];
 
 // For Google Places
 import { fetchNearbyPlaces } from "@/app/services/GoogleMap/googlePlacesService";
 import { useRouter } from "expo-router";
+import Constants from "expo-constants";
 
 // Extend your POICategory to include "campus"
 type POICategory = "restaurant" | "cafe" | "washroom" | "campus";
@@ -56,10 +64,15 @@ export default function CompleteDistanceMatrixChunked() {
   const [startTaskID, setStartTaskID] = useState("USER_LOC"); // default
 
   // All possible categories in the UI:
-  const CATEGORY_OPTIONS: POICategory[] = ["restaurant", "cafe", "washroom", "campus"];
+  const CATEGORY_OPTIONS: POICategory[] = [
+    "restaurant",
+    "cafe",
+    "washroom",
+    "campus",
+  ];
 
   // Your Distance Matrix API key
-  const apiKey = "AIzaSyCXmkSx4RToDWaI54NlhVisIsQoCAQoZR8";
+  const apiKey = Constants.expoConfig?.extra?.distanceMatrixApiKey;
 
   useEffect(() => {
     initialize();
@@ -79,7 +92,9 @@ export default function CompleteDistanceMatrixChunked() {
       // Fetch today's events
       const dayEvents = await fetchTodaysEventsFromSelectedSchedule();
       dayEvents.sort(
-        (a, b) => new Date(a.start.dateTime).getTime() - new Date(b.start.dateTime).getTime()
+        (a, b) =>
+          new Date(a.start.dateTime).getTime() -
+          new Date(b.start.dateTime).getTime()
       );
       setEvents(dayEvents);
     } catch (err) {
@@ -152,7 +167,9 @@ export default function CompleteDistanceMatrixChunked() {
           // If you store building info in JSON, parse it here
           const raw = JSON.parse(ev.location);
           // Try to match the building in the combined array
-          const foundBuilding = myBuildings.find((b) => b.name === raw.building);
+          const foundBuilding = myBuildings.find(
+            (b) => b.name === raw.building
+          );
           if (foundBuilding) {
             coords = foundBuilding.coordinates[0];
           }
@@ -251,7 +268,9 @@ export default function CompleteDistanceMatrixChunked() {
     const chunks = chunkArray(allDestCoords, maxDestPerRequest);
     let startIndex = 0;
     for (const chunk of chunks) {
-      const chunkDest = chunk.map((c) => `${c.latitude},${c.longitude}`).join("|");
+      const chunkDest = chunk
+        .map((c) => `${c.latitude},${c.longitude}`)
+        .join("|");
       const orgStr = `${originCoord.latitude},${originCoord.longitude}`;
 
       const base = "https://maps.googleapis.com/maps/api/distancematrix/json";
@@ -262,7 +281,11 @@ export default function CompleteDistanceMatrixChunked() {
       const data = await res.json();
 
       if (data.status !== "OK") {
-        console.warn("Chunk error for origin:", data.status, data.error_message);
+        console.warn(
+          "Chunk error for origin:",
+          data.status,
+          data.error_message
+        );
         // fill chunk range with 999999
         for (let j = 0; j < chunk.length; j++) {
           rowResult[startIndex + j] = 999999;
@@ -286,7 +309,9 @@ export default function CompleteDistanceMatrixChunked() {
   }
 
   // Build the NxN cost matrix by doing N separate "origins" requests, each chunked.
-  async function buildDistanceMatrix(selectedTasks: Task[]): Promise<number[][]> {
+  async function buildDistanceMatrix(
+    selectedTasks: Task[]
+  ): Promise<number[][]> {
     const n = selectedTasks.length;
     const matrix = Array.from({ length: n }, () => new Array(n).fill(Infinity));
 
@@ -303,8 +328,12 @@ export default function CompleteDistanceMatrixChunked() {
   // TSP with bitmask DP
   function solveTSPdp(matrix: number[][]): number[] {
     const n = matrix.length;
-    const dp: number[][] = Array.from({ length: 1 << n }, () => new Array(n).fill(Infinity));
-    const parent: number[][] = Array.from({ length: 1 << n }, () => new Array(n).fill(-1));
+    const dp: number[][] = Array.from({ length: 1 << n }, () =>
+      new Array(n).fill(Infinity)
+    );
+    const parent: number[][] = Array.from({ length: 1 << n }, () =>
+      new Array(n).fill(-1)
+    );
 
     // start at node 0 (the chosen start), mark visited
     dp[1][0] = 0;
@@ -382,7 +411,9 @@ export default function CompleteDistanceMatrixChunked() {
           b = route[i + 1];
         const dist = matrix[a][b];
         total += dist;
-        steps.push(`Step ${i + 1}: ${selected[a].name} -> ${selected[b].name}, ${dist}m`);
+        steps.push(
+          `Step ${i + 1}: ${selected[a].name} -> ${selected[b].name}, ${dist}m`
+        );
       }
       steps.push(`Total distance: ${total}m`);
       setRouteSteps(steps);
@@ -397,24 +428,34 @@ export default function CompleteDistanceMatrixChunked() {
   if (loading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator testID="ActivityIndicator" size="large" color="#912338" />
+        <ActivityIndicator
+          testID="ActivityIndicator"
+          size="large"
+          color="#912338"
+        />
       </View>
     );
   }
 
   /** A simple label to show which categories are currently selected. */
-  const selectedCatText = categories.length > 0 ? categories.join(", ") : "None selected";
+  const selectedCatText =
+    categories.length > 0 ? categories.join(", ") : "None selected";
 
   // The chosen startTask object
   const startTask = tasks.find((t) => t.id === startTaskID);
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={() => router.back()} style={{ marginBottom: 20 }}>
+      <TouchableOpacity
+        onPress={() => router.back()}
+        style={{ marginBottom: 20 }}
+      >
         <Text style={{ color: "#912338", fontSize: 16 }}>Back</Text>
       </TouchableOpacity>
 
-      <Text style={styles.title}>Chunked Distance Matrix TSP (Choose Start)</Text>
+      <Text style={styles.title}>
+        Chunked Distance Matrix TSP (Choose Start)
+      </Text>
 
       {/* Category Dropdown container */}
       <View style={styles.dropdown}>
@@ -423,7 +464,9 @@ export default function CompleteDistanceMatrixChunked() {
           onPress={() => setDropdownOpen(!dropdownOpen)}
           testID={"category-dropdown"}
         >
-          <Text style={styles.dropdownHeaderText}>Select Categories: {selectedCatText}</Text>
+          <Text style={styles.dropdownHeaderText}>
+            Select Categories: {selectedCatText}
+          </Text>
         </TouchableOpacity>
 
         {dropdownOpen && (
@@ -471,7 +514,9 @@ export default function CompleteDistanceMatrixChunked() {
                     onPress={() => onSelectStartLocation(task.id)}
                     testID={`start-option-${task.id}`}
                   >
-                    <Text style={{ fontWeight: isSelected ? "bold" : "normal" }}>
+                    <Text
+                      style={{ fontWeight: isSelected ? "bold" : "normal" }}
+                    >
                       {task.name}
                       {isSelected ? " ✓" : ""}
                     </Text>
