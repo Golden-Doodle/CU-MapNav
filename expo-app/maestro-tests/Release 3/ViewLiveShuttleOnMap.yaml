@@ -1,0 +1,12 @@
+appId: com.goldendoodle.expoapp
+---
+- tapOn:
+    id: "menu-button"
+- tapOn:
+    id: "campus-map-button"
+- tapOn:
+    id: "toggle-campus-button-hamburger-button-hamburger-button"
+- tapOn:
+    id: "toggle-campus-button-hamburger-button-display-live-shuttle-Location-switch"
+- tapOn:
+    id: "toggle-campus-button-hamburger-button-hamburger-button"

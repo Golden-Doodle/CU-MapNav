@@ -94,7 +94,7 @@ interface Message {
 }
 
 // --------- ChatBotScreen --------- //
-export default function ChatBotScreen() {
+export default function ChatBotScreen(): React.JSX.Element {
   const router = useRouter();
 
   const [conversation, setConversation] = useState<AIMessage[]>([]);
@@ -188,7 +188,10 @@ export default function ChatBotScreen() {
     return (
       <View
         key={msg.id}
-        style={[styles.messageRow, isBot ? styles.leftAlign : styles.rightAlign]}
+        style={[
+          styles.messageRow,
+          isBot ? styles.leftAlign : styles.rightAlign,
+        ]}
       >
         {isBot && <Avatar />}
         <View style={bubbleStyle}>
@@ -220,7 +223,10 @@ export default function ChatBotScreen() {
             <Text style={styles.modalMessage}>
               Oops! You are offline or the request failed.
             </Text>
-            <TouchableOpacity style={styles.modalButton} onPress={handleNetworkError}>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={handleNetworkError}
+            >
               <Text style={styles.modalButtonText}>Go Back</Text>
             </TouchableOpacity>
           </View>
@@ -229,7 +235,10 @@ export default function ChatBotScreen() {
 
       {/* Header */}
       <View style={styles.headerContainer}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backArrowWrapper}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backArrowWrapper}
+        >
           <Icon name="arrow-left" size={20} color="#FFF" />
         </TouchableOpacity>
         <View style={styles.headerContent}>
@@ -254,7 +263,9 @@ export default function ChatBotScreen() {
         <ScrollView
           ref={scrollViewRef}
           style={styles.messagesList}
-          onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
+          onContentSizeChange={() =>
+            scrollViewRef.current?.scrollToEnd({ animated: true })
+          }
         >
           {messages.map(renderMessage)}
           {loading && (
@@ -295,7 +306,7 @@ export default function ChatBotScreen() {
       </KeyboardAvoidingView>
 
       {/* Bottom Navigation for consistent layout */}
-      <BottomNavigation testID="bottom-navigation"/>
+      <BottomNavigation testID="bottom-navigation" />
     </SafeAreaView>
   );
 }

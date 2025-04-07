@@ -1,0 +1,16 @@
+appId: com.goldendoodle.expoapp
+---
+- tapOn: "Sign in with Google"
+- tapOn:
+    id: "com.google.android.gms:id/container"
+    index: 0
+- tapOn: "Advanced"
+- tapOn: "Go to project-259837654437 (unsafe)"
+- tapOn: "Continue"
+- tapOn: "See and download any calendar you can access using your Google Calendar.\
+    \ Learn more"
+- swipe:
+    start: "64%,82%"
+    end: "64%,8%"
+    duration: 553
+- tapOn: "Continue"

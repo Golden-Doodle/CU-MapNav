@@ -1,0 +1,14 @@
+appId: com.goldendoodle.expoapp
+---
+- assertVisible:
+    id: "study-spot-text"
+- tapOn: ""
+- tapOn: "🚌 Shuttle Schedule"
+- assertVisible:
+    id: "ShuttleSchedule-time-row-9:15 AM"
+- assertVisible:
+    id: "route-switch"
+- tapOn:
+    id: "route-switch"
+- tapOn:
+    id: "ShuttleSchedule-time-row-9:15 AM"

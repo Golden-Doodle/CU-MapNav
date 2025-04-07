@@ -2,14 +2,24 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
+import { useRouter } from "expo-router";
 
 const QuickShortcuts = () => {
-
+  const router = useRouter();
   const {t} = useTranslation("HomePageScreen");
+
+  const onFoodPress = () => {
+    router.push({
+      pathname: "/screens/Home/CampusMapScreen",
+      params: {
+        pressedFood: "true",
+      },
+    });
+  };
 
   return (
     <View style={styles.container} testID="quick-shortcuts-container">
-      <TouchableOpacity style={styles.shortcut} testID="food-shortcut">
+      <TouchableOpacity style={styles.shortcut} testID="food-shortcut" onPress={onFoodPress}>
         <FontAwesome5 name="utensils" size={24} color="#912338" testID="food-icon" />
         <Text style={styles.text}>{t("Food")}</Text>
       </TouchableOpacity>

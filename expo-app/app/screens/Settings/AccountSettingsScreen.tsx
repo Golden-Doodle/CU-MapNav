@@ -22,7 +22,7 @@ import { useTranslation } from "react-i18next";
 
 export default function AccountDetailsScreen() {
   const { t } = useTranslation("AccountSettingsScreen");
-  
+
   const getMajors = () => {
     return [
       t("Computer Science"),
@@ -37,7 +37,7 @@ export default function AccountDetailsScreen() {
     ];
   };
   const MAJORS = getMajors();
-  
+
   const router = useRouter();
   const authContext = useContext(AuthContext);
   if (!authContext) {
@@ -48,18 +48,21 @@ export default function AccountDetailsScreen() {
   // Local Profile State
   const [profile, setProfile] = useState({
     name: "Johnny Woodstorm",
-    email: user?.email || "j.wood@live.concordia.ca",
+    email: user?.email ?? "j.wood@live.concordia.ca",
     password: "********",
     major: t("Software Engineering"), // default
     phone: "514-101-1008",
   });
 
   // Photo State & Permissions
-  const [selectedPhotoUri, setSelectedPhotoUri] = useState<string | null>(user?.photoURL || null);
+  const [selectedPhotoUri, setSelectedPhotoUri] = useState<string | null>(
+    user?.photoURL ?? null
+  );
 
   useEffect(() => {
     (async () => {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
         Alert.alert(
           t("Permission required"),
@@ -86,7 +89,9 @@ export default function AccountDetailsScreen() {
   };
 
   // Edit Modal Logic
-  const [editingField, setEditingField] = useState<keyof typeof profile | "">("");
+  const [editingField, setEditingField] = useState<keyof typeof profile | "">(
+    ""
+  );
   const [editedValue, setEditedValue] = useState("");
 
   const startEditing = (field: keyof typeof profile) => {
@@ -102,16 +107,22 @@ export default function AccountDetailsScreen() {
   };
 
   // Schedule Selection
-  const [selectedCalendarId, setSelectedCalendarId] = useState<string | null>(null);
+  const [selectedCalendarId, setSelectedCalendarId] = useState<string | null>(
+    null
+  );
   const [availableSchedules, setAvailableSchedules] = useState<any[]>([]);
-  const [initialCalendarId, setInitialCalendarId] = useState<string | null>(null);
+  const [initialCalendarId, setInitialCalendarId] = useState<string | null>(
+    null
+  );
   const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
       try {
         const allCalendars = await fetchAllCalendars();
-        const storedCalendarId = await AsyncStorage.getItem("selectedScheduleID");
+        const storedCalendarId = await AsyncStorage.getItem(
+          "selectedScheduleID"
+        );
         setAvailableSchedules(allCalendars);
         setSelectedCalendarId(storedCalendarId);
         setInitialCalendarId(storedCalendarId);
@@ -130,7 +141,9 @@ export default function AccountDetailsScreen() {
   const saveChanges = async () => {
     if (selectedCalendarId) {
       await AsyncStorage.setItem("selectedScheduleID", selectedCalendarId);
-      const selCalendar = availableSchedules.find((cal) => cal.id === selectedCalendarId);
+      const selCalendar = availableSchedules.find(
+        (cal) => cal.id === selectedCalendarId
+      );
       if (selCalendar) {
         await AsyncStorage.setItem("selectedScheduleName", selCalendar.summary);
       }
@@ -141,9 +154,15 @@ export default function AccountDetailsScreen() {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.scrollContent}
+    >
       <View style={styles.header} testID="header">
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+        >
           <FontAwesome5 name="arrow-left" size={28} color="#333" />
         </TouchableOpacity>
         <Text style={styles.headerText}>{t("Account Details")}</Text>
@@ -169,32 +188,34 @@ export default function AccountDetailsScreen() {
           </TouchableOpacity>
         </View>
 
-        {Object.entries(profile).map(
-          ([fieldKey, fieldValue]) => (
-            (fieldKey = t(fieldKey)),
-            (
-              <View key={fieldKey} style={styles.section} testID={`section-${fieldKey}`}>
-                <View style={styles.rowBetween}>
-                  <Text style={styles.label}>
-                    {fieldKey.charAt(0).toUpperCase() + fieldKey.slice(1)}
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => startEditing(fieldKey as keyof typeof profile)}
-                    testID={`edit-${fieldKey}`}
-                  >
-                    <FontAwesome5 name="edit" size={18} color="#912238" />
-                  </TouchableOpacity>
-                </View>
-                <TextInput
-                  style={[styles.input, { backgroundColor: "#F2F3F5" }]}
-                  value={fieldValue as string}
-                  editable={false}
-                  testID={`input-${fieldKey}`}
-                />
+        {Object.entries(profile).map(([fieldKeyTranslation, fieldValue]) => {
+          const fieldKey = t(fieldKeyTranslation);
+          return (
+            <View
+              key={fieldKey}
+              style={styles.section}
+              testID={`section-${fieldKey}`}
+            >
+              <View style={styles.rowBetween}>
+                <Text style={styles.label}>
+                  {fieldKey.charAt(0).toUpperCase() + fieldKey.slice(1)}
+                </Text>
+                <TouchableOpacity
+                  onPress={() => startEditing(fieldKey as keyof typeof profile)}
+                  testID={`edit-${fieldKey}`}
+                >
+                  <FontAwesome5 name="edit" size={18} color="#912238" />
+                </TouchableOpacity>
               </View>
-            )
-          )
-        )}
+              <TextInput
+                style={[styles.input, { backgroundColor: "#F2F3F5" }]}
+                value={fieldValue}
+                editable={false}
+                testID={`input-${fieldKey}`}
+              />
+            </View>
+          );
+        })}
 
         <View style={styles.divider} testID="divider" />
 
@@ -241,7 +262,9 @@ export default function AccountDetailsScreen() {
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>
               Edit{" "}
-              {editingField ? editingField.charAt(0).toUpperCase() + editingField.slice(1) : ""}
+              {editingField
+                ? editingField.charAt(0).toUpperCase() + editingField.slice(1)
+                : ""}
             </Text>
 
             {editingField === "major" ? (

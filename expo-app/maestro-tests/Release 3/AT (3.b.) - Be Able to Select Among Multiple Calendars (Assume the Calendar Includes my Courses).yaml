@@ -1,0 +1,12 @@
+appId: com.goldendoodle.expoapp
+---
+- tapOn:
+    id: "bottom-navigation-settings-tab"
+- tapOn:
+    id: "account-details-button"
+- swipe:
+    start: "56%,79%"
+    end: "64%,10%"
+    duration: 336
+- assertVisible:
+    id: "schedule-label"

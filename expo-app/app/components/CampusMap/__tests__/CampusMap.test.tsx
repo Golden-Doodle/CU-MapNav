@@ -21,7 +21,6 @@ jest.mock("@/app/services/GoogleMap/googlePlacesService", () => ({
 }));
 
 jest.mock("../HamburgerWidget", () => {
-  const React = require("react");
   const { TouchableOpacity, Text } = require("react-native");
   return (props: { toggleCampus: () => void; campus?: string }) => (
     <>
@@ -39,19 +38,21 @@ jest.mock("../HamburgerWidget", () => {
           {props.campus === "LOY" ? "View SGW Campus" : "View Loyola Campus"}
         </Text>
       </TouchableOpacity>
+      <TouchableOpacity
+        testID="toggle-live-shuttle-location"
+        onPress={props.toggleCampus}
+      >
+        <Text>Toggle Live Shuttle Location</Text>
+      </TouchableOpacity>
     </>
   );
 });
 
-jest.mock(
-  "@/app/components/IndoorNavigation/IndoorMap",
-  () => {
-    const React = require("react");
-    return function MockIndoorMap(props: any) {
-      return <React.Fragment />;
-    };
-  }
-);
+jest.mock("@/app/components/IndoorNavigation/IndoorMap", () => {
+  return function MockIndoorMap(props: any) {
+    return <></>;
+  };
+});
 
 jest.mock("expo-location", () => ({
   Accuracy: { High: 3 },
@@ -84,9 +85,12 @@ jest.mock("@/app/utils/helperFunctions", () => ({
 }));
 
 jest.mock("../modals/SearchModal", () => {
-  const React = require("react");
   const { View, TouchableOpacity, Text } = require("react-native");
-  return (props: { visible: boolean; onGetDirections: () => void; onClose: () => void }) =>
+  return (props: {
+    visible: boolean;
+    onGetDirections: () => void;
+    onClose: () => void;
+  }) =>
     props.visible ? (
       <View testID="search-modal">
         <TouchableOpacity
@@ -106,7 +110,6 @@ jest.mock("../modals/SearchModal", () => {
 });
 
 jest.mock("../CampusMapNavTab", () => {
-  const React = require("react");
   const { View, TouchableOpacity, Text } = require("react-native");
   return (props: {
     onSearchPress: () => void;
@@ -118,7 +121,10 @@ jest.mock("../CampusMapNavTab", () => {
     onInfoPress: () => void;
   }) => (
     <View testID="nav-tab">
-      <TouchableOpacity testID="nav-tab-nav-item-Search" onPress={props.onSearchPress}>
+      <TouchableOpacity
+        testID="nav-tab-nav-item-Search"
+        onPress={props.onSearchPress}
+      >
         <Text>Search</Text>
       </TouchableOpacity>
       <TouchableOpacity
@@ -127,13 +133,22 @@ jest.mock("../CampusMapNavTab", () => {
       >
         <Text>Directions</Text>
       </TouchableOpacity>
-      <TouchableOpacity testID="nav-tab-nav-item-Eat" onPress={props.onEatPress}>
+      <TouchableOpacity
+        testID="nav-tab-nav-item-Eat"
+        onPress={props.onEatPress}
+      >
         <Text>Eat</Text>
       </TouchableOpacity>
-      <TouchableOpacity testID="nav-tab-nav-item-Class" onPress={props.onNextClassPress}>
+      <TouchableOpacity
+        testID="nav-tab-nav-item-Class"
+        onPress={props.onNextClassPress}
+      >
         <Text>Class</Text>
       </TouchableOpacity>
-      <TouchableOpacity testID="nav-tab-nav-item-Back" onPress={props.onBackPress}>
+      <TouchableOpacity
+        testID="nav-tab-nav-item-Back"
+        onPress={props.onBackPress}
+      >
         <Text>Back</Text>
       </TouchableOpacity>
       <TouchableOpacity
@@ -142,7 +157,10 @@ jest.mock("../CampusMapNavTab", () => {
       >
         <Text>More Options</Text>
       </TouchableOpacity>
-      <TouchableOpacity testID="nav-tab-nav-item-Info" onPress={props.onInfoPress}>
+      <TouchableOpacity
+        testID="nav-tab-nav-item-Info"
+        onPress={props.onInfoPress}
+      >
         <Text>Info</Text>
       </TouchableOpacity>
     </View>
@@ -150,9 +168,12 @@ jest.mock("../CampusMapNavTab", () => {
 });
 
 jest.mock("../modals/BuildingInfoModal", () => {
-  const React = require("react");
   const { View, TouchableOpacity, Text } = require("react-native");
-  return (props: { visible: boolean; onClose: () => void; onUseAsOrigin: () => void }) => {
+  return (props: {
+    visible: boolean;
+    onClose: () => void;
+    onUseAsOrigin: () => void;
+  }) => {
     if (!props.visible) return null;
     return (
       <View testID="building-info-modal-content">
@@ -174,7 +195,6 @@ jest.mock("../modals/BuildingInfoModal", () => {
 });
 
 jest.mock("../modals/TransitModal", () => {
-  const React = require("react");
   const { View, TouchableOpacity, Text } = require("react-native");
   return (props: { visible: boolean; onClose: () => void }) => {
     if (!props.visible) return null;
@@ -192,7 +212,6 @@ jest.mock("../modals/TransitModal", () => {
 });
 
 jest.mock("../modals/NextClassModal", () => {
-  const React = require("react");
   const { View, TouchableOpacity, Text } = require("react-native");
   return (props: { visible: boolean; onClose: () => void }) => {
     if (!props.visible) return null;
@@ -246,7 +265,6 @@ jest.mock("../data/customMarkerData", () => ({
 }));
 
 jest.mock("../CustomMarker", () => {
-  const React = require("react");
   const { TouchableOpacity, Text } = require("react-native");
   return (props: { testID: string; onPress: () => void; title: string }) => (
     <TouchableOpacity testID={props.testID} onPress={props.onPress}>
@@ -255,12 +273,22 @@ jest.mock("../CustomMarker", () => {
   );
 });
 
+jest.mock("@/app/services/ConcordiaShuttle/ConcordiaApiShuttle", () => ({
+  fetchBusCoordinates: jest
+    .fn()
+    .mockResolvedValue([
+      { coordinates: { latitude: 45.5017, longitude: -73.5673 } },
+      { coordinates: { latitude: 45.502, longitude: -73.568 } },
+    ]),
+}));
+
 import CampusMap from "../CampusMap";
 
 // ---------------------
 // Helper: Render & Actions
 // ---------------------
-const renderCampusMap = () => render(<CampusMap pressedOptimizeRoute={false} />);
+const renderCampusMap = () =>
+  render(<CampusMap pressedOptimizeRoute={false} />);
 
 const simulateLongPressOnMap = (
   getByTestId: RenderAPI["getByTestId"],
@@ -418,21 +446,30 @@ describe("CampusMap", () => {
     const { getByTestId, queryByTestId } = renderCampusMap();
     fireEvent.press(getByTestId("building-marker-FB-marker"));
     await waitFor(() =>
-      expect(queryByTestId("building-info-modal-use-as-origin-button")).toBeTruthy()
+      expect(
+        queryByTestId("building-info-modal-use-as-origin-button")
+      ).toBeTruthy()
     );
     fireEvent.press(getByTestId("building-info-modal-use-as-origin-button"));
     await waitFor(() =>
-      expect(queryByTestId("building-info-modal-use-as-origin-button")).toBeNull()
+      expect(
+        queryByTestId("building-info-modal-use-as-origin-button")
+      ).toBeNull()
     );
   });
 
   it("should alert when location permission is not granted", async () => {
     const { requestForegroundPermissionsAsync } = require("expo-location");
-    requestForegroundPermissionsAsync.mockResolvedValueOnce({ status: "denied" });
+    requestForegroundPermissionsAsync.mockResolvedValueOnce({
+      status: "denied",
+    });
     const alertSpy = jest.spyOn(Alert, "alert");
     renderCampusMap();
     await waitFor(() =>
-      expect(alertSpy).toHaveBeenCalledWith(expect.any(String), expect.any(String))
+      expect(alertSpy).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.any(String)
+      )
     );
   });
 
@@ -499,9 +536,7 @@ describe("CampusMap", () => {
   it("should show radius adjuster when eating mode is activated", async () => {
     const { getByTestId, getByText } = renderCampusMap();
     openEatMode(getByTestId);
-    await waitFor(() =>
-      expect(getByText("Adjust Search Radius")).toBeTruthy()
-    );
+    await waitFor(() => expect(getByText("Adjust Search Radius")).toBeTruthy());
     fireEvent.press(getByText("Adjust Search Radius"));
   });
 });
@@ -524,27 +559,46 @@ describe("Additional Modals and Components", () => {
     const restaurantSwitch = getByTestId("filter-modal-switch-restaurant");
     fireEvent(restaurantSwitch, "valueChange", false);
     fireEvent.press(getByTestId("filter-modal-apply-button"));
-    await waitFor(() =>
-      expect(queryByTestId("filter-modal")).toBeNull()
-    );
+    await waitFor(() => expect(queryByTestId("filter-modal")).toBeNull());
   });
 
   it("should close the FilterModal when the cancel button is pressed", async () => {
     const { getByTestId, getByText, queryByTestId } = renderCampusMap();
     await openFilterModal(getByTestId, getByText);
     fireEvent.press(getByTestId("filter-modal-cancel-button"));
-    await waitFor(() =>
-      expect(queryByTestId("filter-modal")).toBeNull()
-    );
+    await waitFor(() => expect(queryByTestId("filter-modal")).toBeNull());
   });
 
   it("should trigger optimize route behavior when pressedOptimizeRoute is true", async () => {
     const { getByTestId } = render(<CampusMap pressedOptimizeRoute={true} />);
 
     await waitFor(() => {
-      // Check if search modal is automatically opened
       expect(getByTestId("next-class-modal-overlay")).toBeTruthy();
-      // Or check if any other optimize route behavior is triggered
+    });
+  });
+
+  it("should open search modal when pressedSearch is true", async () => {
+    const { getByTestId } = render(<CampusMap pressedSearch={true} />);
+    await waitFor(() => {
+      expect(getByTestId("search-modal")).toBeTruthy();
+    });
+  });
+
+  it("should trigger coffee stop behavior when pressedCoffeeStop is true", async () => {
+    const { getByTestId } = render(<CampusMap pressedCoffeeStop={true} />);
+
+    await waitFor(() => {
+      expect(getByTestId("adjust-search-radius-button")).toBeTruthy();
+      expect(getByTestId("filter-places-button")).toBeTruthy();
+    });
+  });
+
+  it("should trigger food behavior when pressedFood is true", async () => {
+    const { getByTestId } = render(<CampusMap pressedFood={true} />);
+
+    await waitFor(() => {
+      expect(getByTestId("adjust-search-radius-button")).toBeTruthy();
+      expect(getByTestId("filter-places-button")).toBeTruthy();
     });
   });
 });

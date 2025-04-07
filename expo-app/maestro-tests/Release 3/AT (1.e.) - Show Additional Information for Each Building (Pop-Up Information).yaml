@@ -1,0 +1,8 @@
+appId: com.goldendoodle.expoapp
+---
+- tapOn:
+    id: "menu-button"
+- tapOn:
+    id: "campus-map-button"
+- tapOn:
+    point: "50%,49%"

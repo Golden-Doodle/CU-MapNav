@@ -1,4 +1,3 @@
-// IndoorMapService.test.ts
 import { fetchRoomItems, generateDirections, clearDirections } from '../MappedInService';
 import { MapViewStore, MappedinDirections } from '@mappedin/react-native-sdk';
 import React from 'react';
@@ -40,19 +39,23 @@ describe('IndoorMapService', () => {
   });
 
   describe('generateDirections', () => {
+    
     it('should generate directions between two rooms', () => {
       const mockDirections = {} as MappedinDirections;
-      (mapViewMock.current!.venueData!.locations[0].directionsTo as jest.Mock).mockReturnValue(mockDirections);
-
+      const departure = mapViewMock.current!.venueData!.locations[0];
+      const destination = mapViewMock.current!.venueData!.locations[1];
+      (departure.directionsTo as jest.Mock).mockReturnValue(mockDirections);
+    
       const directions = generateDirections(mapViewMock, 'Room A', 'Room B');
-
-      expect(mapViewMock.current!.venueData!.locations[0].directionsTo).toHaveBeenCalledWith(
-        mapViewMock.current!.venueData!.locations[1]
-      );
+    
+      const calls = (departure.directionsTo as jest.Mock).mock.calls;
+      expect(calls.length).toBe(1);
+      expect(calls[0][0]).toEqual(destination);
+      expect(calls[0][1]).toBeUndefined();
       expect(mapViewMock.current!.Journey.draw).toHaveBeenCalledWith(mockDirections);
       expect(directions).toBe(mockDirections);
     });
-
+    
     it('should return null if start or destination room is not found', () => {
       const directions = generateDirections(mapViewMock, 'Room A', 'Non-existent Room');
       expect(directions).toBeNull();

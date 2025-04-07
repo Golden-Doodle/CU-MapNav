@@ -1,0 +1,26 @@
+appId: com.goldendoodle.expoapp
+---
+- tapOn:
+    id: "menu-button"
+- tapOn:
+    id: "indoor-nav-button"
+- assertVisible:
+    id: "mapContainer"
+- assertVisible:
+    text: "Stairs"
+    index: 10
+- assertVisible:
+    text: "Elevator"
+    index: 1
+- tapOn:
+    id: "settingsButton"
+- tapOn:
+    id: "floorDropdownPicker"
+- tapOn:
+    point: "25%,73%"
+- tapOn:
+    id: "bfsCloseButton"
+- assertVisible: "Water Fountain"
+- assertVisible: "Men's Washroom"
+- assertVisible: "Women's Washroom"
+- doubleTapOn: "Women's Washroom"

@@ -1,0 +1,28 @@
+appId: com.goldendoodle.expoapp
+---
+- tapOn:
+    id: "menu-button"
+- tapOn:
+    id: "campus-map-button"
+- assertVisible:
+    id: "campus-map"
+- tapOn:
+    id: "nav-tab-nav-item-Eat"
+- assertVisible: "Adjust Search Radius"
+- assertVisible: "Filter Places"
+- tapOn: "Adjust Search Radius"
+- swipe:
+    start: "18%,50%"
+    end: "46%,50%"
+    duration: 1937
+- tapOn:
+    id: "radius-adjuster-apply-button"
+- assertVisible: "Map Marker"
+- tapOn: "Filter Places"
+- tapOn:
+    id: "filter-modal-switch-restaurant"
+- tapOn:
+    id: "filter-modal-switch-washroom"
+- tapOn:
+    id: "filter-modal-apply-button"
+- assertVisible: "Map Marker"
