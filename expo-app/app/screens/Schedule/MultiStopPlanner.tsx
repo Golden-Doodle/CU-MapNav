@@ -391,6 +391,13 @@ export default function CompleteDistanceMatrixChunked() {
     categories.length > 0 ? categories.join(", ") : "None selected";
   const startTask = tasks.find((t) => t.id === startTaskID);
 
+  let FlatListIndex = 0;
+
+  function updateFlatListCount() {
+    FlatListIndex += 1;
+    return FlatListIndex;
+  }
+  
   return (
     <View style={stylesLocal.container}>
       <GenericHeader
@@ -474,7 +481,7 @@ export default function CompleteDistanceMatrixChunked() {
           renderItem={({ item }) => (
             <View style={stylesLocal.taskRow}>
               <Switch
-                testID={`switch-${item.id}`}
+                testID={`switch-${updateFlatListCount()}`}
                 value={item.selected}
                 onValueChange={() => toggleTask(item.id)}
               />
