@@ -88,4 +88,11 @@ describe("fetchNearbyPlaces", () => {
 
     expect(result).toEqual([]);
   });
+
+  it("should return an empty array for campus type", async () => {
+    const userLocation = { latitude: 10.0, longitude: 20.0 };
+    const result = await fetchNearbyPlaces(userLocation, "campus");
+
+    expect(result).toEqual([]);
+  });
 });
