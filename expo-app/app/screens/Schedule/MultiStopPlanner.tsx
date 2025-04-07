@@ -24,6 +24,7 @@ const myBuildings = [...LoyolaBuildings, ...SGWBuildings];
 
 // For Google Places
 import { fetchNearbyPlaces } from "@/app/services/GoogleMap/googlePlacesService";
+import { useRouter } from "expo-router";
 
 // Extend your POICategory to include "campus"
 type POICategory = "restaurant" | "cafe" | "washroom" | "campus";
@@ -39,6 +40,7 @@ interface Task {
 }
 
 export default function CompleteDistanceMatrixChunked() {
+  const router = useRouter();
   const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
   const [categories, setCategories] = useState<POICategory[]>([]);
   const [events, setEvents] = useState<GoogleCalendarEvent[]>([]);
@@ -392,6 +394,9 @@ export default function CompleteDistanceMatrixChunked() {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity onPress={() => router.back()} style={{ marginBottom: 20 }}> 
+        <Text style={{ color: "#912338", fontSize: 16 }}>Back</Text>
+      </TouchableOpacity>
       <Text style={styles.title}>Chunked Distance Matrix TSP (With Dropdown)</Text>
 
       {/* Dropdown container */}
