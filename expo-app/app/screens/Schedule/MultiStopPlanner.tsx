@@ -9,6 +9,7 @@ import {
   ScrollView,
   FlatList,
   Switch,
+  Modal,
 } from "react-native";
 import * as Location from "expo-location";
 
@@ -34,7 +35,13 @@ import { fetchNearbyPlaces } from "@/app/services/GoogleMap/googlePlacesService"
 import { useRouter } from "expo-router";
 import Constants from "expo-constants";
 
-// Extend your POICategory to include "campus"
+// Import your Generic Header and Bottom Navigation components
+import GenericHeader from "@/app/components/Header/GenericHeader";
+import BottomNavigation from "@/app/components/BottomNavigation/BottomNavigation";
+
+// Import the ListModal component
+import ListModal from "./ListModal";
+
 type POICategory = "restaurant" | "cafe" | "washroom" | "campus";
 
 interface Task {
@@ -42,7 +49,7 @@ interface Task {
   name: string;
   coordinates: Coordinates;
   selected: boolean;
-  building?: any; // Or strongly typed if you prefer
+  building?: any;
   room?: string;
 }
 
@@ -56,6 +63,9 @@ export default function CompleteDistanceMatrixChunked() {
   const [routeSteps, setRouteSteps] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // For modal visibility
+  const [modalVisible, setModalVisible] = useState(false);
+
   // For category dropdown
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -63,7 +73,6 @@ export default function CompleteDistanceMatrixChunked() {
   const [startDropdownOpen, setStartDropdownOpen] = useState(false);
   const [startTaskID, setStartTaskID] = useState("USER_LOC"); // default
 
-  // All possible categories in the UI:
   const CATEGORY_OPTIONS: POICategory[] = [
     "restaurant",
     "cafe",
@@ -71,7 +80,6 @@ export default function CompleteDistanceMatrixChunked() {
     "campus",
   ];
 
-  // Your Distance Matrix API key
   const apiKey = Constants.expoConfig?.extra?.distanceMatrixApiKey;
 
   useEffect(() => {
@@ -85,9 +93,8 @@ export default function CompleteDistanceMatrixChunked() {
       if (status !== "granted") {
         Alert.alert("Location permission not granted; using fallback coords");
       }
-      // let loc = await Location.getCurrentPositionAsync({});
-      // setUserLocation({ latitude: loc.coords.latitude, longitude: loc.coords.longitude });
-      setUserLocation({ latitude: 45.495, longitude: -73.578 }); // fallback
+      // Fallback location
+      setUserLocation({ latitude: 45.495, longitude: -73.578 });
 
       // Fetch today's events
       const dayEvents = await fetchTodaysEventsFromSelectedSchedule();
@@ -105,12 +112,10 @@ export default function CompleteDistanceMatrixChunked() {
     }
   }
 
-  // Whenever categories or userLocation change, fetch POIs (but only for non-"campus" categories)
   useEffect(() => {
     if (!userLocation) return;
     const nonCampusCats = categories.filter((c) => c !== "campus");
     if (nonCampusCats.length === 0) {
-      // If no categories left to fetch from Google, clear places & skip
       setPlaces([]);
       return;
     }
@@ -124,7 +129,6 @@ export default function CompleteDistanceMatrixChunked() {
       const combined: GooglePlace[] = [];
 
       for (const cat of selectedCats) {
-        // cat will never be "campus" here, due to our filter
         const results = await fetchNearbyPlaces(userLocation!, cat);
         for (const p of results) {
           if (!placeIDs.has(p.place_id)) {
@@ -141,32 +145,25 @@ export default function CompleteDistanceMatrixChunked() {
     }
   }
 
-  // Build tasks from userLocation, events, places, and possibly buildings
   useEffect(() => {
     buildTasks();
   }, [userLocation, events, places, categories]);
 
   function buildTasks() {
     const newTasks: Task[] = [];
-
-    // Add user location as a normal task (can now be toggled!)
     if (userLocation) {
       newTasks.push({
         id: "USER_LOC",
         name: "My Location (Start)",
         coordinates: userLocation,
-        selected: false, // can be toggled now
+        selected: false,
       });
     }
-
-    // 1) Calendar events
     for (const ev of events) {
       let coords: Coordinates | undefined;
       try {
         if (ev.location) {
-          // If you store building info in JSON, parse it here
           const raw = JSON.parse(ev.location);
-          // Try to match the building in the combined array
           const foundBuilding = myBuildings.find(
             (b) => b.name === raw.building
           );
@@ -177,7 +174,6 @@ export default function CompleteDistanceMatrixChunked() {
       } catch {
         console.warn("Invalid location JSON for event:", ev.summary);
       }
-
       if (coords) {
         newTasks.push({
           id: ev.id,
@@ -187,8 +183,6 @@ export default function CompleteDistanceMatrixChunked() {
         });
       }
     }
-
-    // 2) Google Places (from fetchPOIs)
     for (const p of places) {
       newTasks.push({
         id: p.place_id,
@@ -200,24 +194,20 @@ export default function CompleteDistanceMatrixChunked() {
         selected: false,
       });
     }
-
-    // 3) If "campus" is in categories, add your building tasks:
     if (categories.includes("campus")) {
       for (const b of myBuildings) {
         newTasks.push({
           id: b.id,
           name: b.name,
-          coordinates: b.coordinates[0], // Use the first coordinate
+          coordinates: b.coordinates[0],
           selected: false,
           building: b,
         });
       }
     }
-
     setTasks(newTasks);
   }
 
-  /** Toggle the user’s selection of a given category. */
   function onToggleCategory(cat: POICategory) {
     setCategories((prev) => {
       if (prev.includes(cat)) {
@@ -227,7 +217,6 @@ export default function CompleteDistanceMatrixChunked() {
     });
   }
 
-  /** Toggle tasks on/off for the TSP route. */
   function toggleTask(tid: string) {
     setTasks((prev) =>
       prev.map((t) => {
@@ -239,13 +228,11 @@ export default function CompleteDistanceMatrixChunked() {
     );
   }
 
-  // *** Start location dropdown logic ***
   function onSelectStartLocation(taskId: string) {
     setStartTaskID(taskId);
     setStartDropdownOpen(false);
   }
 
-  // Break the destinations into chunks so we never exceed 25 destinations
   function chunkArray<T>(arr: T[], size: number): T[][] {
     const chunks: T[][] = [];
     for (let i = 0; i < arr.length; i += size) {
@@ -254,17 +241,12 @@ export default function CompleteDistanceMatrixChunked() {
     return chunks;
   }
 
-  /**
-   * For a single origin, request distances in chunks of up to 25 destinations each,
-   * then merge them into one row of length n.
-   */
   async function getRowForOrigin(
     originCoord: Coordinates,
     allDestCoords: Coordinates[],
     maxDestPerRequest = 25
   ): Promise<number[]> {
     const rowResult = new Array(allDestCoords.length).fill(Infinity);
-
     const chunks = chunkArray(allDestCoords, maxDestPerRequest);
     let startIndex = 0;
     for (const chunk of chunks) {
@@ -272,26 +254,17 @@ export default function CompleteDistanceMatrixChunked() {
         .map((c) => `${c.latitude},${c.longitude}`)
         .join("|");
       const orgStr = `${originCoord.latitude},${originCoord.longitude}`;
-
       const base = "https://maps.googleapis.com/maps/api/distancematrix/json";
       const url = `${base}?origins=${orgStr}&destinations=${chunkDest}&units=metric&key=${apiKey}`;
       console.log("Chunk request:", url);
-
       const res = await fetch(url);
       const data = await res.json();
-
       if (data.status !== "OK") {
-        console.warn(
-          "Chunk error for origin:",
-          data.status,
-          data.error_message
-        );
-        // fill chunk range with 999999
+        console.warn("Chunk error for origin:", data.status, data.error_message);
         for (let j = 0; j < chunk.length; j++) {
           rowResult[startIndex + j] = 999999;
         }
       } else {
-        // data.rows[0].elements => distances for these chunk destinations
         const row = data.rows[0];
         for (let j = 0; j < chunk.length; j++) {
           const elem = row.elements[j];
@@ -304,19 +277,13 @@ export default function CompleteDistanceMatrixChunked() {
       }
       startIndex += chunk.length;
     }
-
     return rowResult;
   }
 
-  // Build the NxN cost matrix by doing N separate "origins" requests, each chunked.
-  async function buildDistanceMatrix(
-    selectedTasks: Task[]
-  ): Promise<number[][]> {
+  async function buildDistanceMatrix(selectedTasks: Task[]): Promise<number[][]> {
     const n = selectedTasks.length;
     const matrix = Array.from({ length: n }, () => new Array(n).fill(Infinity));
-
     const allDestCoords = selectedTasks.map((t) => t.coordinates);
-
     for (let i = 0; i < n; i++) {
       const originCoord = selectedTasks[i].coordinates;
       const row = await getRowForOrigin(originCoord, allDestCoords, 25);
@@ -325,7 +292,6 @@ export default function CompleteDistanceMatrixChunked() {
     return matrix;
   }
 
-  // TSP with bitmask DP
   function solveTSPdp(matrix: number[][]): number[] {
     const n = matrix.length;
     const dp: number[][] = Array.from({ length: 1 << n }, () =>
@@ -334,17 +300,13 @@ export default function CompleteDistanceMatrixChunked() {
     const parent: number[][] = Array.from({ length: 1 << n }, () =>
       new Array(n).fill(-1)
     );
-
-    // start at node 0 (the chosen start), mark visited
     dp[1][0] = 0;
-
     for (let mask = 0; mask < 1 << n; mask++) {
       for (let i = 0; i < n; i++) {
         if (dp[mask][i] === Infinity) continue;
         if (!((mask >> i) & 1)) continue;
-
         for (let j = 0; j < n; j++) {
-          if ((mask >> j) & 1) continue; // j is visited
+          if ((mask >> j) & 1) continue;
           const nextMask = mask | (1 << j);
           const cost = dp[mask][i] + matrix[i][j];
           if (cost < dp[nextMask][j]) {
@@ -354,22 +316,16 @@ export default function CompleteDistanceMatrixChunked() {
         }
       }
     }
-
-    // Find best path finishing at any node
     const fullMask = (1 << n) - 1;
-    let best = Infinity,
-      endNode = -1;
+    let best = Infinity, endNode = -1;
     for (let i = 0; i < n; i++) {
       if (dp[fullMask][i] < best) {
         best = dp[fullMask][i];
         endNode = i;
       }
     }
-
-    // Backtrack to get the route
     const route: number[] = [];
-    let cur = endNode,
-      mask = fullMask;
+    let cur = endNode, mask = fullMask;
     while (cur !== -1) {
       route.push(cur);
       const p = parent[mask][cur];
@@ -378,37 +334,29 @@ export default function CompleteDistanceMatrixChunked() {
       cur = p;
     }
     route.reverse();
-    return route; // e.g. [0, 2, 1, 3, ...]
+    return route;
   }
 
   async function onBuildRoute() {
-    // Gather tasks that are selected OR the chosen startTask
-    // Because we want to ensure the startTask is always included in the route:
     let selected = tasks.filter((t) => t.selected || t.id === startTaskID);
     if (selected.length < 2) {
       Alert.alert("Select at least 2 tasks (including your start)!");
       return;
     }
-
-    // Reorder so that the chosen start location is at index 0:
     const idx0 = selected.findIndex((x) => x.id === startTaskID);
     if (idx0 !== 0) {
       const tmp = selected[0];
       selected[0] = selected[idx0];
       selected[idx0] = tmp;
     }
-
     setLoading(true);
     try {
       const matrix = await buildDistanceMatrix(selected);
       const route = solveTSPdp(matrix);
-
-      // Construct step strings
       const steps: string[] = [];
       let total = 0;
       for (let i = 0; i < route.length - 1; i++) {
-        const a = route[i],
-          b = route[i + 1];
+        const a = route[i], b = route[i + 1];
         const dist = matrix[a][b];
         total += dist;
         steps.push(
@@ -417,6 +365,8 @@ export default function CompleteDistanceMatrixChunked() {
       }
       steps.push(`Total distance: ${total}m`);
       setRouteSteps(steps);
+      // Open the list modal after computing the route
+      setModalVisible(true);
     } catch (err) {
       console.error("onBuildRoute error:", err);
       Alert.alert("Failed to build route");
@@ -427,7 +377,7 @@ export default function CompleteDistanceMatrixChunked() {
 
   if (loading) {
     return (
-      <View style={styles.container}>
+      <View style={stylesLocal.loadingContainer}>
         <ActivityIndicator
           testID="ActivityIndicator"
           size="large"
@@ -437,149 +387,132 @@ export default function CompleteDistanceMatrixChunked() {
     );
   }
 
-  /** A simple label to show which categories are currently selected. */
   const selectedCatText =
     categories.length > 0 ? categories.join(", ") : "None selected";
-
-  // The chosen startTask object
   const startTask = tasks.find((t) => t.id === startTaskID);
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity
-        onPress={() => router.back()}
-        style={{ marginBottom: 20 }}
-      >
-        <Text style={{ color: "#912338", fontSize: 16 }}>Back</Text>
-      </TouchableOpacity>
-
-      <Text style={styles.title}>
-        Chunked Distance Matrix TSP (Choose Start)
-      </Text>
-
-      {/* Category Dropdown container */}
-      <View style={styles.dropdown}>
-        <TouchableOpacity
-          style={styles.dropdownHeader}
-          onPress={() => setDropdownOpen(!dropdownOpen)}
-          testID={"category-dropdown"}
-        >
-          <Text style={styles.dropdownHeaderText}>
-            Select Categories: {selectedCatText}
-          </Text>
-        </TouchableOpacity>
-
-        {dropdownOpen && (
-          <View style={styles.dropdownMenu}>
-            {CATEGORY_OPTIONS.map((cat) => {
-              const isSelected = categories.includes(cat);
-              return (
-                <TouchableOpacity
-                  key={cat}
-                  style={styles.dropdownItem}
-                  onPress={() => onToggleCategory(cat)}
-                >
-                  <Text style={{ fontWeight: isSelected ? "bold" : "normal" }}>
-                    {cat}
-                    {isSelected ? " ✓" : ""}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        )}
-      </View>
-
-      {/* Start Location Dropdown */}
-      <View style={styles.dropdown}>
-        <TouchableOpacity
-          style={styles.dropdownHeader}
-          onPress={() => setStartDropdownOpen(!startDropdownOpen)}
-        >
-          <Text style={styles.dropdownHeaderText}>
-            Start Location: {startTask ? startTask.name : "None selected"}
-          </Text>
-        </TouchableOpacity>
-        {startDropdownOpen && (
-          <View style={styles.dropdownMenu}>
-            {tasks.length === 0 ? (
-              <Text style={{ padding: 12 }}>No tasks yet</Text>
-            ) : (
-              tasks.map((task) => {
-                const isSelected = startTaskID === task.id;
+    <View style={stylesLocal.container}>
+      <GenericHeader
+        testID="generic-header"
+        title="Multi-Stop Planner"
+        noticeText="Smart Planner: Optimize your day"
+        noticeIcon="lightbulb"
+      />
+      <View style={stylesLocal.content}>
+        <View style={stylesLocal.dropdown}>
+          <TouchableOpacity
+            style={stylesLocal.dropdownHeader}
+            onPress={() => setDropdownOpen(!dropdownOpen)}
+            testID={"category-dropdown"}
+          >
+            <Text style={stylesLocal.dropdownHeaderText}>
+              Select Categories: {selectedCatText}
+            </Text>
+          </TouchableOpacity>
+          {dropdownOpen && (
+            <View style={stylesLocal.dropdownMenu}>
+              {CATEGORY_OPTIONS.map((cat) => {
+                const isSelected = categories.includes(cat);
                 return (
                   <TouchableOpacity
-                    key={task.id}
-                    style={styles.dropdownItem}
-                    onPress={() => onSelectStartLocation(task.id)}
-                    testID={`start-option-${task.id}`}
+                    key={cat}
+                    style={stylesLocal.dropdownItem}
+                    onPress={() => onToggleCategory(cat)}
                   >
-                    <Text
-                      style={{ fontWeight: isSelected ? "bold" : "normal" }}
-                    >
-                      {task.name}
+                    <Text style={{ fontWeight: isSelected ? "bold" : "normal" }}>
+                      {cat}
                       {isSelected ? " ✓" : ""}
                     </Text>
                   </TouchableOpacity>
                 );
-              })
-            )}
-          </View>
-        )}
-      </View>
-
-      <Text style={styles.subtitle}>Tasks (toggle them on/off below):</Text>
-      <FlatList
-        data={tasks}
-        keyExtractor={(item) => item.id}
-        style={{ maxHeight: 200, borderWidth: 1, borderColor: "#ccc" }}
-        renderItem={({ item }) => (
-          <View style={styles.taskRow}>
-            <Switch
-              testID={`switch-${item.id}`}
-              value={item.selected}
-              onValueChange={() => toggleTask(item.id)}
-            />
-            <Text style={styles.taskName}>{item.name}</Text>
-          </View>
-        )}
-      />
-
-      <TouchableOpacity style={styles.button} onPress={onBuildRoute}>
-        <Text style={styles.buttonText}>Build Best Route (TSP)</Text>
-      </TouchableOpacity>
-
-      <ScrollView style={{ flex: 1, marginTop: 10 }}>
-        {routeSteps.length === 0 ? (
-          <Text>No route yet</Text>
-        ) : (
-          routeSteps.map((s, i) => (
-            <Text key={i} style={styles.step}>
-              {s}
+              })}
+            </View>
+          )}
+        </View>
+        <View style={stylesLocal.dropdown}>
+          <TouchableOpacity
+            style={stylesLocal.dropdownHeader}
+            onPress={() => setStartDropdownOpen(!startDropdownOpen)}
+          >
+            <Text style={stylesLocal.dropdownHeaderText}>
+              Start Location: {startTask ? startTask.name : "None selected"}
             </Text>
-          ))
-        )}
-      </ScrollView>
+          </TouchableOpacity>
+          {startDropdownOpen && (
+            <View style={stylesLocal.dropdownMenu}>
+              {tasks.length === 0 ? (
+                <Text style={{ padding: 12 }}>No tasks yet</Text>
+              ) : (
+                tasks.map((task) => {
+                  const isSelected = startTaskID === task.id;
+                  return (
+                    <TouchableOpacity
+                      key={task.id}
+                      style={stylesLocal.dropdownItem}
+                      onPress={() => onSelectStartLocation(task.id)}
+                      testID={`start-option-${task.id}`}
+                    >
+                      <Text style={{ fontWeight: isSelected ? "bold" : "normal" }}>
+                        {task.name}
+                        {isSelected ? " ✓" : ""}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })
+              )}
+            </View>
+          )}
+        </View>
+        <Text style={stylesLocal.subtitle}>
+          Tasks (toggle them on/off below):
+        </Text>
+        <FlatList
+          data={tasks}
+          keyExtractor={(item) => item.id}
+          style={stylesLocal.taskList}
+          renderItem={({ item }) => (
+            <View style={stylesLocal.taskRow}>
+              <Switch
+                testID={`switch-${item.id}`}
+                value={item.selected}
+                onValueChange={() => toggleTask(item.id)}
+              />
+              <Text style={stylesLocal.taskName}>{item.name}</Text>
+            </View>
+          )}
+        />
+        <TouchableOpacity style={stylesLocal.button} onPress={onBuildRoute}>
+          <Text style={stylesLocal.buttonText}>Build Best Route (TSP)</Text>
+        </TouchableOpacity>
+      </View>
+      <BottomNavigation testID="bottom-navigation" />
+
+      {/* List Modal for showing the route steps */}
+      <ListModal
+        visible={modalVisible}
+        routeSteps={routeSteps}
+        onClose={() => setModalVisible(false)}
+      />
     </View>
   );
 }
 
-//
-// Styles
-//
-const styles = StyleSheet.create({
+const stylesLocal = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingTop: 40,
-    paddingHorizontal: 16,
   },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#912338",
-    textAlign: "center",
-    marginBottom: 10,
+  content: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+    backgroundColor: "#fff",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   dropdown: {
     marginBottom: 16,
@@ -611,10 +544,19 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginBottom: 6,
   },
+  taskList: {
+    maxHeight: 220,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 6,
+    marginBottom: 16,
+    backgroundColor: "#fff",
+  },
   taskRow: {
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 6,
+    paddingHorizontal: 8,
     borderBottomWidth: 1,
     borderColor: "#ccc",
   },
@@ -622,6 +564,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexWrap: "wrap",
     marginLeft: 8,
+    fontSize: 14,
   },
   button: {
     backgroundColor: "#912338",
@@ -633,10 +576,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#fff",
     fontWeight: "600",
-  },
-  step: {
     fontSize: 14,
-    marginBottom: 6,
-    color: "#333",
   },
 });
