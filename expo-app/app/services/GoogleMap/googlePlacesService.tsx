@@ -15,8 +15,12 @@ export const getGooglePlaceImageUrl = (photoReference: string): string => {
 
 export const fetchNearbyPlaces = async (
   userLocation: Coordinates,
-  placeType: "restaurant" | "cafe" | "washroom"
+  placeType: "restaurant" | "cafe" | "washroom" | "campus"
 ): Promise<GooglePlace[]> => {
+  if (placeType === "campus") {
+    return [];
+  }
+
   try {
     const { latitude, longitude } = userLocation;
     const placesUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=1500&type=${placeType}&key=${Constants.expoConfig?.extra?.googleMapsApiKey}`;
