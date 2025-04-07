@@ -46,7 +46,7 @@ interface Task {
   room?: string;
 }
 
-export default function CompleteDistanceMatrixChunked() {
+export default function CompleteDistanceMatrixChunked(): React.JSX.Element {
   const router = useRouter();
   const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
   const [categories, setCategories] = useState<POICategory[]>([]);
@@ -74,6 +74,15 @@ export default function CompleteDistanceMatrixChunked() {
   // Your Distance Matrix API key
   dotenv.config();
   const apiKey = process.env.DISTANCE_MATRIX_API_KEY;
+
+  if (!apiKey) {
+    return (
+      <div>
+        The Distance Matrix API Key is expired or non-functional. Please try
+        again later.
+      </div>
+    );
+  }
 
   useEffect(() => {
     initialize();
