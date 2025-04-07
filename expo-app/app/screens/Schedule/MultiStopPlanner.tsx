@@ -421,6 +421,7 @@ export default function CompleteDistanceMatrixChunked() {
         <TouchableOpacity
           style={styles.dropdownHeader}
           onPress={() => setDropdownOpen(!dropdownOpen)}
+          testID={"category-dropdown"}
         >
           <Text style={styles.dropdownHeaderText}>Select Categories: {selectedCatText}</Text>
         </TouchableOpacity>
@@ -488,7 +489,11 @@ export default function CompleteDistanceMatrixChunked() {
         style={{ maxHeight: 200, borderWidth: 1, borderColor: "#ccc" }}
         renderItem={({ item }) => (
           <View style={styles.taskRow}>
-            <Switch value={item.selected} onValueChange={() => toggleTask(item.id)} />
+            <Switch
+              testID={`switch-${item.id}`}
+              value={item.selected}
+              onValueChange={() => toggleTask(item.id)}
+            />
             <Text style={styles.taskName}>{item.name}</Text>
           </View>
         )}
