@@ -32,7 +32,7 @@ const myBuildings = [...LoyolaBuildings, ...SGWBuildings];
 // For Google Places
 import { fetchNearbyPlaces } from "@/app/services/GoogleMap/googlePlacesService";
 import { useRouter } from "expo-router";
-import dotenv from "dotenv";
+import { DISTANCE_MATRIX_API_KEY } from "@env";
 
 // Extend your POICategory to include "campus"
 type POICategory = "restaurant" | "cafe" | "washroom" | "campus";
@@ -72,8 +72,7 @@ export default function CompleteDistanceMatrixChunked(): React.JSX.Element {
   ];
 
   // Your Distance Matrix API key
-  dotenv.config();
-  const apiKey = process.env.DISTANCE_MATRIX_API_KEY;
+  const apiKey = DISTANCE_MATRIX_API_KEY;
 
   if (!apiKey) {
     return (
