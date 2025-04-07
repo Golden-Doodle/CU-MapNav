@@ -3,7 +3,7 @@ name: CI Pipeline
 on:
   push:
     branches:
-      - '**'
+      - "**"
   pull_request:
     types: [opened, synchronize, reopened]
 
@@ -13,18 +13,18 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-      
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          cache: 'npm'
+          node-version: "20.x"
+          cache: "npm"
           cache-dependency-path: expo-app/package-lock.json
-          
+
       - name: Install Expo CLI
         run: npm install expo-cli
         working-directory: expo-app
-        
+
       - name: Install Dependencies
         run: npm install
         working-directory: expo-app
@@ -39,12 +39,12 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-  
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          cache: 'npm'
+          node-version: "20.x"
+          cache: "npm"
           cache-dependency-path: expo-app/package-lock.json
 
       - name: Cache npm dependencies
@@ -54,18 +54,22 @@ jobs:
           key: node-cache-${{ runner.os }}-${{ hashFiles('expo-app/package-lock.json') }}
           restore-keys: |
             node-cache-${{ runner.os }}-
-  
+
       - name: Install Dependencies
         run: |
           npm install
           npm install --save-dev jest-expo
         working-directory: expo-app
-  
+
+      - name: Create .env file
+        run: |
+          echo "DISTANCE_MATRIX_API_KEY=${{ secrets.DISTANCE_MATRIX_API_KEY }}" > .env
+
       - name: Run Jest Tests with Coverage
         run: |
           npx jest --coverage --ci --passWithNoTests
         working-directory: expo-app
-  
+
       - name: Upload Coverage Report to Codecov
         uses: codecov/codecov-action@v4
         with:
@@ -78,12 +82,12 @@ jobs:
         run: |
           echo "Listing contents of the expo-app directory..."
           ls -R expo-app/
-          
+
       - name: List contents of coverage directory
         run: |
           echo "Listing contents of the expo-app/coverage directory..."
           ls -R expo-app/coverage/
-          
+
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v5
         env:
