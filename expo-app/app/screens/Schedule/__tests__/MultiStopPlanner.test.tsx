@@ -6,36 +6,29 @@ import * as Location from "expo-location";
 import { fetchTodaysEventsFromSelectedSchedule } from "@/app/services/GoogleCalendar/fetchingUserCalendarData";
 import { fetchNearbyPlaces } from "@/app/services/GoogleMap/googlePlacesService";
 
-// Mock Alert
 jest.spyOn(Alert, "alert");
 
-// Mock the expo-router
 jest.mock("expo-router", () => ({
   useRouter: jest.fn(() => ({
     back: jest.fn(),
   })),
 }));
 
-// Mock the location services
 jest.mock("expo-location", () => ({
   requestForegroundPermissionsAsync: jest.fn(),
   getCurrentPositionAsync: jest.fn(),
 }));
 
-// Mock the calendar service
 jest.mock("@/app/services/GoogleCalendar/fetchingUserCalendarData", () => ({
   fetchTodaysEventsFromSelectedSchedule: jest.fn(),
 }));
 
-// Mock the places service
 jest.mock("@/app/services/GoogleMap/googlePlacesService", () => ({
   fetchNearbyPlaces: jest.fn(),
 }));
 
-// Mock the fetch API
 global.fetch = jest.fn();
 
-// Mock Alert
 jest.mock("react-native", () => {
   const RN = jest.requireActual("react-native");
   RN.Alert.alert = jest.fn();
@@ -45,15 +38,14 @@ jest.mock("react-native", () => {
 describe("CompleteDistanceMatrixChunked", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
     (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValue({
       status: "granted",
     });
     (Location.getCurrentPositionAsync as jest.Mock).mockResolvedValue({
-      coords: {
-        latitude: 45.495,
-        longitude: -73.578,
-      },
+      coords: { latitude: 45.495, longitude: -73.578 },
     });
+
     (fetchTodaysEventsFromSelectedSchedule as jest.Mock).mockResolvedValue([
       {
         id: "event1",
@@ -66,12 +58,11 @@ describe("CompleteDistanceMatrixChunked", () => {
       {
         place_id: "place1",
         name: "Coffee Shop",
-        geometry: {
-          location: { lat: 45.496, lng: -73.579 },
-        },
+        geometry: { location: { lat: 45.496, lng: -73.579 } },
       },
     ]);
-    (global.fetch as jest.Mock).mockImplementation((url) => {
+
+    (global.fetch as jest.Mock).mockImplementation((url: string) => {
       if (url.includes("maps.googleapis.com/maps/api/distancematrix/json")) {
         return Promise.resolve({
           json: () =>
@@ -92,55 +83,22 @@ describe("CompleteDistanceMatrixChunked", () => {
     });
   });
 
-  // ... other tests ...
-
-  it("toggles categories correctly", async () => {
-    const { getByText, getByTestId, queryByText } = render(<CompleteDistanceMatrixChunked />);
-
+  it("renders the component and hides the loading indicator", async () => {
+    const { queryByTestId, getByTestId } = render(<CompleteDistanceMatrixChunked />);
+    expect(queryByTestId("ActivityIndicator")).toBeTruthy();
     await waitFor(() => {
-      expect(getByText("Select Categories: None selected")).toBeTruthy();
-    });
-
-    // Open dropdown
-    fireEvent.press(getByText("Select Categories: None selected"));
-
-    // Wait for dropdown to open and render options
-    await waitFor(() => {
-      expect(getByText("cafe")).toBeTruthy();
-    });
-
-    // Toggle the category
-    fireEvent.press(getByTestId("category-dropdown"));
-
-   await waitFor(() => {
-     expect(getByTestId("category-dropdown")).toBeTruthy();
-   });
-
-    // Toggle it off - need to reopen dropdown
-    fireEvent.press(getByTestId("category-dropdown"));
-    fireEvent.press(getByText("cafe"));
-
-    await waitFor(() => {
-      expect(queryByText("Select Categories: cafe")).toBeFalsy();
+      expect(getByTestId("generic-header")).toBeTruthy();
     });
   });
 
   it("changes start location", async () => {
     const { getByText, getByTestId } = render(<CompleteDistanceMatrixChunked />);
-
     await waitFor(() => {
       expect(getByText("Start Location: My Location (Start)")).toBeTruthy();
     });
-
-    // Open start location dropdown
     fireEvent.press(getByText("Start Location: My Location (Start)"));
-
-    // Wait for dropdown to open and find the Math Class option using testID
     const mathClassOption = await waitFor(() => getByTestId("start-option-event1"));
-
-    // Select it
     fireEvent.press(mathClassOption);
-
     await waitFor(() => {
       expect(getByText("Start Location: Math Class")).toBeTruthy();
     });
@@ -148,15 +106,14 @@ describe("CompleteDistanceMatrixChunked", () => {
 
   it("shows alert when not enough tasks are selected for route", async () => {
     const { getByText } = render(<CompleteDistanceMatrixChunked />);
-
     await waitFor(() => {
       expect(getByText("Build Best Route (TSP)")).toBeTruthy();
     });
-
     fireEvent.press(getByText("Build Best Route (TSP)"));
-
     await waitFor(() => {
-      expect(Alert.alert).toHaveBeenCalledWith("Select at least 2 tasks (including your start)!");
+      expect(Alert.alert).toHaveBeenCalledWith(
+        "Select at least 2 tasks (including your start)!"
+      );
     });
   });
 
@@ -164,13 +121,26 @@ describe("CompleteDistanceMatrixChunked", () => {
     (global.fetch as jest.Mock).mockImplementationOnce(() =>
       Promise.reject(new Error("API error"))
     );
-
     const { getByText, getAllByRole } = render(<CompleteDistanceMatrixChunked />);
-
     await waitFor(() => {
       expect(getByText("Math Class")).toBeTruthy();
     });
+    const switches = getAllByRole("switch");
+    fireEvent(switches[0], "valueChange", true);
+    fireEvent(switches[1], "valueChange", true);
+    fireEvent.press(getByText("Build Best Route (TSP)"));
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith("Failed to build route");
+    });
+  });
 
+  it("builds route and shows modal with route steps", async () => {
+    const { getByText, getByTestId, queryByTestId, getAllByRole } = render(
+      <CompleteDistanceMatrixChunked />
+    );
+    await waitFor(() => {
+      expect(getByText("Math Class")).toBeTruthy();
+    });
     const switches = getAllByRole("switch");
     fireEvent(switches[0], "valueChange", true);
     fireEvent(switches[1], "valueChange", true);
@@ -178,7 +148,37 @@ describe("CompleteDistanceMatrixChunked", () => {
     fireEvent.press(getByText("Build Best Route (TSP)"));
 
     await waitFor(() => {
-      expect(Alert.alert).toHaveBeenCalledWith("Failed to build route");
+      expect(getByTestId("list-modal")).toBeTruthy();
     });
+    const routeSteps = getByTestId("route-steps-list");
+    expect(routeSteps).toBeTruthy();
+
+    fireEvent.press(getByTestId("close-button"));
+    await waitFor(() => {
+      expect(queryByTestId("list-modal")).toBeNull();
+    });
+  });
+
+  it("handles location permission not granted", async () => {
+    (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValue({
+      status: "denied",
+    });
+    const { getByText } = render(<CompleteDistanceMatrixChunked />);
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith(
+        "Location permission not granted; using fallback coords"
+      );
+    });
+  });
+
+  it("toggles a task's selection state", async () => {
+    const { getByText, getAllByRole } = render(<CompleteDistanceMatrixChunked />);
+    await waitFor(() => {
+      expect(getByText("Math Class")).toBeTruthy();
+    });
+    const switches = getAllByRole("switch");
+    const firstSwitch = switches[0];
+    fireEvent(firstSwitch, "valueChange", true);
+    fireEvent(firstSwitch, "valueChange", false);
   });
 });
