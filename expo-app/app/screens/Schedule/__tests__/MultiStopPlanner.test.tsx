@@ -105,7 +105,26 @@ describe("CompleteDistanceMatrixChunked", () => {
     });
   });
 
-
+  it("toggles category dropdown and selects categories", async () => {
+    const { getByTestId, findByText } = render(<CompleteDistanceMatrixChunked />);
+  
+    // Wait until dropdown can be opened
+    await waitFor(() => {
+      fireEvent.press(getByTestId("category-dropdown"));
+    });
+  
+    const cafeOption = await findByText("cafe");
+    const restaurantOption = await findByText("restaurant");
+  
+    fireEvent.press(cafeOption);
+    fireEvent.press(restaurantOption);
+  
+    // Wait for one or more fetchNearbyPlaces calls (allowing async state update)
+    await waitFor(() => {
+      expect(fetchNearbyPlaces).toHaveBeenCalled();
+    });
+  });
+  
   it("resets places if only 'campus' category is selected", async () => {
     const { getByTestId, getByText, queryByText } = render(<CompleteDistanceMatrixChunked />);
     await waitFor(() => {
