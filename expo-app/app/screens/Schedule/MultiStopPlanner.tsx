@@ -34,8 +34,7 @@ interface Task {
   name: string;
   coordinates: Coordinates;
   selected: boolean;
-  // building?: Building; // If strongly typed
-  building?: any;
+  building?: any; // Or strongly typed if you prefer
   room?: string;
 }
 
@@ -49,8 +48,12 @@ export default function CompleteDistanceMatrixChunked() {
   const [routeSteps, setRouteSteps] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // For a simple custom dropdown
+  // For category dropdown
   const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  // For start-location dropdown
+  const [startDropdownOpen, setStartDropdownOpen] = useState(false);
+  const [startTaskID, setStartTaskID] = useState("USER_LOC"); // default
 
   // All possible categories in the UI:
   const CATEGORY_OPTIONS: POICategory[] = ["restaurant", "cafe", "washroom", "campus"];
@@ -73,7 +76,7 @@ export default function CompleteDistanceMatrixChunked() {
       // setUserLocation({ latitude: loc.coords.latitude, longitude: loc.coords.longitude });
       setUserLocation({ latitude: 45.495, longitude: -73.578 }); // fallback
 
-      // fetch events
+      // Fetch today's events
       const dayEvents = await fetchTodaysEventsFromSelectedSchedule();
       dayEvents.sort(
         (a, b) => new Date(a.start.dateTime).getTime() - new Date(b.start.dateTime).getTime()
@@ -131,13 +134,13 @@ export default function CompleteDistanceMatrixChunked() {
   function buildTasks() {
     const newTasks: Task[] = [];
 
-    // Always add user location at index 0
+    // Add user location as a normal task (can now be toggled!)
     if (userLocation) {
       newTasks.push({
         id: "USER_LOC",
         name: "My Location (Start)",
         coordinates: userLocation,
-        selected: true, // cannot be deselected
+        selected: false, // can be toggled now
       });
     }
 
@@ -207,15 +210,22 @@ export default function CompleteDistanceMatrixChunked() {
     });
   }
 
-  /** A single function that toggles tasks. */
+  /** Toggle tasks on/off for the TSP route. */
   function toggleTask(tid: string) {
     setTasks((prev) =>
       prev.map((t) => {
-        if (t.id === "USER_LOC") return t; // can't unselect user location
-        if (t.id === tid) return { ...t, selected: !t.selected };
+        if (t.id === tid) {
+          return { ...t, selected: !t.selected };
+        }
         return t;
       })
     );
+  }
+
+  // *** Start location dropdown logic ***
+  function onSelectStartLocation(taskId: string) {
+    setStartTaskID(taskId);
+    setStartDropdownOpen(false);
   }
 
   // Break the destinations into chunks so we never exceed 25 destinations
@@ -296,7 +306,7 @@ export default function CompleteDistanceMatrixChunked() {
     const dp: number[][] = Array.from({ length: 1 << n }, () => new Array(n).fill(Infinity));
     const parent: number[][] = Array.from({ length: 1 << n }, () => new Array(n).fill(-1));
 
-    // start at node 0 (user loc), mark visited
+    // start at node 0 (the chosen start), mark visited
     dp[1][0] = 0;
 
     for (let mask = 0; mask < 1 << n; mask++) {
@@ -343,13 +353,16 @@ export default function CompleteDistanceMatrixChunked() {
   }
 
   async function onBuildRoute() {
-    const selected = tasks.filter((t) => t.selected);
+    // Gather tasks that are selected OR the chosen startTask
+    // Because we want to ensure the startTask is always included in the route:
+    let selected = tasks.filter((t) => t.selected || t.id === startTaskID);
     if (selected.length < 2) {
-      Alert.alert("Select at least 2 tasks!");
+      Alert.alert("Select at least 2 tasks (including your start)!");
       return;
     }
-    // Ensure the first task is user location
-    const idx0 = selected.findIndex((x) => x.id === "USER_LOC");
+
+    // Reorder so that the chosen start location is at index 0:
+    const idx0 = selected.findIndex((x) => x.id === startTaskID);
     if (idx0 !== 0) {
       const tmp = selected[0];
       selected[0] = selected[idx0];
@@ -392,14 +405,18 @@ export default function CompleteDistanceMatrixChunked() {
   /** A simple label to show which categories are currently selected. */
   const selectedCatText = categories.length > 0 ? categories.join(", ") : "None selected";
 
+  // The chosen startTask object
+  const startTask = tasks.find((t) => t.id === startTaskID);
+
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={() => router.back()} style={{ marginBottom: 20 }}> 
+      <TouchableOpacity onPress={() => router.back()} style={{ marginBottom: 20 }}>
         <Text style={{ color: "#912338", fontSize: 16 }}>Back</Text>
       </TouchableOpacity>
-      <Text style={styles.title}>Chunked Distance Matrix TSP (With Dropdown)</Text>
 
-      {/* Dropdown container */}
+      <Text style={styles.title}>Chunked Distance Matrix TSP (Choose Start)</Text>
+
+      {/* Category Dropdown container */}
       <View style={styles.dropdown}>
         <TouchableOpacity
           style={styles.dropdownHeader}
@@ -429,18 +446,49 @@ export default function CompleteDistanceMatrixChunked() {
         )}
       </View>
 
-      <Text style={styles.subtitle}>Tasks:</Text>
+      {/* Start Location Dropdown */}
+      <View style={styles.dropdown}>
+        <TouchableOpacity
+          style={styles.dropdownHeader}
+          onPress={() => setStartDropdownOpen(!startDropdownOpen)}
+        >
+          <Text style={styles.dropdownHeaderText}>
+            Start Location: {startTask ? startTask.name : "None selected"}
+          </Text>
+        </TouchableOpacity>
+        {startDropdownOpen && (
+          <View style={styles.dropdownMenu}>
+            {tasks.length === 0 ? (
+              <Text style={{ padding: 12 }}>No tasks yet</Text>
+            ) : (
+              tasks.map((task) => {
+                const isSelected = startTaskID === task.id;
+                return (
+                  <TouchableOpacity
+                    key={task.id}
+                    style={styles.dropdownItem}
+                    onPress={() => onSelectStartLocation(task.id)}
+                  >
+                    <Text style={{ fontWeight: isSelected ? "bold" : "normal" }}>
+                      {task.name}
+                      {isSelected ? " ✓" : ""}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })
+            )}
+          </View>
+        )}
+      </View>
+
+      <Text style={styles.subtitle}>Tasks (toggle them on/off below):</Text>
       <FlatList
         data={tasks}
         keyExtractor={(item) => item.id}
         style={{ maxHeight: 200, borderWidth: 1, borderColor: "#ccc" }}
         renderItem={({ item }) => (
           <View style={styles.taskRow}>
-            <Switch
-              value={item.selected}
-              onValueChange={() => toggleTask(item.id)}
-              disabled={item.id === "USER_LOC"}
-            />
+            <Switch value={item.selected} onValueChange={() => toggleTask(item.id)} />
             <Text style={styles.taskName}>{item.name}</Text>
           </View>
         )}
