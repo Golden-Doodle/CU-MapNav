@@ -71,17 +71,17 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     name: "expo-app",
   };
   newConfig.expo.extras = {
-    clarityProjectId: "qtckqvmd75",
-    googleMapsApiKey: "AIzaSyBYvb6Sg2jIbSgu_ckcLfsUekS2-pS5mc8",
-    mappedInApiKey: "mik_LUeYSdqlvDJYpSHXT56b207a8",
-    mappedInSecret: "mis_toNhLLj9mmlK5rJzJHebi3km4rjI9V3x3VUzgpPCYbq9a2410c7",
+    clarityProjectId: process.env.CLARITY_PROJECT_ID,
+    googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
+    mappedInApiKey: process.env.MAPPED_IN_API_KEY,
+    mappedInSecret: process.env.MAPPED_IN_SECRET,
+    distanceMatrixApiKey: process.env.DISTANCE_MATRIX_API_KEY,
     router: {
       origin: false,
     },
     eas: {
       projectId: "fd5074ae-9387-4f62-9753-f8274ba822e0",
     },
-    distanceMatrixApiKey: process.env.DISTANCE_MATRIX_API_KEY,
   };
   return newConfig;
 };
