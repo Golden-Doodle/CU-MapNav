@@ -126,7 +126,7 @@ describe("CompleteDistanceMatrixChunked", () => {
   });
 
   it("changes start location", async () => {
-    const { getByText } = render(<CompleteDistanceMatrixChunked />);
+    const { getByText, getByTestId } = render(<CompleteDistanceMatrixChunked />);
 
     await waitFor(() => {
       expect(getByText("Start Location: My Location (Start)")).toBeTruthy();
@@ -135,8 +135,8 @@ describe("CompleteDistanceMatrixChunked", () => {
     // Open start location dropdown
     fireEvent.press(getByText("Start Location: My Location (Start)"));
 
-    // Find the Math Class option in the dropdown
-    const mathClassOption = getByText("Math Class");
+    // Wait for dropdown to open and find the Math Class option using testID
+    const mathClassOption = await waitFor(() => getByTestId("start-option-event1"));
 
     // Select it
     fireEvent.press(mathClassOption);

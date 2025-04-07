@@ -469,6 +469,7 @@ export default function CompleteDistanceMatrixChunked() {
                     key={task.id}
                     style={styles.dropdownItem}
                     onPress={() => onSelectStartLocation(task.id)}
+                    testID={`start-option-${task.id}`}
                   >
                     <Text style={{ fontWeight: isSelected ? "bold" : "normal" }}>
                       {task.name}
