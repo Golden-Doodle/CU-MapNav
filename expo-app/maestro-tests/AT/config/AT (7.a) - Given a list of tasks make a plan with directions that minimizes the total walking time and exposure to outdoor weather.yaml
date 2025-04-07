@@ -1,0 +1,17 @@
+appId: com.goldendoodle.expoapp
+---
+- tapOn:
+    id: "menu-button"
+- tapOn:
+    id: "multi-stop-planner-button"
+- tapOn:
+    id: "category-dropdown"
+- tapOn: "restaurant"
+- tapOn: "campus"
+- tapOn:
+    id: "switch-2"
+- tapOn:
+    id: "switch-3"
+- tapOn: "Build Best Route (TSP)"
+- tapOn:
+    id: "close-button"

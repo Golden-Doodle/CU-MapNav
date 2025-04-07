@@ -64,13 +64,22 @@ export default function HomeMenuScreen() {
         <Text style={styles.menuText}>📖 {t("Study Spots")}</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity 
-        style={styles.menuItem} 
-        activeOpacity={0.8} 
+      <TouchableOpacity
+        style={styles.menuItem}
+        activeOpacity={0.8}
         onPress={() => router.push("/screens/IndoorMap/IndoorMapScreen")}
         testID="indoor-nav-button"
       >
         <Text style={styles.menuText}>🏢 {t("Indoor Map")}</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.menuItem}
+        activeOpacity={0.8}
+        onPress={() => router.push("/screens/Schedule/MultiStopPlanner")}
+        testID="multi-stop-planner-button"
+      >
+        <Text style={styles.menuText}>📖 {t("Multi Stop Planner")}</Text>
       </TouchableOpacity>
     </View>
   );

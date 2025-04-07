@@ -59,4 +59,11 @@ describe("HomeMenuScreen", () => {
     fireEvent.press(getByTestId("study-spots-button"));
     expect(mockPush).toHaveBeenCalledWith("/screens/StudySpots/StudySpotScreen");
   });
+
+  it("calls the router.push() for the the MultiStopPlannerScreen", () => {
+    const { getByTestId } = render(<HomeMenuScreen />);
+
+    fireEvent.press(getByTestId("multi-stop-planner-button"));
+    expect(mockPush).toHaveBeenCalledWith("/screens/Schedule/MultiStopPlanner");
+  });
 });
