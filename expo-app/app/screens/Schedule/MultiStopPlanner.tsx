@@ -397,7 +397,7 @@ export default function CompleteDistanceMatrixChunked() {
   if (loading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#912338" />
+        <ActivityIndicator testID="ActivityIndicator" size="large" color="#912338" />
       </View>
     );
   }
