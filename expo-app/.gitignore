@@ -51,3 +51,5 @@ app/services/firebase/firebaseConfig.ts
 
 # Clover reports
 coverage/
+
+.env
