@@ -15,32 +15,28 @@ import * as Location from "expo-location";
 // For Google Calendar events
 import { fetchTodaysEventsFromSelectedSchedule } from "@/app/services/GoogleCalendar/fetchingUserCalendarData";
 
-// For building data
-import { SGWBuildings, LoyolaBuildings } from "@/app/components/CampusMap/data/buildingData";
+// For typed definitions
+import { GoogleCalendarEvent, GooglePlace, Coordinates } from "@/app/utils/types";
+
+// Import your buildings array:
+import { LoyolaBuildings, SGWBuildings } from "@/app/components/CampusMap/data/buildingData";
+const myBuildings = [...LoyolaBuildings, ...SGWBuildings];
 
 // For Google Places
 import { fetchNearbyPlaces } from "@/app/services/GoogleMap/googlePlacesService";
 
-// For typed definitions
-import {
-  GoogleCalendarEvent,
-  GooglePlace,
-  Building,
-  Coordinates,
-  RoomLocation,
-} from "@/app/utils/types";
+// Extend your POICategory to include "campus"
+type POICategory = "restaurant" | "cafe" | "washroom" | "campus";
 
-// A minimal "Task"
 interface Task {
   id: string;
   name: string;
   coordinates: Coordinates;
   selected: boolean;
-  building?: Building;
+  // building?: Building; // If strongly typed
+  building?: any;
   room?: string;
 }
-
-type POICategory = "restaurant" | "cafe" | "washroom";
 
 export default function CompleteDistanceMatrixChunked() {
   const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
@@ -51,7 +47,13 @@ export default function CompleteDistanceMatrixChunked() {
   const [routeSteps, setRouteSteps] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // YOUR Distance Matrix API key
+  // For a simple custom dropdown
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  // All possible categories in the UI:
+  const CATEGORY_OPTIONS: POICategory[] = ["restaurant", "cafe", "washroom", "campus"];
+
+  // Your Distance Matrix API key
   const apiKey = "AIzaSyCXmkSx4RToDWaI54NlhVisIsQoCAQoZR8";
 
   useEffect(() => {
@@ -72,7 +74,7 @@ export default function CompleteDistanceMatrixChunked() {
       // fetch events
       const dayEvents = await fetchTodaysEventsFromSelectedSchedule();
       dayEvents.sort(
-        (a,b) => new Date(a.start.dateTime).getTime() - new Date(b.start.dateTime).getTime()
+        (a, b) => new Date(a.start.dateTime).getTime() - new Date(b.start.dateTime).getTime()
       );
       setEvents(dayEvents);
     } catch (err) {
@@ -83,19 +85,26 @@ export default function CompleteDistanceMatrixChunked() {
     }
   }
 
-  // when categories or userLocation changes, fetch POIs
+  // Whenever categories or userLocation change, fetch POIs (but only for non-"campus" categories)
   useEffect(() => {
-    if (!userLocation || categories.length===0) return;
-    fetchPOIs();
+    if (!userLocation) return;
+    const nonCampusCats = categories.filter((c) => c !== "campus");
+    if (nonCampusCats.length === 0) {
+      // If no categories left to fetch from Google, clear places & skip
+      setPlaces([]);
+      return;
+    }
+    fetchPOIs(nonCampusCats);
   }, [categories, userLocation]);
 
-  // We also ensure no duplicates if a place appears in multiple categories
-  async function fetchPOIs() {
+  async function fetchPOIs(selectedCats: POICategory[]) {
     setLoading(true);
     try {
-      const placeIDs = new Set<string>(); 
+      const placeIDs = new Set<string>();
       const combined: GooglePlace[] = [];
-      for (const cat of categories) {
+
+      for (const cat of selectedCats) {
+        // cat will never be "campus" here, due to our filter
         const results = await fetchNearbyPlaces(userLocation!, cat);
         for (const p of results) {
           if (!placeIDs.has(p.place_id)) {
@@ -112,10 +121,10 @@ export default function CompleteDistanceMatrixChunked() {
     }
   }
 
-  // build tasks from userLocation, events, places
+  // Build tasks from userLocation, events, places, and possibly buildings
   useEffect(() => {
     buildTasks();
-  }, [userLocation, events, places]);
+  }, [userLocation, events, places, categories]);
 
   function buildTasks() {
     const newTasks: Task[] = [];
@@ -130,16 +139,17 @@ export default function CompleteDistanceMatrixChunked() {
       });
     }
 
-    // from calendar events
+    // 1) Calendar events
     for (const ev of events) {
       let coords: Coordinates | undefined;
-      let buildingObj: Building | undefined;
       try {
         if (ev.location) {
+          // If you store building info in JSON, parse it here
           const raw = JSON.parse(ev.location);
-          buildingObj = [...SGWBuildings, ...LoyolaBuildings].find(b => b.name === raw.building);
-          if (buildingObj) {
-            coords = buildingObj.coordinates[0]; // first coordinate
+          // Try to match the building in the combined array
+          const foundBuilding = myBuildings.find((b) => b.name === raw.building);
+          if (foundBuilding) {
+            coords = foundBuilding.coordinates[0];
           }
         }
       } catch {
@@ -147,22 +157,16 @@ export default function CompleteDistanceMatrixChunked() {
       }
 
       if (coords) {
-        const buildingName = buildingObj ? buildingObj.name : "Unknown Building";
-        const className = ev.summary || "Class Event";
-        // Combine them
-        const combinedName = `${className} (${buildingName})`;
-
         newTasks.push({
           id: ev.id,
-          name: combinedName,
+          name: ev.summary || "Class Event",
           coordinates: coords,
-          building: buildingObj,
           selected: false,
         });
       }
     }
 
-    // from places
+    // 2) Google Places (from fetchPOIs)
     for (const p of places) {
       newTasks.push({
         id: p.place_id,
@@ -175,29 +179,48 @@ export default function CompleteDistanceMatrixChunked() {
       });
     }
 
+    // 3) If "campus" is in categories, add your building tasks:
+    if (categories.includes("campus")) {
+      for (const b of myBuildings) {
+        newTasks.push({
+          id: b.id,
+          name: b.name,
+          coordinates: b.coordinates[0], // Use the first coordinate
+          selected: false,
+          building: b,
+        });
+      }
+    }
+
     setTasks(newTasks);
   }
 
-  function toggleCategory(cat: POICategory, val: boolean) {
-    setCategories(prev => {
-      if (val) return [...prev, cat];
-      else return prev.filter(c => c!==cat);
+  /** Toggle the user’s selection of a given category. */
+  function onToggleCategory(cat: POICategory) {
+    setCategories((prev) => {
+      if (prev.includes(cat)) {
+        return prev.filter((c) => c !== cat);
+      }
+      return [...prev, cat];
     });
   }
 
+  /** A single function that toggles tasks. */
   function toggleTask(tid: string) {
-    setTasks(prev => prev.map(t => {
-      if (t.id==="USER_LOC") return t; // can't unselect user location
-      if (t.id===tid) return { ...t, selected: !t.selected };
-      return t;
-    }));
+    setTasks((prev) =>
+      prev.map((t) => {
+        if (t.id === "USER_LOC") return t; // can't unselect user location
+        if (t.id === tid) return { ...t, selected: !t.selected };
+        return t;
+      })
+    );
   }
 
   // Break the destinations into chunks so we never exceed 25 destinations
   function chunkArray<T>(arr: T[], size: number): T[][] {
     const chunks: T[][] = [];
-    for (let i=0; i<arr.length; i+=size) {
-      chunks.push(arr.slice(i,i+size));
+    for (let i = 0; i < arr.length; i += size) {
+      chunks.push(arr.slice(i, i + size));
     }
     return chunks;
   }
@@ -209,43 +232,38 @@ export default function CompleteDistanceMatrixChunked() {
   async function getRowForOrigin(
     originCoord: Coordinates,
     allDestCoords: Coordinates[],
-    maxDestPerRequest=25
+    maxDestPerRequest = 25
   ): Promise<number[]> {
     const rowResult = new Array(allDestCoords.length).fill(Infinity);
 
-    // chunk the destinations
     const chunks = chunkArray(allDestCoords, maxDestPerRequest);
     let startIndex = 0;
     for (const chunk of chunks) {
-      // build chunk destinations param
-      const chunkDest = chunk
-        .map(c => `${c.latitude},${c.longitude}`)
-        .join("|");
-
+      const chunkDest = chunk.map((c) => `${c.latitude},${c.longitude}`).join("|");
       const orgStr = `${originCoord.latitude},${originCoord.longitude}`;
 
       const base = "https://maps.googleapis.com/maps/api/distancematrix/json";
       const url = `${base}?origins=${orgStr}&destinations=${chunkDest}&units=metric&key=${apiKey}`;
-
       console.log("Chunk request:", url);
+
       const res = await fetch(url);
       const data = await res.json();
 
       if (data.status !== "OK") {
         console.warn("Chunk error for origin:", data.status, data.error_message);
         // fill chunk range with 999999
-        for (let j=0; j<chunk.length; j++){
-          rowResult[startIndex+j] = 999999;
+        for (let j = 0; j < chunk.length; j++) {
+          rowResult[startIndex + j] = 999999;
         }
       } else {
         // data.rows[0].elements => distances for these chunk destinations
         const row = data.rows[0];
-        for (let j=0; j<chunk.length; j++){
+        for (let j = 0; j < chunk.length; j++) {
           const elem = row.elements[j];
-          if (elem.status==="OK") {
-            rowResult[startIndex+j] = elem.distance.value;
+          if (elem.status === "OK") {
+            rowResult[startIndex + j] = elem.distance.value;
           } else {
-            rowResult[startIndex+j] = 999999;
+            rowResult[startIndex + j] = 999999;
           }
         }
       }
@@ -258,16 +276,12 @@ export default function CompleteDistanceMatrixChunked() {
   // Build the NxN cost matrix by doing N separate "origins" requests, each chunked.
   async function buildDistanceMatrix(selectedTasks: Task[]): Promise<number[][]> {
     const n = selectedTasks.length;
-    const matrix = Array.from({ length: n }, ()=> new Array(n).fill(Infinity));
+    const matrix = Array.from({ length: n }, () => new Array(n).fill(Infinity));
 
-    // We'll do N "origin" queries
-    // Each origin might have to do multiple chunk calls for destinations > 25
-    const allDestCoords = selectedTasks.map(t => t.coordinates);
+    const allDestCoords = selectedTasks.map((t) => t.coordinates);
 
-    for (let i=0; i<n; i++) {
+    for (let i = 0; i < n; i++) {
       const originCoord = selectedTasks[i].coordinates;
-
-      // get distances row for origin i
       const row = await getRowForOrigin(originCoord, allDestCoords, 25);
       matrix[i] = row;
     }
@@ -276,88 +290,88 @@ export default function CompleteDistanceMatrixChunked() {
 
   // TSP with bitmask DP
   function solveTSPdp(matrix: number[][]): number[] {
-    const n=matrix.length;
-    const dp: number[][]= Array.from({ length: 1<<n }, () => new Array(n).fill(Infinity));
-    const parent: number[][]= Array.from({ length: 1<<n }, () => new Array(n).fill(-1));
+    const n = matrix.length;
+    const dp: number[][] = Array.from({ length: 1 << n }, () => new Array(n).fill(Infinity));
+    const parent: number[][] = Array.from({ length: 1 << n }, () => new Array(n).fill(-1));
 
-    dp[1][0]=0; // start at node 0 (user loc)
+    // start at node 0 (user loc), mark visited
+    dp[1][0] = 0;
 
-    for (let mask=0; mask<(1<<n); mask++) {
-      for (let i=0; i<n; i++) {
-        if (dp[mask][i]===Infinity) continue;
-        if (!((mask>>i)&1)) continue;
+    for (let mask = 0; mask < 1 << n; mask++) {
+      for (let i = 0; i < n; i++) {
+        if (dp[mask][i] === Infinity) continue;
+        if (!((mask >> i) & 1)) continue;
 
-        for (let j=0; j<n; j++){
-          if ((mask>>j)&1) continue; // visited j
-          const nextMask=mask|(1<<j);
-          const cost=dp[mask][i]+matrix[i][j];
-          if (cost<dp[nextMask][j]){
-            dp[nextMask][j]=cost;
-            parent[nextMask][j]=i;
+        for (let j = 0; j < n; j++) {
+          if ((mask >> j) & 1) continue; // j is visited
+          const nextMask = mask | (1 << j);
+          const cost = dp[mask][i] + matrix[i][j];
+          if (cost < dp[nextMask][j]) {
+            dp[nextMask][j] = cost;
+            parent[nextMask][j] = i;
           }
         }
       }
     }
 
-    // final
-    const fullMask=(1<<n)-1;
-    let best=Infinity, endNode=-1;
-    for (let i=0; i<n; i++){
-      if (dp[fullMask][i]<best) {
-        best=dp[fullMask][i];
-        endNode=i;
+    // Find best path finishing at any node
+    const fullMask = (1 << n) - 1;
+    let best = Infinity,
+      endNode = -1;
+    for (let i = 0; i < n; i++) {
+      if (dp[fullMask][i] < best) {
+        best = dp[fullMask][i];
+        endNode = i;
       }
     }
 
-    // backtrack
-    const route=[];
-    let cur=endNode, mask=fullMask;
-    while (cur!==-1) {
+    // Backtrack to get the route
+    const route: number[] = [];
+    let cur = endNode,
+      mask = fullMask;
+    while (cur !== -1) {
       route.push(cur);
-      const p=parent[mask][cur];
-      if (p===-1) break;
-      mask=mask^(1<<cur);
-      cur=p;
+      const p = parent[mask][cur];
+      if (p === -1) break;
+      mask = mask ^ (1 << cur);
+      cur = p;
     }
     route.reverse();
-    return route; // e.g. [0, 2, 1, ...]
+    return route; // e.g. [0, 2, 1, 3, ...]
   }
 
   async function onBuildRoute() {
-    // gather selected tasks
-    const selected = tasks.filter(t => t.selected);
-    if (selected.length<2) {
+    const selected = tasks.filter((t) => t.selected);
+    if (selected.length < 2) {
       Alert.alert("Select at least 2 tasks!");
       return;
     }
-    // ensure index 0 => user loc
-    const idx0= selected.findIndex(x => x.id==="USER_LOC");
-    if (idx0!==0) {
-      const tmp=selected[0];
-      selected[0]=selected[idx0];
-      selected[idx0]=tmp;
+    // Ensure the first task is user location
+    const idx0 = selected.findIndex((x) => x.id === "USER_LOC");
+    if (idx0 !== 0) {
+      const tmp = selected[0];
+      selected[0] = selected[idx0];
+      selected[idx0] = tmp;
     }
 
     setLoading(true);
     try {
-      // build chunked matrix
-      const matrix=await buildDistanceMatrix(selected);
-      // solve TSP
-      const route=solveTSPdp(matrix);
+      const matrix = await buildDistanceMatrix(selected);
+      const route = solveTSPdp(matrix);
 
-      // build step strings
-      const steps:string[]=[];
-      let total=0;
-      for (let i=0; i<route.length-1; i++){
-        const a=route[i], b=route[i+1];
-        const dist=matrix[a][b];
-        total+=dist;
-        steps.push(`Step ${i+1}: ${selected[a].name} -> ${selected[b].name}, ${dist}m`);
+      // Construct step strings
+      const steps: string[] = [];
+      let total = 0;
+      for (let i = 0; i < route.length - 1; i++) {
+        const a = route[i],
+          b = route[i + 1];
+        const dist = matrix[a][b];
+        total += dist;
+        steps.push(`Step ${i + 1}: ${selected[a].name} -> ${selected[b].name}, ${dist}m`);
       }
       steps.push(`Total distance: ${total}m`);
       setRouteSteps(steps);
-
-    } catch(err){
+    } catch (err) {
       console.error("onBuildRoute error:", err);
       Alert.alert("Failed to build route");
     } finally {
@@ -368,44 +382,59 @@ export default function CompleteDistanceMatrixChunked() {
   if (loading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#912338"/>
+        <ActivityIndicator size="large" color="#912338" />
       </View>
     );
   }
 
+  /** A simple label to show which categories are currently selected. */
+  const selectedCatText = categories.length > 0 ? categories.join(", ") : "None selected";
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Chunked Distance Matrix TSP (Split Destinations)</Text>
+      <Text style={styles.title}>Chunked Distance Matrix TSP (With Dropdown)</Text>
 
-      <View style={styles.catRow}>
-        <Text>Restaurant</Text>
-        <Switch
-          value={categories.includes("restaurant")}
-          onValueChange={v => toggleCategory("restaurant", v)}
-        />
-        <Text>Cafe</Text>
-        <Switch
-          value={categories.includes("cafe")}
-          onValueChange={v => toggleCategory("cafe", v)}
-        />
-        <Text>Washroom</Text>
-        <Switch
-          value={categories.includes("washroom")}
-          onValueChange={v => toggleCategory("washroom", v)}
-        />
+      {/* Dropdown container */}
+      <View style={styles.dropdown}>
+        <TouchableOpacity
+          style={styles.dropdownHeader}
+          onPress={() => setDropdownOpen(!dropdownOpen)}
+        >
+          <Text style={styles.dropdownHeaderText}>Select Categories: {selectedCatText}</Text>
+        </TouchableOpacity>
+
+        {dropdownOpen && (
+          <View style={styles.dropdownMenu}>
+            {CATEGORY_OPTIONS.map((cat) => {
+              const isSelected = categories.includes(cat);
+              return (
+                <TouchableOpacity
+                  key={cat}
+                  style={styles.dropdownItem}
+                  onPress={() => onToggleCategory(cat)}
+                >
+                  <Text style={{ fontWeight: isSelected ? "bold" : "normal" }}>
+                    {cat}
+                    {isSelected ? " ✓" : ""}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
       </View>
 
       <Text style={styles.subtitle}>Tasks:</Text>
       <FlatList
         data={tasks}
-        keyExtractor={item=>item.id} // unique
-        style={{maxHeight:200, borderWidth:1, borderColor:"#ccc"}}
+        keyExtractor={(item) => item.id}
+        style={{ maxHeight: 200, borderWidth: 1, borderColor: "#ccc" }}
         renderItem={({ item }) => (
           <View style={styles.taskRow}>
             <Switch
               value={item.selected}
-              onValueChange={()=>toggleTask(item.id)}
-              disabled={item.id==="USER_LOC"}
+              onValueChange={() => toggleTask(item.id)}
+              disabled={item.id === "USER_LOC"}
             />
             <Text style={styles.taskName}>{item.name}</Text>
           </View>
@@ -416,12 +445,14 @@ export default function CompleteDistanceMatrixChunked() {
         <Text style={styles.buttonText}>Build Best Route (TSP)</Text>
       </TouchableOpacity>
 
-      <ScrollView style={{flex:1, marginTop:10}}>
-        {routeSteps.length===0 ? (
+      <ScrollView style={{ flex: 1, marginTop: 10 }}>
+        {routeSteps.length === 0 ? (
           <Text>No route yet</Text>
         ) : (
-          routeSteps.map((s, i)=>(
-            <Text key={i} style={styles.step}>{s}</Text>
+          routeSteps.map((s, i) => (
+            <Text key={i} style={styles.step}>
+              {s}
+            </Text>
           ))
         )}
       </ScrollView>
@@ -433,56 +464,75 @@ export default function CompleteDistanceMatrixChunked() {
 // Styles
 //
 const styles = StyleSheet.create({
-  container:{
-    flex:1,
-    backgroundColor:"#fff",
-    paddingTop:40,
-    paddingHorizontal:16
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    paddingTop: 40,
+    paddingHorizontal: 16,
   },
-  title:{
-    fontSize:18,
-    fontWeight:"bold",
-    color:"#912338",
-    textAlign:"center",
-    marginBottom:10
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#912338",
+    textAlign: "center",
+    marginBottom: 10,
   },
-  catRow:{
-    flexDirection:"row",
-    alignItems:"center",
-    justifyContent:"space-evenly",
-    marginBottom:10
+  dropdown: {
+    marginBottom: 16,
   },
-  subtitle:{
-    fontSize:16,
-    fontWeight:"600",
-    marginVertical:8
+  dropdownHeader: {
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    backgroundColor: "#f9f9f9",
+    borderRadius: 6,
   },
-  taskRow:{
-    flexDirection:"row",
-    alignItems:"center",
-    paddingVertical:6,
-    borderBottomWidth:1,
-    borderColor:"#ccc"
+  dropdownHeaderText: {
+    fontSize: 14,
+    color: "#333",
   },
-  taskName:{
-    flex:1,
-    flexWrap:"wrap",
-    marginLeft:8
+  dropdownMenu: {
+    marginTop: 4,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    backgroundColor: "#fff",
+    borderRadius: 6,
   },
-  button:{
-    backgroundColor:"#912338",
-    padding:12,
-    borderRadius:8,
-    alignItems:"center",
-    marginVertical:10
+  dropdownItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 12,
   },
-  buttonText:{
-    color:"#fff",
-    fontWeight:"600"
+  subtitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 6,
   },
-  step:{
-    fontSize:14,
-    marginBottom:6,
-    color:"#333"
-  }
+  taskRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderColor: "#ccc",
+  },
+  taskName: {
+    flex: 1,
+    flexWrap: "wrap",
+    marginLeft: 8,
+  },
+  button: {
+    backgroundColor: "#912338",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "600",
+  },
+  step: {
+    fontSize: 14,
+    marginBottom: 6,
+    color: "#333",
+  },
 });
